@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主体性 — 拒绝外包，做回自己</title>
+<style>
+  @font-face {
+    font-family: 'Noto Serif SC';
+    src: local('Noto Serif SC'), local('Source Han Serif SC'), local('SimSun'), local('STSong'), local('Songti SC');
+  }
+  :root {
+    --bg: #FAFAFA;
+    --ink: #1A1A1A;
+    --gray: #888888;
+    --light-gray: #CCCCCC;
+    --accent: #69DB7C;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', 'STSong', 'Songti SC', serif;
+    background: var(--bg);
+    color: var(--ink);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  /* 页面过渡效果 */
+  body.page-fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  /* ===== 开场页面 ===== */
+  #intro {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: opacity 1s ease;
+    overflow: hidden;
+  }
+  #intro.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .intro-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: url('./assets/side_profile_sparse_16x9.jpg') center 35% / 90% auto no-repeat;
+    opacity: 0.12;
+    filter: grayscale(100%) contrast(1.8);
+  }
+  .intro-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .intro-title {
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+  .intro-sub {
+    font-size: clamp(1rem, 1.8vw, 1.3rem);
+    color: var(--gray);
+    letter-spacing: 0.08em;
+    margin-bottom: 2.5rem;
+    font-weight: 300;
+  }
+  .intro-dedicate {
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    color: #BBBBBB;
+    letter-spacing: 0.1em;
+    margin-bottom: 4rem;
+    font-weight: 300;
+    font-style: italic;
+  }
+  .btn-agree {
+    display: inline-block;
+    padding: 1.2rem 4rem;
+    background: var(--ink);
+    color: #FFFFFF;
+    border: none;
+    font-size: 1rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    font-family: inherit;
+  }
+  .btn-agree:hover {
+    background: #333333;
+    transform: translateY(-2px);
+  }
+
+  /* ===== 四个群体选择页面 ===== */
+  #role-select {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--bg);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  .role-back-btn {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--light-gray);
+    color: var(--gray);
+    font-family: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    z-index: 101;
+  }
+  .role-back-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  /* ===== 场景选择（生活/工作） ===== */
+  #scene-select {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--bg);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  #scene-select.show {
+    display: flex;
+    opacity: 1;
+  }
+  .scene-title {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    margin-bottom: 0.8rem;
+    text-align: center;
+  }
+  .scene-sub {
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    margin-bottom: 3.5rem;
+    text-align: center;
+  }
+  .scene-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 240px);
+    gap: 1.5rem;
+  }
+  @media (max-width: 540px) {
+    .scene-grid {
+      grid-template-columns: 1fr;
+      max-width: 280px;
+    }
+  }
+  .scene-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.5s ease;
+  }
+  .scene-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .scene-card .scene-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.2rem;
+    opacity: 0.5;
+  }
+  .scene-card .scene-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.6rem;
+  }
+  .scene-card .scene-desc {
+    font-size: 0.8rem;
+    color: #999999;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+
+  #role-select.show {
+    display: flex;
+    opacity: 1;
+  }
+  .role-title {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    margin-bottom: 0.8rem;
+    text-align: center;
+  }
+  .role-sub {
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    margin-bottom: 3.5rem;
+    text-align: center;
+  }
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 240px);
+    gap: 1.5rem;
+  }
+  .role-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E5E5;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.5s ease;
+  }
+  .role-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .role-card .role-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  .role-card .role-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .role-card .role-desc {
+    font-size: 0.75rem;
+    color: #999999;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- 开场 -->
+<div id="intro">
+  <div class="intro-bg"></div>
+  <div class="intro-content">
+    <h1 class="intro-title">拒绝外包，做回自己。</h1>
+    <p class="intro-sub">别把感知、判断与决策，拱手让给算法与他人。</p>
+    <p class="intro-dedicate">献给每一个不想被工具驯化、不想被他人定义的人。</p>
+    <button class="btn-agree" id="btnAgree">我也有同感</button>
+  </div>
+</div>
+
+<!-- 场景选择（生活/工作） -->
+<div id="scene-select">
+  <button class="role-back-btn" onclick="backToIntro()">&#8592; 返回</button>
+  <h2 class="scene-title">选择你的场景</h2>
+  <p class="scene-sub">主体性觉醒，从觉察自己的处境开始</p>
+  <div class="scene-grid">
+    <div class="scene-card" onclick="enterLife()">
+      <div class="scene-icon">&#127968;</div>
+      <div class="scene-name">生活</div>
+      <div class="scene-desc">在日常的琐碎与觉察中<br>守住自己的边界与节奏</div>
+    </div>
+    <div class="scene-card" onclick="enterRelation()">
+      <div class="scene-icon">&#128149;</div>
+      <div class="scene-name">情感</div>
+      <div class="scene-desc">不用假装坚强<br>我们接住你所有的破碎</div>
+    </div>
+    <div class="scene-card" onclick="enterWork()">
+      <div class="scene-icon">&#128188;</div>
+      <div class="scene-name">工作</div>
+      <div class="scene-desc">在职场与创作的场域中<br>找回自己的主动权</div>
+    </div>
+    <div class="scene-card" onclick="enterCommunity()">
+      <div class="scene-icon">&#128101;</div>
+      <div class="scene-name">社群</div>
+      <div class="scene-desc">你不是一个人在战斗<br>找到同类，彼此照见</div>
+    </div>
+  </div>
+</div>
+
+<!-- 四个群体选择 -->
+<div id="role-select">
+  <button class="role-back-btn" onclick="backToScene()">&#8592; 返回</button>
+  <h2 class="role-title">选择你的身份</h2>
+  <p class="role-sub">获取专属的主体性觉醒路径</p>
+  <div class="role-grid">
+    <div class="role-card" data-role="worker" onclick="enterRole('worker')">
+      <div class="role-icon">&#128188;</div>
+      <div class="role-name">职场人</div>
+      <div class="role-desc">在算法与KPI之间<br>找回自己的节奏</div>
+    </div>
+    <div class="role-card" data-role="student" onclick="enterRole('student')">
+      <div class="role-icon">&#127891;</div>
+      <div class="role-name">学生 / 学习者</div>
+      <div class="role-desc">在信息洪流中<br>建立独立思考</div>
+    </div>
+    <div class="role-card" data-role="creator" onclick="enterRole('creator')">
+      <div class="role-icon">&#9999;&#65039;</div>
+      <div class="role-name">自由职业 / 创作者</div>
+      <div class="role-desc">在创作与商业之间<br>守住表达的底线</div>
+    </div>
+    <div class="role-card" data-role="leader" onclick="enterRole('leader')">
+      <div class="role-icon">&#128640;</div>
+      <div class="role-name">管理者 / Leader</div>
+      <div class="role-desc">在决策与执行之间<br>保持清醒的判断</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const btnAgree = document.getElementById('btnAgree');
+const intro = document.getElementById('intro');
+const sceneSelect = document.getElementById('scene-select');
+const roleSelect = document.getElementById('role-select');
+
+// 页面跳转函数（带淡出效果）
+function navigateWithFade(url) {
+  document.body.classList.add('page-fade-out');
+  setTimeout(() => {
+    window.location.href = url;
+  }, 300);
+}
+
+// 检查是否直接显示场景选择页面或角色选择页面
+(function checkDirectPage() {
+  const params = new URLSearchParams(window.location.search);
+  // 从其他模块返回时，localStorage 会标记跳过开场页
+  const skipIntro = localStorage.getItem('skipIntro');
+  if (params.get('scene') === '1' || skipIntro === 'scene') {
+    // 直接显示四板块选择页（跳过开场页）
+    intro.style.display = 'none';
+    sceneSelect.style.display = 'flex';
+    void sceneSelect.offsetWidth;
+    sceneSelect.classList.add('show');
+    localStorage.removeItem('skipIntro');
+  } else if (params.get('role') === '1' || skipIntro === 'role') {
+    // 直接显示四个角色选择页（跳过开场页和场景选择）
+    intro.style.display = 'none';
+    sceneSelect.style.display = 'none';
+    roleSelect.style.display = 'flex';
+    void roleSelect.offsetWidth;
+    roleSelect.classList.add('show');
+    localStorage.removeItem('skipIntro');
+  }
+})();
+
+// 点击"我也有同感"
+btnAgree.addEventListener('click', () => {
+  intro.classList.add('fade-out');
+  setTimeout(() => {
+    intro.style.display = 'none';
+    sceneSelect.classList.add('show');
+  }, 1000);
+});
+
+// 选择"生活"
+function enterLife() {
+  navigateWithFade('./life.html');
+}
+
+// 选择"情感"
+function enterRelation() {
+  navigateWithFade('./relationship-intro.html');
+}
+
+// 选择"工作"
+function enterWork() {
+  sceneSelect.classList.remove('show');
+  setTimeout(() => {
+    sceneSelect.style.display = 'none';
+    roleSelect.style.display = 'flex';
+    void roleSelect.offsetWidth;
+    roleSelect.classList.add('show');
+  }, 300);
+}
+
+// 选择"社群"
+function enterCommunity() {
+  navigateWithFade('./community.html');
+}
+
+// 从场景选择返回开场页
+function backToIntro() {
+  sceneSelect.classList.remove('show');
+  setTimeout(() => {
+    sceneSelect.style.display = 'none';
+    intro.style.display = 'flex';
+    void intro.offsetWidth;
+    intro.classList.remove('fade-out');
+  }, 300);
+}
+
+// 从角色选择返回场景选择
+function backToScene() {
+  roleSelect.classList.remove('show');
+  setTimeout(() => {
+    roleSelect.style.display = 'none';
+    sceneSelect.style.display = 'flex';
+    void sceneSelect.offsetWidth;
+    sceneSelect.classList.add('show');
+  }, 300);
+}
+
+// 进入角色（带进度检测）
+function enterRole(role) {
+  localStorage.setItem('userRole', role);
+
+  // 角色对应的测评页面
+  const rolePages = {
+    worker: './worker.html',
+    student: './student.html',
+    creator: './creator.html',
+    leader: './leader.html'
+  };
+  const quizPage = rolePages[role] || './worker.html';
+
+  // 直接进入测评页面（进度恢复由测评页面自身处理）
+  navigateWithFade(quizPage);
+}
+</script>
+
+</body>
+</html>

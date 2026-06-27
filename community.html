@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>社群 — 你不是一个人</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #1a1a1a;
+    --gray: #999999;
+    --light-gray: #f5f5f5;
+    --bg: #ffffff;
+    --border: #f5f5f5;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: #ffffff;
+    color: var(--ink);
+    width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden;
+    opacity: 0;
+    animation: pageFadeIn 0.6s ease forwards;
+  }
+  @keyframes pageFadeIn { to { opacity: 1; } }
+  body.page-fade-out { opacity: 0; transition: opacity 0.3s ease; }
+
+  /* ===== 卷首语覆盖层 ===== */
+  .intro-overlay {
+    position: fixed; inset: 0;
+    background: #ffffff;
+    z-index: 1000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 3rem 2rem;
+    transition: opacity 1s ease, visibility 1s ease;
+  }
+  .intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .intro-deco-line {
+    width: 1px; height: 40px;
+    background: #e0e0e0;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeIn 0.8s ease 0.3s forwards;
+  }
+  .intro-headline {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', 'STSong', 'Songti SC', serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: var(--ink);
+    text-align: center;
+    line-height: 1.3;
+    margin-bottom: 0.3rem;
+    opacity: 0;
+    animation: fadeIn 0.8s ease 0.6s forwards;
+  }
+  .intro-headline strong { font-weight: 700; }
+  .intro-subhead {
+    font-size: 0.7rem;
+    color: var(--gray);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeIn 0.8s ease 0.9s forwards;
+  }
+  .intro-divider {
+    width: 24px; height: 1px;
+    background: #d0d0d0;
+    margin: 0 auto 2.5rem;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 1.1s forwards;
+  }
+  .intro-text {
+    max-width: 400px;
+    text-align: center;
+    font-size: clamp(0.8rem, 1.5vw, 0.9rem);
+    color: #666;
+    line-height: 2.6;
+    letter-spacing: 0.02em;
+    font-weight: 300;
+  }
+  .intro-text .line {
+    display: block;
+    opacity: 0;
+    animation: fadeIn 0.6s ease forwards;
+  }
+  .intro-text .line:nth-child(1) { animation-delay: 1.4s; }
+  .intro-text .line:nth-child(2) { animation-delay: 1.8s; }
+  .intro-text .line:nth-child(3) { animation-delay: 2.2s; }
+  .intro-text .line:nth-child(4) { animation-delay: 2.6s; }
+  .intro-text .line:nth-child(5) { animation-delay: 3.0s; }
+  .intro-text .line:nth-child(6) { animation-delay: 3.4s; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .intro-text .highlight {
+    color: var(--ink);
+    font-weight: 400;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 2px;
+  }
+  .intro-enter-btn {
+    margin-top: 2.5rem;
+    padding: 0.8rem 2.5rem;
+    background: #000000;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 3.8s forwards;
+    transition: all 0.3s ease;
+  }
+  .intro-enter-btn:hover { background: #333333; }
+  .intro-footer-line {
+    width: 1px; height: 30px;
+    background: #e0e0e0;
+    margin-top: 2.5rem;
+    opacity: 0;
+    animation: fadeIn 0.6s ease 4.2s forwards;
+  }
+
+  /* ===== 导航栏 ===== */
+  .nav-bar {
+    position: fixed; top: 0; left: 0; right: 0; height: 50px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.5rem; z-index: 90;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
+  }
+  .nav-back {
+    font-size: 0.8rem; color: var(--gray); cursor: pointer;
+    letter-spacing: 0.1em; background: none; border: none;
+    font-family: inherit; padding: 0.3rem 0;
+  }
+  .nav-back:hover { color: var(--ink); }
+  .nav-title {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', serif;
+    font-size: 0.7rem; color: #BBBBBB; letter-spacing: 0.2em;
+  }
+
+  /* ===== 页面容器 ===== */
+  .page-container {
+    width: 100%; max-width: 640px;
+    margin: 0 auto; padding: 4rem 1.5rem 5rem;
+  }
+
+  /* ===== 匿名树洞 ===== */
+  .section-block { margin-bottom: 3rem; }
+  .section-header {
+    display: flex; align-items: center; gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .section-icon {
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink);
+    font-size: 0.9rem;
+  }
+  .section-title {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', serif;
+    font-size: 1.05rem; color: var(--ink); letter-spacing: 0.05em;
+    font-weight: 400;
+  }
+  .section-subtitle {
+    font-size: 0.75rem; color: var(--gray); margin-left: auto;
+  }
+
+  /* 无边框输入区 */
+  .cave-post-area {
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 0;
+  }
+  .cave-textarea {
+    width: 100%; padding: 1rem 0;
+    border: none;
+    border-bottom: 1px solid var(--light-gray);
+    font-family: inherit; font-size: 0.95rem; resize: none;
+    background: transparent; outline: none; min-height: 100px;
+    color: var(--ink); line-height: 1.7;
+    transition: border-color 0.3s ease;
+  }
+  .cave-textarea::placeholder {
+    color: #cccccc;
+    font-size: 0.95rem;
+  }
+  .cave-textarea:focus {
+    border-color: #1a1a1a;
+  }
+
+  /* 匿名开关 */
+  .cave-anonymous-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 1rem; padding: 0.5rem 0;
+  }
+  .cave-anonymous-label {
+    font-size: 0.8rem; color: var(--gray);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .toggle-switch {
+    position: relative;
+    width: 40px; height: 22px;
+    background: #e0e0e0;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+  }
+  .toggle-switch.active { background: #1a1a1a; }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .toggle-switch.active::after { transform: translateX(18px); }
+
+  /* 投递按钮 */
+  .cave-post-btn {
+    width: 100%; margin-top: 1.2rem; padding: 0.85rem;
+    background: #000000; color: #ffffff;
+    border: none; border-radius: 4px;
+    font-family: inherit; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.25s ease;
+    letter-spacing: 0.15em;
+  }
+  .cave-post-btn:hover { background: #333333; }
+
+  /* 树洞帖子列表 */
+  .cave-feed {
+    margin-top: 2rem;
+    display: flex; flex-direction: column;
+    gap: 0;
+  }
+  .cave-post {
+    background: #ffffff;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--light-gray);
+    animation: fadeInUp 0.4s ease;
+  }
+  .cave-post:last-child { border-bottom: none; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .cave-post-header {
+    display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.8rem;
+  }
+  .cave-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #1a1a1a; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: bold; flex-shrink: 0;
+  }
+  .cave-meta {
+    font-size: 0.75rem; color: var(--gray);
+  }
+  .cave-body {
+    font-size: 0.9rem; line-height: 1.8;
+    color: var(--ink); word-break: break-word;
+    padding-left: 0;
+  }
+  .cave-actions {
+    display: flex; gap: 1.5rem; margin-top: 0.8rem;
+  }
+  .cave-action {
+    font-size: 0.75rem; color: var(--gray);
+    cursor: pointer; background: none; border: none;
+    font-family: inherit; transition: color 0.2s ease;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .cave-action:hover { color: #1a1a1a; }
+  .cave-action.liked { color: #1a1a1a; }
+
+  /* 树洞评论 */
+  .cave-comment-section {
+    margin-top: 1rem; padding-top: 1rem;
+    border-top: 1px solid var(--light-gray);
+    animation: fadeInUp 0.3s ease;
+  }
+  .cave-comment-input-row {
+    display: flex; gap: 0.5rem; margin-bottom: 0.5rem;
+  }
+  .cave-comment-input {
+    flex: 1; padding: 0.5rem 0;
+    border: none;
+    border-bottom: 1px solid var(--light-gray);
+    font-family: inherit; font-size: 0.8rem;
+    outline: none; background: transparent; color: var(--ink);
+    transition: border-color 0.3s ease;
+  }
+  .cave-comment-input::placeholder { color: #cccccc; }
+  .cave-comment-input:focus { border-color: #1a1a1a; }
+  .cave-comment-btn {
+    padding: 0.4rem 0.9rem;
+    background: #000000; color: white;
+    border: none; border-radius: 4px;
+    font-family: inherit; font-size: 0.78rem;
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .cave-comment-btn:hover { background: #333333; }
+  .cave-comment-list {
+    display: flex; flex-direction: column; gap: 0.3rem;
+  }
+  .cave-comment-item {
+    font-size: 0.82rem; color: var(--ink);
+    line-height: 1.6;
+    padding: 0.3rem 0;
+  }
+  .cave-comment-author {
+    color: var(--gray); font-size: 0.72rem;
+  }
+
+  /* ===== 话题广场 ===== */
+  .topic-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+  }
+  .topic-card {
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+  }
+  .topic-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+  }
+  .topic-icon {
+    width: 32px; height: 32px;
+    margin: 0 auto 0.6rem;
+    display: flex; align-items: center; justify-content: center;
+    color: #1a1a1a;
+    font-size: 1.1rem;
+  }
+  .topic-name {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', serif;
+    font-size: 0.85rem; color: var(--ink); font-weight: 400;
+    margin-bottom: 0.3rem; letter-spacing: 0.05em;
+  }
+  .topic-count {
+    font-size: 0.7rem; color: var(--gray);
+  }
+
+  /* ===== 话题讨论区 ===== */
+  .topic-detail {
+    display: none;
+    animation: fadeInUp 0.4s ease;
+  }
+  .topic-detail.active { display: block; }
+  .topic-back-btn {
+    font-size: 0.8rem; color: var(--gray); cursor: pointer;
+    background: none; border: none; font-family: inherit;
+    letter-spacing: 0.05em; margin-bottom: 1rem;
+    transition: color 0.2s ease;
+  }
+  .topic-back-btn:hover { color: #1a1a1a; }
+  .topic-post-area {
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 1.2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    margin-bottom: 1.5rem;
+  }
+  .topic-post-textarea {
+    width: 100%; padding: 0.8rem 0;
+    border: none;
+    border-bottom: 1px solid var(--light-gray);
+    font-family: inherit; font-size: 0.9rem; resize: none;
+    background: transparent; outline: none; min-height: 60px;
+    color: var(--ink); line-height: 1.6;
+    transition: border-color 0.3s ease;
+  }
+  .topic-post-textarea::placeholder { color: #cccccc; }
+  .topic-post-textarea:focus { border-color: #1a1a1a; }
+  .topic-post-row {
+    display: flex; gap: 0.6rem; margin-top: 0.8rem;
+    align-items: center;
+  }
+  .topic-post-name {
+    flex: 1; padding: 0.6rem 0;
+    border: none;
+    border-bottom: 1px solid var(--light-gray);
+    font-family: inherit; font-size: 0.85rem;
+    outline: none; background: transparent; color: var(--ink);
+    transition: border-color 0.3s ease;
+  }
+  .topic-post-name::placeholder { color: #cccccc; }
+  .topic-post-name:focus { border-color: #1a1a1a; }
+  .topic-post-btn {
+    padding: 0.6rem 1.6rem;
+    background: #000000; color: white;
+    border: none; border-radius: 4px;
+    font-family: inherit; font-size: 0.8rem;
+    cursor: pointer; transition: all 0.25s ease;
+    letter-spacing: 0.05em;
+  }
+  .topic-post-btn:hover { background: #333333; }
+  .topic-post-list {
+    display: flex; flex-direction: column;
+    gap: 0;
+  }
+  .topic-post-item {
+    background: #ffffff;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--light-gray);
+    animation: fadeInUp 0.4s ease;
+  }
+  .topic-post-item:last-child { border-bottom: none; }
+  .topic-post-header {
+    display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;
+  }
+  .topic-post-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #1a1a1a; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: bold; flex-shrink: 0;
+  }
+  .topic-post-meta {
+    font-size: 0.75rem; color: var(--gray);
+  }
+  .topic-post-body {
+    font-size: 0.88rem; line-height: 1.7;
+    color: var(--ink); word-break: break-word;
+  }
+  .topic-post-actions {
+    display: flex; gap: 1.5rem; margin-top: 0.7rem;
+  }
+  .topic-post-action {
+    font-size: 0.75rem; color: var(--gray);
+    cursor: pointer; background: none; border: none;
+    font-family: inherit; transition: color 0.2s ease;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .topic-post-action:hover { color: #1a1a1a; }
+  .topic-post-action.liked { color: #1a1a1a; }
+  .topic-comment-section {
+    margin-top: 1rem; padding-top: 1rem;
+    border-top: 1px solid var(--light-gray);
+  }
+  .topic-comment-input-row {
+    display: flex; gap: 0.5rem; margin-bottom: 0.6rem;
+  }
+  .topic-comment-input {
+    flex: 1; padding: 0.5rem 0;
+    border: none;
+    border-bottom: 1px solid var(--light-gray);
+    font-family: inherit; font-size: 0.8rem;
+    outline: none; background: transparent; color: var(--ink);
+    transition: border-color 0.3s ease;
+  }
+  .topic-comment-input::placeholder { color: #cccccc; }
+  .topic-comment-input:focus { border-color: #1a1a1a; }
+  .topic-comment-btn {
+    padding: 0.4rem 0.9rem;
+    background: #000000; color: white;
+    border: none; border-radius: 4px;
+    font-family: inherit; font-size: 0.78rem;
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .topic-comment-btn:hover { background: #333333; }
+  .topic-comment-list {
+    display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .topic-comment-item {
+    font-size: 0.8rem; color: var(--ink);
+    line-height: 1.6;
+    padding: 0.4rem 0;
+  }
+  .topic-comment-author {
+    color: var(--gray); font-size: 0.72rem;
+  }
+  .topic-empty-state {
+    text-align: center; padding: 3rem 2rem;
+    color: var(--gray); font-size: 0.85rem;
+  }
+
+  /* ===== 互勉语录 ===== */
+  .quote-card {
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+    text-align: center;
+  }
+  .quote-text {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', serif;
+    font-size: 0.95rem; line-height: 2;
+    color: var(--ink);
+    font-style: italic;
+  }
+  .quote-author {
+    font-size: 0.75rem; color: var(--gray);
+    margin-top: 1rem;
+  }
+  .quote-refresh {
+    margin-top: 1.2rem; font-size: 0.75rem; color: var(--gray);
+    cursor: pointer; background: none; border: none;
+    font-family: inherit; transition: color 0.2s ease;
+  }
+  .quote-refresh:hover { color: #1a1a1a; }
+
+  /* 分割线 */
+  .section-divider {
+    height: 1px; background: var(--light-gray);
+    margin: 3rem 0;
+  }
+
+  /* 响应式 */
+  @media (max-width: 480px) {
+    .page-container { padding: 4rem 1rem 5rem; }
+    .topic-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+    .topic-card { padding: 1.2rem 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 卷首语覆盖层 ===== -->
+<div class="intro-overlay" id="introOverlay">
+  <div class="intro-deco-line"></div>
+  <div class="intro-headline">你不是<strong>一个人</strong></div>
+  <div class="intro-subhead">Community</div>
+  <div class="intro-text" id="introText">
+    <span class="line">在这个世界上，有很多人和你一样——</span>
+    <span class="line">在深夜里辗转反侧，在人群中感到孤独，</span>
+    <span class="line">在关系里小心翼翼，在工作中渐渐失去自己。</span>
+    <span class="line">你不需要一个人扛着。</span>
+    <span class="line">在这里，<span class="highlight">你的脆弱会被接住</span>，</span>
+    <span class="line">你的勇敢会被看见。</span>
+  </div>
+  <button class="intro-enter-btn" onclick="enterMainFromIntro()">进入社群</button>
+  <div class="intro-footer-line"></div>
+</div>
+
+<!-- ===== 导航栏 ===== -->
+<div class="nav-bar">
+  <button class="nav-back" onclick="goBack()">&#8592; 返回</button>
+  <div class="nav-title">社群 &#183; 你不是一个人</div>
+  <div style="width:40px;"></div>
+</div>
+
+<!-- ===== 页面容器 ===== -->
+<div class="page-container">
+
+  <!-- ===== 匿名树洞 ===== -->
+  <div class="section-block">
+    <div class="section-header">
+      <span class="section-icon">&#9670;</span>
+      <span class="section-title">匿名树洞</span>
+      <span class="section-subtitle">说出来，就轻了一半</span>
+    </div>
+    <div class="cave-post-area">
+      <textarea class="cave-textarea" id="caveInput" placeholder="此刻，你在想什么？"></textarea>
+      <div class="cave-anonymous-row">
+        <span class="cave-anonymous-label">
+          <span>匿名模式</span>
+          <span class="toggle-switch active" id="anonymousToggle" onclick="toggleAnonymous()"></span>
+        </span>
+        <span style="font-size:0.75rem;color:#ccc;">开启后昵称将被隐藏</span>
+      </div>
+      <button class="cave-post-btn" onclick="postCaveMessage()">投递到树洞</button>
+    </div>
+    <div class="cave-feed" id="caveFeed"></div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== 话题广场 ===== -->
+  <div class="section-block">
+    <div class="section-header">
+      <span class="section-icon">&#9671;</span>
+      <span class="section-title">话题广场</span>
+      <span class="section-subtitle">找到同类，彼此照见</span>
+    </div>
+
+    <!-- 话题分类 -->
+    <div class="topic-grid" id="topicGrid">
+      <div class="topic-card" onclick="showTopicDetail('family','原生家庭')">
+        <div class="topic-icon">&#10022;</div>
+        <div class="topic-name">原生家庭</div>
+        <div class="topic-count" id="topicCountFamily">0 帖</div>
+      </div>
+      <div class="topic-card" onclick="showTopicDetail('love','亲密关系')">
+        <div class="topic-icon">&#9825;</div>
+        <div class="topic-name">亲密关系</div>
+        <div class="topic-count" id="topicCountLove">0 帖</div>
+      </div>
+      <div class="topic-card" onclick="showTopicDetail('work','职场困局')">
+        <div class="topic-icon">&#9670;</div>
+        <div class="topic-name">职场困局</div>
+        <div class="topic-count" id="topicCountWork">0 帖</div>
+      </div>
+      <div class="topic-card" onclick="showTopicDetail('growth','自我成长')">
+        <div class="topic-icon">&#9671;</div>
+        <div class="topic-name">自我成长</div>
+        <div class="topic-count" id="topicCountGrowth">0 帖</div>
+      </div>
+    </div>
+
+    <!-- 话题讨论区 -->
+    <div class="topic-detail" id="topicDetail">
+      <button class="topic-back-btn" onclick="backToTopicGrid()">&#8592; 返回话题广场</button>
+      <div class="section-header" style="margin-bottom:0.8rem;">
+        <span class="section-icon" id="topicDetailEmoji">&#9671;</span>
+        <span class="section-title" id="topicDetailTitle">话题</span>
+      </div>
+      <div class="topic-post-area">
+        <textarea class="topic-post-textarea" id="topicPostInput" placeholder="在这个话题下说点什么..."></textarea>
+        <div class="topic-post-row">
+          <input type="text" class="topic-post-name" id="topicPostName" placeholder="你的名字（选填，默认匿名）" maxlength="10">
+          <button class="topic-post-btn" onclick="postToTopic()">发布</button>
+        </div>
+      </div>
+      <div class="topic-post-list" id="topicPostList"></div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ===== 互勉语录 ===== -->
+  <div class="section-block">
+    <div class="section-header">
+      <span class="section-icon">&#9733;</span>
+      <span class="section-title">今日互勉</span>
+    </div>
+    <div class="quote-card">
+      <div class="quote-text" id="quoteText">加载中...</div>
+      <div class="quote-author" id="quoteAuthor"></div>
+      <button class="quote-refresh" onclick="refreshQuote()">&#8635; 换一句</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let isAnonymous = true;
+
+function toggleAnonymous() {
+  isAnonymous = !isAnonymous;
+  document.getElementById('anonymousToggle').classList.toggle('active', isAnonymous);
+}
+
+// ===== 卷首语 =====
+function enterMainFromIntro() {
+  document.getElementById('introOverlay').classList.add('hidden');
+  localStorage.setItem('community_visited', '1');
+}
+window.addEventListener('load', () => {
+  if (localStorage.getItem('community_visited')) {
+    document.getElementById('introOverlay').classList.add('hidden');
+  }
+  loadCaveFeed();
+  refreshQuote();
+  updateTopicCounts();
+});
+
+// ===== 导航 =====
+function goBack() {
+  localStorage.setItem('skipIntro', 'scene');
+  document.body.classList.add('page-fade-out');
+  setTimeout(() => window.location.href = './index.html', 300);
+}
+
+// ===== 匿名树洞 =====
+function postCaveMessage() {
+  const input = document.getElementById('caveInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const nickname = isAnonymous ? '匿名旅人' : (document.getElementById('caveNickname')?.value.trim() || '匿名旅人');
+
+  const post = {
+    id: Date.now(),
+    nickname,
+    text,
+    time: new Date().toISOString(),
+    likes: 0,
+    liked: false,
+    comments: []
+  };
+  const feed = JSON.parse(localStorage.getItem('community_cave_feed') || '[]');
+  feed.unshift(post);
+  if (feed.length > 50) feed.pop();
+  localStorage.setItem('community_cave_feed', JSON.stringify(feed));
+  renderCavePost(post, true);
+  input.value = '';
+}
+
+function renderCavePost(post, prepend) {
+  const feed = document.getElementById('caveFeed');
+  const el = document.createElement('div');
+  el.className = 'cave-post';
+  el.id = 'cave-post-' + post.id;
+  const initial = post.nickname.charAt(0).toUpperCase();
+  const timeAgo = getTimeAgo(post.time);
+  const avatarColors = ['#1a1a1a', '#444444', '#777777', '#aaaaaa', '#cccccc'];
+  const avatarColor = avatarColors[post.id % avatarColors.length];
+  const comments = post.comments || [];
+  const commentsHtml = comments.map(c =>
+    `<div class="cave-comment-item"><span class="cave-comment-author">${escapeHtml(c.nickname)}</span> ${escapeHtml(c.text)}</div>`
+  ).join('');
+  el.innerHTML = `
+    <div class="cave-post-header">
+      <div class="cave-avatar" style="background:${avatarColor};">${initial}</div>
+      <div class="cave-meta">${escapeHtml(post.nickname)} &middot; ${timeAgo}</div>
+    </div>
+    <div class="cave-body">${escapeHtml(post.text)}</div>
+    <div class="cave-actions">
+      <button class="cave-action ${post.liked ? 'liked' : ''}" onclick="toggleLike(${post.id})">
+        ${post.liked ? '&#10084;' : '&#9825;'} <span id="like-count-${post.id}">${post.likes}</span>
+      </button>
+      <button class="cave-action" onclick="sendComfort(${post.id})">&#9734; 安慰</button>
+      <button class="cave-action" onclick="toggleCaveCommentBox(${post.id})">&#9671; 评论</button>
+    </div>
+    <div class="cave-comment-section" id="cave-comment-box-${post.id}" style="display:none;">
+      <div class="cave-comment-input-row">
+        <input type="text" class="cave-comment-input" id="cave-comment-name-${post.id}" placeholder="名字（选填）" maxlength="8" style="flex:0.3;">
+        <input type="text" class="cave-comment-input" id="cave-comment-text-${post.id}" placeholder="写下你的评论..." onkeypress="if(event.key==='Enter')postCaveComment(${post.id})">
+        <button class="cave-comment-btn" onclick="postCaveComment(${post.id})">发送</button>
+      </div>
+      <div class="cave-comment-list" id="cave-comment-list-${post.id}">${commentsHtml}</div>
+    </div>
+  `;
+  if (prepend) feed.insertBefore(el, feed.firstChild);
+  else feed.appendChild(el);
+}
+
+function loadCaveFeed() {
+  const feed = JSON.parse(localStorage.getItem('community_cave_feed') || '[]');
+  feed.forEach(post => renderCavePost(post, false));
+}
+
+function toggleLike(postId) {
+  const feed = JSON.parse(localStorage.getItem('community_cave_feed') || '[]');
+  const post = feed.find(p => p.id === postId);
+  if (!post) return;
+  post.liked = !post.liked;
+  post.likes += post.liked ? 1 : -1;
+  localStorage.setItem('community_cave_feed', JSON.stringify(feed));
+  const btn = document.querySelector(`#cave-post-${postId} .cave-action`);
+  const countEl = document.getElementById('like-count-' + postId);
+  if (btn && countEl) {
+    btn.className = `cave-action ${post.liked ? 'liked' : ''}`;
+    btn.innerHTML = `${post.liked ? '&#10084;' : '&#9825;'} <span id="like-count-${postId}">${post.likes}</span>`;
+  }
+}
+
+const COMFORTS = [
+  '你的感受是真实的，值得被认真对待。',
+  '我听到你了。你不是一个人。',
+  '能说出这些，已经很勇敢了。',
+  '给自己一个拥抱吧，你辛苦了。',
+  '此刻的脆弱，恰恰是力量的开始。'
+];
+
+function sendComfort(postId) {
+  const comfort = COMFORTS[Math.floor(Math.random() * COMFORTS.length)];
+  const postEl = document.getElementById('cave-post-' + postId);
+  if (!postEl) return;
+  const existing = postEl.querySelector('.comfort-reply');
+  if (existing) existing.remove();
+  const reply = document.createElement('div');
+  reply.className = 'comfort-reply';
+  reply.style.cssText = 'margin-top:0.8rem; padding:0.8rem; background:#fafafa; border-radius:4px; font-size:0.82rem; color:#555555; animation:fadeInUp 0.3s ease;';
+  reply.innerHTML = comfort;
+  postEl.appendChild(reply);
+}
+
+function toggleCaveCommentBox(postId) {
+  const box = document.getElementById('cave-comment-box-' + postId);
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function postCaveComment(postId) {
+  const text = document.getElementById('cave-comment-text-' + postId).value.trim();
+  if (!text) return;
+  const nickname = document.getElementById('cave-comment-name-' + postId).value.trim() || '匿名旅人';
+  const feed = JSON.parse(localStorage.getItem('community_cave_feed') || '[]');
+  const post = feed.find(p => p.id === postId);
+  if (!post) return;
+  if (!post.comments) post.comments = [];
+  post.comments.push({ nickname, text, time: new Date().toISOString() });
+  localStorage.setItem('community_cave_feed', JSON.stringify(feed));
+  // 重新渲染该帖子
+  const postEl = document.getElementById('cave-post-' + postId);
+  if (postEl) {
+    const listEl = document.getElementById('cave-comment-list-' + postId);
+    if (listEl) {
+      const item = document.createElement('div');
+      item.className = 'cave-comment-item';
+      item.innerHTML = `<span class="cave-comment-author">${escapeHtml(nickname)}</span> ${escapeHtml(text)}`;
+      item.style.animation = 'fadeInUp 0.3s ease';
+      listEl.appendChild(item);
+    }
+  }
+  document.getElementById('cave-comment-text-' + postId).value = '';
+  document.getElementById('cave-comment-name-' + postId).value = '';
+}
+
+function getTimeAgo(dateStr) {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diff = Math.floor((now - date) / 1000);
+  if (diff < 60) return '刚刚';
+  if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+  if (diff < 86400) return Math.floor(diff / 3600) + ' 小时前';
+  return Math.floor(diff / 86400) + ' 天前';
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ===== 话题广场 =====
+const TOPIC_ICONS = {
+  family: '&#10022;', love: '&#9825;', work: '&#9670;', growth: '&#9671;'
+};
+let currentTopicKey = '';
+
+function showTopicDetail(key, title) {
+  currentTopicKey = key;
+  document.getElementById('topicGrid').style.display = 'none';
+  document.getElementById('topicDetail').classList.add('active');
+  document.getElementById('topicDetailTitle').textContent = title;
+  document.getElementById('topicDetailEmoji').innerHTML = TOPIC_ICONS[key];
+  document.getElementById('topicPostInput').value = '';
+  document.getElementById('topicPostName').value = '';
+  renderTopicPosts(key);
+}
+
+function backToTopicGrid() {
+  document.getElementById('topicDetail').classList.remove('active');
+  document.getElementById('topicGrid').style.display = 'grid';
+  currentTopicKey = '';
+  updateTopicCounts();
+}
+
+function getTopicStorageKey(key) { return 'community_topic_' + key; }
+
+function postToTopic() {
+  const text = document.getElementById('topicPostInput').value.trim();
+  if (!text) return;
+  const nickname = document.getElementById('topicPostName').value.trim() || '匿名旅人';
+  const posts = JSON.parse(localStorage.getItem(getTopicStorageKey(currentTopicKey)) || '[]');
+  posts.unshift({
+    id: Date.now(),
+    nickname,
+    text,
+    time: new Date().toISOString(),
+    likes: 0,
+    liked: false,
+    comments: []
+  });
+  if (posts.length > 100) posts.pop();
+  localStorage.setItem(getTopicStorageKey(currentTopicKey), JSON.stringify(posts));
+  document.getElementById('topicPostInput').value = '';
+  document.getElementById('topicPostName').value = '';
+  renderTopicPosts(currentTopicKey);
+  updateTopicCounts();
+}
+
+function renderTopicPosts(key) {
+  const list = document.getElementById('topicPostList');
+  list.innerHTML = '';
+  const posts = JSON.parse(localStorage.getItem(getTopicStorageKey(key)) || '[]');
+  if (posts.length === 0) {
+    list.innerHTML = '<div class="topic-empty-state">还没有人发帖，来做第一个吧</div>';
+    return;
+  }
+  posts.forEach(post => {
+    const el = document.createElement('div');
+    el.className = 'topic-post-item';
+    el.id = 'tpost-' + post.id;
+    const avatarColors = ['#1a1a1a','#444444','#777777','#aaaaaa','#cccccc'];
+    const color = avatarColors[post.id % avatarColors.length];
+    const commentsHtml = (post.comments || []).map(c =>
+      `<div class="topic-comment-item"><span class="topic-comment-author">${escapeHtml(c.nickname)}</span> ${escapeHtml(c.text)}</div>`
+    ).join('');
+    el.innerHTML = `
+      <div class="topic-post-header">
+        <div class="topic-post-avatar" style="background:${color};">${post.nickname.charAt(0).toUpperCase()}</div>
+        <div class="topic-post-meta">${escapeHtml(post.nickname)} &middot; ${getTimeAgo(post.time)}</div>
+      </div>
+      <div class="topic-post-body">${escapeHtml(post.text)}</div>
+      <div class="topic-post-actions">
+        <button class="topic-post-action ${post.liked ? 'liked' : ''}" onclick="toggleTopicLike('${key}',${post.id})">
+          ${post.liked ? '&#10084;' : '&#9825;'} <span id="tlike-${key}-${post.id}">${post.likes}</span>
+        </button>
+        <button class="topic-post-action" onclick="toggleCommentBox(${post.id})">&#9734; 评论</button>
+      </div>
+      <div class="topic-comment-section" id="tcomment-box-${post.id}" style="display:none;">
+        <div class="topic-comment-input-row">
+          <input type="text" class="topic-comment-input" id="tcomment-name-${post.id}" placeholder="名字（选填）" maxlength="8" style="flex:0.4;">
+          <input type="text" class="topic-comment-input" id="tcomment-text-${post.id}" placeholder="写下你的评论..." onkeypress="if(event.key==='Enter')postTopicComment('${key}',${post.id})">
+          <button class="topic-comment-btn" onclick="postTopicComment('${key}',${post.id})">发送</button>
+        </div>
+        <div class="topic-comment-list">${commentsHtml}</div>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+function toggleTopicLike(key, postId) {
+  const posts = JSON.parse(localStorage.getItem(getTopicStorageKey(key)) || '[]');
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+  post.liked = !post.liked;
+  post.likes += post.liked ? 1 : -1;
+  localStorage.setItem(getTopicStorageKey(key), JSON.stringify(posts));
+  renderTopicPosts(key);
+}
+
+function toggleCommentBox(postId) {
+  const box = document.getElementById('tcomment-box-' + postId);
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function postTopicComment(key, postId) {
+  const text = document.getElementById('tcomment-text-' + postId).value.trim();
+  if (!text) return;
+  const nickname = document.getElementById('tcomment-name-' + postId).value.trim() || '匿名旅人';
+  const posts = JSON.parse(localStorage.getItem(getTopicStorageKey(key)) || '[]');
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+  if (!post.comments) post.comments = [];
+  post.comments.push({ nickname, text, time: new Date().toISOString() });
+  localStorage.setItem(getTopicStorageKey(key), JSON.stringify(posts));
+  renderTopicPosts(key);
+}
+
+function updateTopicCounts() {
+  const topics = ['family','love','work','growth'];
+  topics.forEach(key => {
+    const posts = JSON.parse(localStorage.getItem(getTopicStorageKey(key)) || '[]');
+    document.getElementById('topicCount' + key.charAt(0).toUpperCase() + key.slice(1)).textContent = posts.length + ' 帖';
+  });
+}
+
+// ===== 互勉语录 =====
+const QUOTES = [
+  { text: '你不需要变得更好才值得被爱。你现在的样子，就已经足够珍贵。', author: '—— 送给每一个觉得「自己不够好」的你' },
+  { text: '允许自己崩溃，是一种比假装坚强更高级的勇敢。', author: '—— 送给正在咬牙坚持的你' },
+  { text: '那些让你痛苦的，不是因为你太敏感，而是因为你太久没照顾自己了。', author: '—— 送给习惯忽视自己的你' },
+  { text: '你不必在所有关系中做那个「懂事」的人。偶尔「自私」一回，天不会塌。', author: '—— 送给永远在照顾别人感受的你' },
+  { text: '崩溃也没关系。碎一地也没关系。重要的是，你还在这里，还在试着把自己拼起来。', author: '—— 送给在深夜里默默流泪的你' },
+  { text: '你那些看似不起眼的幽默、敏锐和真诚，在真正懂你的人眼里，正闪闪发光。', author: '—— 送给觉得自己平凡的你了' },
+  { text: '好的爱不是靠忍耐换来的，是靠真实的互动流动的。做自己也被爱着，才是爱该有的样子。', author: '—— 送给在感情里迷失自己的你' },
+  { text: '如果爱让你觉得越来越小、越来越窒息，那不是你的问题。在爱别人之前，请先抱抱自己。', author: '—— 送给在关系里小心翼翼的你' },
+  { text: '你不是一个人在黑暗里。你回头看，有很多人和你一样，正在努力寻找光。', author: '—— 送给感到孤独的你' },
+  { text: '不必等到「准备好了」才出发。现在这个不完美的你，就是最好的出发状态。', author: '—— 送给在犹豫不决的你' }
+];
+
+let lastQuoteIndex = -1;
+function refreshQuote() {
+  let index;
+  do { index = Math.floor(Math.random() * QUOTES.length); } while (index === lastQuoteIndex);
+  lastQuoteIndex = index;
+  const quote = QUOTES[index];
+  const textEl = document.getElementById('quoteText');
+  const authorEl = document.getElementById('quoteAuthor');
+  textEl.style.opacity = '0';
+  authorEl.style.opacity = '0';
+  setTimeout(() => {
+    textEl.textContent = quote.text;
+    authorEl.textContent = quote.author;
+    textEl.style.transition = 'opacity 0.6s ease';
+    authorEl.style.transition = 'opacity 0.6s ease 0.2s';
+    textEl.style.opacity = '1';
+    authorEl.style.opacity = '1';
+  }, 300);
+}
+</script>
+
+</body>
+</html>

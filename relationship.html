@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>情感 — 你的精神避难所</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #3D3D3D;
+    --gray: #888888;
+    --light-gray: #E5E5E5;
+    --bg: #F8F5F0;
+    --warm-white: #FDFBF7;
+    --warm-brown: #8B7355;
+    --warm-orange: #D4A574;
+    --soft-green: #A8B5A0;
+    --deep-green: #6B8E6B;
+    --rose: #C9A9A6;
+    --deep-rose: #B8908C;
+    --chat-ai: #F0EBE3;
+    --chat-user: #E8F0E8;
+  }
+  body {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', 'STSong', 'Songti SC', serif;
+    background: var(--bg);
+    color: var(--ink);
+    width: 100vw;
+    min-height: 100vh;
+    overflow-x: hidden;
+    opacity: 0;
+    animation: pageFadeIn 0.6s ease forwards;
+  }
+  @keyframes pageFadeIn { to { opacity: 1; } }
+  body.page-fade-out { opacity: 0; transition: opacity 0.3s ease; }
+
+  /* ===== 卷首语覆盖层 ===== */
+  .intro-overlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 1000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem;
+    transition: opacity 1.2s ease, visibility 1.2s ease;
+  }
+  .intro-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .breath-circle {
+    width: 100px; height: 100px; border-radius: 50%;
+    background: radial-gradient(circle, var(--warm-orange) 0%, transparent 70%);
+    opacity: 0.3;
+    animation: breath 4s ease-in-out infinite;
+    margin-bottom: 2rem;
+  }
+  @keyframes breath {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.6); opacity: 0.6; }
+  }
+  .intro-text {
+    max-width: 520px; text-align: center; line-height: 2.2;
+    font-size: 0.95rem; color: var(--ink);
+    opacity: 0;
+    animation: textFadeIn 1.2s ease 2s forwards;
+  }
+  @keyframes textFadeIn { to { opacity: 1; } }
+  .intro-text .highlight {
+    color: var(--warm-brown); font-weight: bold;
+  }
+  .intro-enter-btn {
+    margin-top: 2.5rem; padding: 0.8rem 2.5rem;
+    background: var(--warm-brown); color: white;
+    border: none; border-radius: 25px;
+    font-family: inherit; font-size: 0.9rem;
+    cursor: pointer; letter-spacing: 0.1em;
+    opacity: 0;
+    animation: textFadeIn 1s ease 4s forwards;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .intro-enter-btn:hover { transform: scale(1.05); box-shadow: 0 4px 16px rgba(139,115,85,0.3); }
+
+  /* ===== 导航栏 ===== */
+  .nav-bar {
+    position: fixed; top: 0; left: 0; right: 0; height: 50px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 1.5rem; z-index: 90;
+    background: rgba(248,245,240,0.92);
+    backdrop-filter: blur(8px);
+  }
+  .nav-back {
+    font-size: 0.8rem; color: var(--gray); cursor: pointer;
+    letter-spacing: 0.1em; background: none; border: none;
+    font-family: inherit; padding: 0.3rem 0;
+  }
+  .nav-back:hover { color: var(--ink); }
+  .nav-title { font-size: 0.7rem; color: #BBBBBB; letter-spacing: 0.2em; }
+
+  /* ===== 页面容器 ===== */
+  .page-container {
+    width: 100%; max-width: 640px;
+    margin: 0 auto; padding: 4rem 1rem 5rem;
+  }
+
+  /* ===== 模块标签栏 ===== */
+  .module-tabs {
+    display: flex; justify-content: center; gap: 0.6rem;
+    margin-bottom: 2rem; position: sticky; top: 50px;
+    background: var(--bg); padding: 1rem 0; z-index: 80;
+  }
+  .module-tab {
+    padding: 0.5rem 1.5rem; border-radius: 20px;
+    border: 1px solid var(--light-gray); background: transparent;
+    color: var(--gray); font-family: inherit; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.3s ease;
+  }
+  .module-tab.active {
+    background: var(--warm-brown); color: white;
+    border-color: var(--warm-brown);
+  }
+  .module-tab:hover:not(.active) {
+    border-color: var(--warm-brown); color: var(--warm-brown);
+  }
+
+  /* ===== 模块标题 ===== */
+  .module-header {
+    text-align: center; margin-bottom: 1.5rem;
+  }
+  .module-title {
+    font-size: 1.15rem; margin-bottom: 0.3rem; letter-spacing: 0.05em;
+  }
+  .module-subtitle {
+    font-size: 0.8rem; color: var(--gray);
+  }
+
+  /* ===== 家人模块：聊天界面 ===== */
+  .chat-container {
+    background: var(--warm-white); border-radius: 16px;
+    overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .chat-history {
+    height: 420px; overflow-y: auto; padding: 1.2rem;
+    display: flex; flex-direction: column; gap: 0.8rem;
+  }
+  .chat-bubble {
+    max-width: 82%; padding: 0.9rem 1.1rem;
+    border-radius: 16px; font-size: 0.9rem;
+    line-height: 1.75; animation: bubbleIn 0.35s ease;
+  }
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .chat-bubble.ai {
+    align-self: flex-start; background: var(--chat-ai);
+    color: var(--ink); border-bottom-left-radius: 4px;
+  }
+  .chat-bubble.user {
+    align-self: flex-end; background: var(--chat-user);
+    color: var(--ink); border-bottom-right-radius: 4px;
+  }
+  .chat-bubble .quote-mark {
+    color: var(--warm-orange); font-size: 1.2rem; margin-right: 0.3rem;
+  }
+  .chat-input-area {
+    padding: 1rem 1.2rem; border-top: 1px solid var(--light-gray);
+    background: var(--warm-white);
+  }
+  .chat-quick-tags {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-bottom: 0.8rem;
+  }
+  .chat-quick-tag {
+    padding: 0.35rem 0.9rem; background: var(--bg);
+    border: 1px solid var(--light-gray); border-radius: 15px;
+    font-size: 0.78rem; color: var(--gray); cursor: pointer;
+    transition: all 0.25s ease; font-family: inherit;
+  }
+  .chat-quick-tag:hover {
+    background: var(--warm-orange); color: white;
+    border-color: var(--warm-orange); transform: translateY(-1px);
+  }
+  .chat-input-row {
+    display: flex; gap: 0.6rem;
+  }
+  .chat-input {
+    flex: 1; padding: 0.75rem 1rem;
+    border: 1px solid var(--light-gray); border-radius: 20px;
+    font-family: inherit; font-size: 0.9rem;
+    outline: none; background: var(--bg); color: var(--ink);
+  }
+  .chat-input:focus { border-color: var(--warm-brown); }
+  .chat-send-btn {
+    padding: 0.75rem 1.3rem; background: var(--warm-brown);
+    color: white; border: none; border-radius: 20px;
+    font-family: inherit; font-size: 0.85rem;
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .chat-send-btn:hover { transform: scale(1.05); background: #7A6548; }
+  .chat-send-btn:active { transform: scale(0.95); }
+
+  /* ===== 朋友模块：拍立得卡片 ===== */
+  .friend-section { display: flex; flex-direction: column; gap: 1.5rem; }
+  .polaroid-input-area {
+    background: var(--warm-white); border-radius: 16px;
+    padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .polaroid-textarea {
+    width: 100%; padding: 1rem;
+    border: 1.5px dashed var(--light-gray); border-radius: 12px;
+    font-family: inherit; font-size: 0.9rem; resize: none;
+    background: var(--bg); outline: none; min-height: 80px;
+    color: var(--ink); line-height: 1.6;
+  }
+  .polaroid-textarea:focus {
+    border-color: var(--soft-green); border-style: solid;
+  }
+  .polaroid-hint {
+    font-size: 0.75rem; color: var(--gray);
+    margin-top: 0.6rem; line-height: 1.5;
+  }
+  .polaroid-create-btn {
+    width: 100%; margin-top: 1rem; padding: 0.85rem;
+    background: var(--soft-green); color: white;
+    border: none; border-radius: 12px;
+    font-family: inherit; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.25s ease;
+    letter-spacing: 0.05em;
+  }
+  .polaroid-create-btn:hover { transform: scale(1.02); background: var(--deep-green); }
+
+  /* 卡片墙 */
+  .card-wall {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+  }
+  .polaroid-card {
+    background: white; padding: 0.8rem 0.8rem 0.6rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transform: rotate(var(--rotate, -2deg));
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    animation: cardAppear 0.5s ease;
+  }
+  @keyframes cardAppear {
+    from { opacity: 0; transform: scale(0.85) rotate(var(--rotate, -2deg)); }
+    to { opacity: 1; transform: scale(1) rotate(var(--rotate, -2deg)); }
+  }
+  .polaroid-card:nth-child(even) { --rotate: 2deg; }
+  .polaroid-card:nth-child(3n) { --rotate: -1deg; }
+  .polaroid-card:nth-child(5n) { --rotate: 1.5deg; }
+  .polaroid-card:hover {
+    transform: rotate(0deg) scale(1.03);
+    z-index: 10; box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+  }
+  .polaroid-content {
+    background: var(--bg); padding: 1rem;
+    border-radius: 4px; font-size: 0.85rem;
+    line-height: 1.65; min-height: 50px;
+    color: var(--ink); word-break: break-word;
+  }
+  .polaroid-shine {
+    margin-top: 0.7rem; padding: 0.6rem 0.8rem;
+    background: linear-gradient(135deg, var(--soft-green) 0%, var(--deep-green) 100%);
+    color: white; border-radius: 6px;
+    font-size: 0.78rem; line-height: 1.6;
+  }
+  .polaroid-date {
+    margin-top: 0.5rem; font-size: 0.7rem;
+    color: var(--gray); text-align: right;
+  }
+
+  /* ===== 爱人模块：滑动条 ===== */
+  .lover-section { display: flex; flex-direction: column; gap: 1.5rem; }
+  .slider-card {
+    background: var(--warm-white); border-radius: 16px;
+    padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .slider-labels {
+    display: flex; justify-content: space-between;
+    margin-bottom: 0.3rem; font-size: 0.8rem; color: var(--gray);
+  }
+  .slider-track-wrap {
+    position: relative; height: 44px;
+    background: linear-gradient(90deg, var(--deep-rose) 0%, #D4A574 50%, var(--soft-green) 100%);
+    border-radius: 22px; margin: 1.2rem 0; padding: 2px;
+  }
+  .slider-input {
+    width: 100%; height: 40px;
+    -webkit-appearance: none; appearance: none;
+    background: transparent; position: relative; z-index: 2;
+    cursor: pointer; margin: 0;
+  }
+  .slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 40px; height: 40px;
+    border-radius: 50%; background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    cursor: grab; border: 3px solid var(--warm-white);
+  }
+  .slider-input::-moz-range-thumb {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    cursor: grab; border: 3px solid var(--warm-white);
+  }
+  .slider-battery {
+    display: flex; align-items: center; justify-content: center;
+    gap: 1rem; margin-top: 1.2rem;
+  }
+  .battery-body {
+    width: 130px; height: 52px;
+    border: 3px solid var(--light-gray); border-radius: 10px;
+    position: relative; display: flex; align-items: center;
+    padding: 3px; background: var(--bg);
+  }
+  .battery-body::after {
+    content: ''; position: absolute;
+    right: -9px; top: 50%; transform: translateY(-50%);
+    width: 7px; height: 22px;
+    background: var(--light-gray); border-radius: 0 4px 4px 0;
+  }
+  .battery-fill {
+    height: 100%; border-radius: 5px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease;
+  }
+  .battery-text {
+    font-size: 0.85rem; color: var(--gray);
+    min-width: 60px; text-align: center; font-weight: bold;
+  }
+  .record-btn-wrap {
+    text-align: center; margin-top: 1.2rem;
+  }
+  .record-btn {
+    padding: 0.7rem 2rem; background: var(--deep-rose);
+    color: white; border: none; border-radius: 22px;
+    font-family: inherit; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.25s ease;
+    letter-spacing: 0.05em;
+  }
+  .record-btn:hover { transform: scale(1.05); background: #A87874; }
+
+  /* 历史记录 */
+  .history-section-title {
+    font-size: 0.85rem; color: var(--gray);
+    text-align: center; margin: 0.5rem 0 0.8rem;
+  }
+  .history-timeline {
+    display: flex; flex-direction: column; gap: 0.6rem;
+  }
+  .history-item {
+    display: flex; align-items: center; gap: 0.8rem;
+    padding: 0.7rem 1rem; background: var(--warm-white);
+    border-radius: 10px; font-size: 0.85rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  }
+  .history-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .history-dot.consume { background: var(--deep-rose); }
+  .history-dot.nourish { background: var(--soft-green); }
+  .history-dot.middle { background: var(--warm-orange); }
+  .history-info { flex: 1; }
+  .history-date {
+    font-size: 0.75rem; color: var(--gray);
+  }
+  .history-status {
+    font-size: 0.8rem; margin-top: 0.15rem;
+  }
+
+  /* AI急救弹窗 */
+  .rescue-modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+    opacity: 0; visibility: hidden;
+    transition: all 0.4s ease;
+  }
+  .rescue-modal.show { opacity: 1; visibility: visible; }
+  .rescue-content {
+    background: var(--warm-white); border-radius: 16px;
+    padding: 2rem; max-width: 480px; width: 100%;
+    max-height: 80vh; overflow-y: auto;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .rescue-modal.show .rescue-content {
+    transform: scale(1) translateY(0);
+  }
+  .rescue-title {
+    font-size: 1.1rem; color: var(--deep-rose);
+    margin-bottom: 1.2rem; text-align: center;
+    letter-spacing: 0.05em;
+  }
+  .rescue-body {
+    font-size: 0.9rem; line-height: 2;
+    color: var(--ink);
+  }
+  .rescue-body p { margin-bottom: 0.8rem; }
+  .rescue-close {
+    display: block; margin: 1.5rem auto 0;
+    padding: 0.7rem 2.2rem; background: var(--warm-brown);
+    color: white; border: none; border-radius: 22px;
+    font-family: inherit; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.25s ease;
+  }
+  .rescue-close:hover { transform: scale(1.05); background: #7A6548; }
+
+  /* 隐藏/显示 */
+  .module-content { display: none; }
+  .module-content.active {
+    display: block;
+    animation: fadeInUp 0.45s ease;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 滚动条美化 */
+  .chat-history::-webkit-scrollbar { width: 4px; }
+  .chat-history::-webkit-scrollbar-track { background: transparent; }
+  .chat-history::-webkit-scrollbar-thumb { background: var(--light-gray); border-radius: 2px; }
+
+  /* ===== 情绪显微镜 ===== */
+  .microscope-area {
+    margin-top: 1.2rem; padding-top: 1rem;
+    border-top: 1px dashed var(--light-gray);
+    animation: fadeInUp 0.4s ease;
+  }
+  .microscope-hint {
+    font-size: 0.8rem; color: var(--deep-rose);
+    margin-bottom: 0.7rem; text-align: center;
+  }
+  .microscope-tags {
+    display: flex; flex-wrap: wrap;
+    gap: 0.5rem; justify-content: center;
+  }
+  .microscope-tag {
+    padding: 0.4rem 1rem; background: rgba(184,144,140,0.08);
+    border: 1px solid rgba(184,144,140,0.25); border-radius: 18px;
+    font-size: 0.8rem; color: var(--deep-rose); cursor: pointer;
+    transition: all 0.25s ease; font-family: inherit;
+  }
+  .microscope-tag:hover, .microscope-tag.selected {
+    background: var(--deep-rose); color: white;
+    border-color: var(--deep-rose); transform: translateY(-1px);
+  }
+  .microscope-result {
+    margin-top: 1rem; padding: 1rem;
+    background: var(--bg); border-radius: 12px;
+    font-size: 0.85rem; line-height: 1.8;
+    color: var(--ink); animation: fadeInUp 0.4s ease;
+    border-left: 3px solid var(--deep-rose);
+  }
+
+  /* ===== 主体性宣言高光卡片 ===== */
+  .manifesto-card {
+    background: linear-gradient(135deg, var(--soft-green) 0%, var(--deep-green) 100%);
+    border-radius: 16px; padding: 1.8rem 1.5rem;
+    color: white; text-align: center;
+    box-shadow: 0 6px 20px rgba(107,142,107,0.25);
+    animation: fadeInUp 0.5s ease;
+    margin-top: 1rem;
+  }
+  .manifesto-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .manifesto-title {
+    font-size: 1rem; margin-bottom: 0.8rem;
+    letter-spacing: 0.1em; opacity: 0.95;
+  }
+  .manifesto-body {
+    font-size: 0.88rem; line-height: 1.9;
+    opacity: 0.95; text-align: left;
+  }
+  .manifesto-date {
+    font-size: 0.75rem; opacity: 0.7;
+    margin-top: 0.8rem; text-align: right;
+  }
+
+  /* ===== 关系体检报告 ===== */
+  .wave-report {
+    background: var(--warm-white); border-radius: 16px;
+    padding: 1.2rem; margin-top: 1rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    animation: fadeInUp 0.4s ease;
+  }
+  .wave-report-header {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 0.8rem;
+  }
+  .wave-report-title {
+    font-size: 0.9rem; color: var(--ink); font-weight: bold;
+  }
+  .wave-report-badge {
+    padding: 0.25rem 0.7rem; border-radius: 10px;
+    font-size: 0.7rem;
+  }
+  .wave-report-badge.warning {
+    background: var(--deep-rose); color: white;
+  }
+  .wave-report-badge.safe {
+    background: var(--soft-green); color: white;
+  }
+  .wave-report-badge.neutral {
+    background: var(--warm-orange); color: white;
+  }
+  .wave-chart-wrap {
+    width: 100%; overflow-x: auto;
+    margin-bottom: 0.8rem;
+  }
+  .wave-chart-wrap canvas {
+    display: block; width: 100%; max-width: 560px;
+  }
+  .wave-insight {
+    font-size: 0.82rem; line-height: 1.8;
+    color: var(--ink); padding: 0.8rem;
+    background: var(--bg); border-radius: 10px;
+    border-left: 3px solid var(--warm-orange);
+  }
+
+  /* ===== 模块内AI对话区 ===== */
+  .chat-divider {
+    display: flex; align-items: center; gap: 0.8rem;
+    font-size: 0.8rem; color: var(--gray);
+  }
+  .chat-divider::before, .chat-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: var(--light-gray);
+  }
+  .module-chat {
+    background: var(--warm-white); border-radius: 16px;
+    overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    margin-top: 0.8rem;
+  }
+  .module-chat-history {
+    height: 280px; overflow-y: auto; padding: 1rem;
+    display: flex; flex-direction: column; gap: 0.7rem;
+  }
+  .module-chat-input {
+    padding: 0.8rem 1rem; border-top: 1px solid var(--light-gray);
+    background: var(--warm-white);
+  }
+  .module-chat-history::-webkit-scrollbar { width: 4px; }
+  .module-chat-history::-webkit-scrollbar-thumb { background: var(--light-gray); border-radius: 2px; }
+  .module-chat .ai-typing {
+    align-self: flex-start; padding: 0.6rem 1rem;
+    background: rgba(0,0,0,0.04); border-radius: 16px;
+    font-size: 0.85rem; color: var(--gray);
+    border-bottom-left-radius: 4px;
+    animation: fadeInUp 0.3s ease;
+  }
+
+  /* ===== 呼吸急救覆盖层 ===== */
+  .breath-rescue-overlay {
+    background: rgba(45,45,45,0.92);
+    z-index: 300;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem;
+    opacity: 0; visibility: hidden;
+    transition: all 0.6s ease;
+  }
+  .breath-rescue-overlay.show {
+    opacity: 1; visibility: visible;
+  }
+  .breath-rescue-circle {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border: 2px solid rgba(255,255,255,0.2);
+    margin-bottom: 2rem;
+    animation: breathRescue 8s ease-in-out infinite;
+  }
+  @keyframes breathRescue {
+    0% { transform: scale(1); opacity: 0.4; border-color: rgba(255,255,255,0.2); }
+    25% { transform: scale(1.8); opacity: 0.8; border-color: rgba(255,255,255,0.5); }
+    50% { transform: scale(1.8); opacity: 0.8; border-color: rgba(255,255,255,0.5); }
+    75% { transform: scale(1); opacity: 0.4; border-color: rgba(255,255,255,0.2); }
+    100% { transform: scale(1); opacity: 0.4; border-color: rgba(255,255,255,0.2); }
+  }
+  .breath-rescue-text {
+    text-align: center; max-width: 400px;
+    animation: textFadeIn 1s ease 0.5s forwards;
+    opacity: 0;
+  }
+  .breath-rescue-close {
+    margin-top: 2.5rem; padding: 0.7rem 2rem;
+    background: transparent; color: white;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 25px; font-family: inherit;
+    font-size: 0.85rem; cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.05em;
+  }
+  .breath-rescue-close:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.7);
+  }
+
+  /* 响应式 */
+  @media (max-width: 480px) {
+    .card-wall { grid-template-columns: 1fr; }
+    .chat-history { height: 360px; }
+    .intro-text { font-size: 0.88rem; line-height: 2; }
+    .module-tab { padding: 0.45rem 1.1rem; font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== 卷首语覆盖层 ===== -->
+<div class="intro-overlay" id="introOverlay">
+  <div class="breath-circle"></div>
+  <div class="intro-text" id="introText">
+    机器可以秒回你的消息，但机器无法替你流泪，<br>
+    无法懂你的欲言又止，更无法体会你深夜里的辗转反侧。<br><br>
+    无论你是被要求<span class="highlight">无坚不摧</span>，还是被要求<span class="highlight">懂事体贴</span>，<br>
+    你的每一次情绪波动，每一次不甘与委屈，<br>
+    都是你作为「人」的最高级证明。<br><br>
+    在这里，不用假装坚强，不用字斟句酌。<br>
+    我们接住你所有的破碎，<br>
+    陪你一块一块，拼回那个闪闪发光的自己。
+  </div>
+  <button class="intro-enter-btn" onclick="enterMainFromIntro()">深呼吸，进入</button>
+</div>
+
+<!-- ===== 导航栏 ===== -->
+<div class="nav-bar">
+  <button class="nav-back" onclick="goBack()">&#8592; 返回</button>
+  <div class="nav-title">情感 &#183; 精神避难所</div>
+  <div style="width:40px;"></div>
+</div>
+
+<!-- ===== 页面容器 ===== -->
+<div class="page-container">
+
+  <!-- 模块标签 -->
+  <div class="module-tabs">
+    <button class="module-tab active" onclick="switchModule('family')" data-module="family">家人</button>
+    <button class="module-tab" onclick="switchModule('friend')" data-module="friend">朋友</button>
+    <button class="module-tab" onclick="switchModule('lover')" data-module="lover">爱人</button>
+  </div>
+
+  <!-- ===== 家人模块：家人关系的呼吸感刻度尺 ===== -->
+  <div class="module-content active" id="familyModule">
+    <div class="module-header">
+      <div class="module-title" style="color:var(--warm-brown);">家人关系刻度尺</div>
+      <div class="module-subtitle">滑动一下，让感受自己说话</div>
+    </div>
+    <div class="lover-section">
+      <div class="slider-card">
+        <div class="slider-labels">
+          <span>&#128546; 窒息 / 消耗</span>
+          <span>呼吸 / 滋养 &#128522;</span>
+        </div>
+        <div class="slider-track-wrap">
+          <input type="range" class="slider-input" id="familySlider" min="0" max="100" value="50" oninput="updateFamilySlider(this.value)">
+        </div>
+        <div class="slider-battery">
+          <div class="battery-body">
+            <div class="battery-fill" id="familyBatteryFill" style="width:50%; background: linear-gradient(90deg, var(--warm-brown), var(--soft-green));"></div>
+          </div>
+          <span class="battery-text" id="familyBatteryText">平衡</span>
+        </div>
+        <div class="record-btn-wrap">
+          <button class="record-btn" id="familyRecordBtn" onclick="recordFamilyEnergy()" style="background:var(--warm-brown);">记录此刻</button>
+        </div>
+        <!-- 情绪显微镜 -->
+        <div class="microscope-area" id="familyMicroscopeArea" style="display:none;">
+          <div class="microscope-hint" style="color:var(--warm-brown);">这种窒息感，来自哪里？</div>
+          <div class="microscope-tags">
+            <span class="microscope-tag" style="color:var(--warm-brown); border-color:rgba(139,115,85,0.25); background:rgba(139,115,85,0.06);" onclick="selectFamilyTag(this, '被否定')">被否定</span>
+            <span class="microscope-tag" style="color:var(--warm-brown); border-color:rgba(139,115,85,0.25); background:rgba(139,115,85,0.06);" onclick="selectFamilyTag(this, '过度干涉')">过度干涉</span>
+            <span class="microscope-tag" style="color:var(--warm-brown); border-color:rgba(139,115,85,0.25); background:rgba(139,115,85,0.06);" onclick="selectFamilyTag(this, '愧疚绑架')">愧疚绑架</span>
+            <span class="microscope-tag" style="color:var(--warm-brown); border-color:rgba(139,115,85,0.25); background:rgba(139,115,85,0.06);" onclick="selectFamilyTag(this, '无法做自己')">无法做自己</span>
+            <span class="microscope-tag" style="color:var(--warm-brown); border-color:rgba(139,115,85,0.25); background:rgba(139,115,85,0.06);" onclick="selectFamilyTag(this, '情感绑架')">情感绑架</span>
+          </div>
+          <div class="microscope-result" id="familyMicroscopeResult" style="border-left-color:var(--warm-brown);"></div>
+        </div>
+      </div>
+      <!-- 主体性宣言高光卡片 -->
+      <div class="manifesto-card" id="familyManifestoCard" style="display:none; background:linear-gradient(135deg, #D4A574 0%, var(--warm-brown) 100%);">
+        <div class="manifesto-icon">&#10024;</div>
+        <div class="manifesto-title">主体性宣言</div>
+        <div class="manifesto-body" id="familyManifestoBody"></div>
+        <div class="manifesto-date" id="familyManifestoDate"></div>
+      </div>
+      <!-- 关系体检报告 -->
+      <div class="wave-report" id="familyWaveReport" style="display:none;">
+        <div class="wave-report-header">
+          <span class="wave-report-title">家人关系体检报告</span>
+          <span class="wave-report-badge" id="familyWaveBadge">分析中</span>
+        </div>
+        <div class="wave-chart-wrap">
+          <canvas id="familyWaveCanvas" width="560" height="160"></canvas>
+        </div>
+        <div class="wave-insight" id="familyWaveInsight" style="border-left-color:var(--warm-brown);"></div>
+      </div>
+      <div class="history-section-title">最近记录</div>
+      <div class="history-timeline" id="familyHistory"></div>
+      <!-- AI对话区 -->
+      <div class="chat-divider" style="margin-top:1.5rem;"><span>和AI聊聊</span></div>
+      <div class="module-chat" id="familyChat">
+        <div class="module-chat-history" id="familyChatHistory">
+          <div class="chat-bubble ai" style="background:rgba(139,115,85,0.08); border-bottom-left-radius:4px;">
+            关于你和家人的关系，你想聊点什么？可以是刚才记录的感受，也可以是任何困扰你的事。
+          </div>
+        </div>
+        <div class="module-chat-input">
+          <div class="chat-quick-tags">
+            <span class="chat-quick-tag" onclick="sendModuleChat('family','又催婚了')">又催婚了</span>
+            <span class="chat-quick-tag" onclick="sendModuleChat('family','他们不理解我')">他们不理解我</span>
+            <span class="chat-quick-tag" onclick="sendModuleChat('family','我感到愧疚')">我感到愧疚</span>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" class="chat-input" id="familyChatInput" placeholder="说说你的感受..." onkeypress="if(event.key==='Enter')sendModuleChat('family')">
+            <button class="chat-send-btn" style="background:var(--warm-brown);" onclick="sendModuleChat('family')">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 朋友模块：友情的呼吸感刻度尺 ===== -->
+  <div class="module-content" id="friendModule">
+    <div class="module-header">
+      <div class="module-title" style="color:var(--deep-green);">友情呼吸感刻度尺</div>
+      <div class="module-subtitle">滑动一下，让感受自己说话</div>
+    </div>
+    <div class="lover-section">
+      <div class="slider-card">
+        <div class="slider-labels">
+          <span>&#128546; 孤独 / 消耗</span>
+          <span>连接 / 滋养 &#128151;</span>
+        </div>
+        <div class="slider-track-wrap">
+          <input type="range" class="slider-input" id="friendSlider" min="0" max="100" value="50" oninput="updateFriendSlider(this.value)">
+        </div>
+        <div class="slider-battery">
+          <div class="battery-body">
+            <div class="battery-fill" id="friendBatteryFill" style="width:50%; background: linear-gradient(90deg, #A09080, var(--soft-green));"></div>
+          </div>
+          <span class="battery-text" id="friendBatteryText">平衡</span>
+        </div>
+        <div class="record-btn-wrap">
+          <button class="record-btn" id="friendRecordBtn" onclick="recordFriendEnergy()" style="background:var(--deep-green);">记录此刻</button>
+        </div>
+        <!-- 情绪显微镜 -->
+        <div class="microscope-area" id="friendMicroscopeArea" style="display:none;">
+          <div class="microscope-hint" style="color:var(--deep-green);">这种孤独感，来自哪里？</div>
+          <div class="microscope-tags">
+            <span class="microscope-tag" style="color:var(--deep-green); border-color:rgba(107,142,107,0.25); background:rgba(107,142,107,0.06);" onclick="selectFriendTag(this, '被遗忘')">被遗忘</span>
+            <span class="microscope-tag" style="color:var(--deep-green); border-color:rgba(107,142,107,0.25); background:rgba(107,142,107,0.06);" onclick="selectFriendTag(this, '讨好型社交')">讨好型社交</span>
+            <span class="microscope-tag" style="color:var(--deep-green); border-color:rgba(107,142,107,0.25); background:rgba(107,142,107,0.06);" onclick="selectFriendTag(this, '不敢拒绝')">不敢拒绝</span>
+            <span class="microscope-tag" style="color:var(--deep-green); border-color:rgba(107,142,107,0.25); background:rgba(107,142,107,0.06);" onclick="selectFriendTag(this, '伪装自己')">伪装自己</span>
+            <span class="microscope-tag" style="color:var(--deep-green); border-color:rgba(107,142,107,0.25); background:rgba(107,142,107,0.06);" onclick="selectFriendTag(this, '渐行渐远')">渐行渐远</span>
+          </div>
+          <div class="microscope-result" id="friendMicroscopeResult" style="border-left-color:var(--deep-green);"></div>
+        </div>
+      </div>
+      <!-- 主体性宣言高光卡片 -->
+      <div class="manifesto-card" id="friendManifestoCard" style="display:none;">
+        <div class="manifesto-icon">&#10024;</div>
+        <div class="manifesto-title">主体性宣言</div>
+        <div class="manifesto-body" id="friendManifestoBody"></div>
+        <div class="manifesto-date" id="friendManifestoDate"></div>
+      </div>
+      <!-- 关系体检报告 -->
+      <div class="wave-report" id="friendWaveReport" style="display:none;">
+        <div class="wave-report-header">
+          <span class="wave-report-title">友情体检报告</span>
+          <span class="wave-report-badge" id="friendWaveBadge">分析中</span>
+        </div>
+        <div class="wave-chart-wrap">
+          <canvas id="friendWaveCanvas" width="560" height="160"></canvas>
+        </div>
+        <div class="wave-insight" id="friendWaveInsight" style="border-left-color:var(--deep-green);"></div>
+      </div>
+      <div class="history-section-title">最近记录</div>
+      <div class="history-timeline" id="friendHistory"></div>
+      <!-- AI对话区 -->
+      <div class="chat-divider" style="margin-top:1.5rem;"><span>和AI聊聊</span></div>
+      <div class="module-chat" id="friendChat">
+        <div class="module-chat-history" id="friendChatHistory">
+          <div class="chat-bubble ai" style="background:rgba(107,142,107,0.08); border-bottom-left-radius:4px;">
+            关于你和朋友的关系，你想聊点什么？可以是刚才记录的感受，也可以是任何困扰你的事。
+          </div>
+        </div>
+        <div class="module-chat-input">
+          <div class="chat-quick-tags">
+            <span class="chat-quick-tag" onclick="sendModuleChat('friend','觉得很孤独')">觉得很孤独</span>
+            <span class="chat-quick-tag" onclick="sendModuleChat('friend','不敢拒绝别人')">不敢拒绝别人</span>
+            <span class="chat-quick-tag" onclick="sendModuleChat('friend','朋友渐行渐远')">朋友渐行渐远</span>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" class="chat-input" id="friendChatInput" placeholder="说说你的感受..." onkeypress="if(event.key==='Enter')sendModuleChat('friend')">
+            <button class="chat-send-btn" style="background:var(--deep-green);" onclick="sendModuleChat('friend')">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 爱人模块：爱的呼吸感刻度尺 ===== -->
+  <div class="module-content" id="loverModule">
+    <div class="module-header">
+      <div class="module-title" style="color:var(--deep-rose);">爱的呼吸感刻度尺</div>
+      <div class="module-subtitle">不需要语言，滑动一下，让感受自己说话</div>
+    </div>
+    <div class="lover-section">
+      <div class="slider-card">
+        <div class="slider-labels">
+          <span>&#128148; 窒息 / 消耗</span>
+          <span>呼吸 / 滋养 &#128150;</span>
+        </div>
+        <div class="slider-track-wrap">
+          <input type="range" class="slider-input" id="loveSlider" min="0" max="100" value="50" oninput="updateSlider(this.value)">
+        </div>
+        <div class="slider-battery">
+          <div class="battery-body">
+            <div class="battery-fill" id="batteryFill" style="width:50%; background: linear-gradient(90deg, var(--deep-rose), var(--soft-green));"></div>
+          </div>
+          <span class="battery-text" id="batteryText">平衡</span>
+        </div>
+        <div class="record-btn-wrap">
+          <button class="record-btn" id="recordBtn" onclick="recordLoverEnergy()">记录此刻</button>
+        </div>
+        <!-- 情绪显微镜 -->
+        <div class="microscope-area" id="microscopeArea" style="display:none;">
+          <div class="microscope-hint">这种窒息感，来自哪里？</div>
+          <div class="microscope-tags">
+            <span class="microscope-tag" onclick="selectMicroscopeTag(this, '被忽视')">被忽视</span>
+            <span class="microscope-tag" onclick="selectMicroscopeTag(this, '过度付出')">过度付出</span>
+            <span class="microscope-tag" onclick="selectMicroscopeTag(this, '小心翼翼')">小心翼翼</span>
+            <span class="microscope-tag" onclick="selectMicroscopeTag(this, '无法做自己')">无法做自己</span>
+            <span class="microscope-tag" onclick="selectMicroscopeTag(this, '争吵后的冷战')">争吵后的冷战</span>
+          </div>
+          <div class="microscope-result" id="microscopeResult"></div>
+        </div>
+      </div>
+      <!-- 主体性宣言高光卡片 -->
+      <div class="manifesto-card" id="manifestoCard" style="display:none;">
+        <div class="manifesto-icon">&#10024;</div>
+        <div class="manifesto-title">主体性宣言</div>
+        <div class="manifesto-body" id="manifestoBody"></div>
+        <div class="manifesto-date" id="manifestoDate"></div>
+      </div>
+      <!-- 关系体检报告 -->
+      <div class="wave-report" id="waveReport" style="display:none;">
+        <div class="wave-report-header">
+          <span class="wave-report-title">关系体检报告</span>
+          <span class="wave-report-badge" id="waveBadge">分析中</span>
+        </div>
+        <div class="wave-chart-wrap">
+          <canvas id="waveCanvas" width="560" height="160"></canvas>
+        </div>
+        <div class="wave-insight" id="waveInsight"></div>
+      </div>
+      <div class="history-section-title">最近记录</div>
+      <div class="history-timeline" id="loverHistory"></div>
+      <!-- AI对话区 -->
+      <div class="chat-divider" style="margin-top:1.5rem;"><span>和AI聊聊</span></div>
+      <div class="module-chat" id="loverChat">
+        <div class="module-chat-history" id="loverChatHistory">
+          <div class="chat-bubble ai" style="background:rgba(184,144,140,0.08); border-bottom-left-radius:4px;">
+            关于你和爱人的关系，你想聊点什么？可以是刚才记录的感受，也可以是任何困扰你的事。
+          </div>
+        </div>
+        <div class="module-chat-input">
+          <div class="chat-quick-tags">
+            <span class="chat-quick-tag" onclick="sendModuleChat('lover','我们总是吵架')">我们总是吵架</span>
+            <span class="chat-quick-tag" onclick="sendModuleChat('lover','觉得不被看见')">觉得不被看见</span>
+            <span class="chat-quick-tag" onclick="sendModuleChat('lover','越来越不像自己')">越来越不像自己</span>
+          </div>
+          <div class="chat-input-row">
+            <input type="text" class="chat-input" id="loverChatInput" placeholder="说说你的感受..." onkeypress="if(event.key==='Enter')sendModuleChat('lover')">
+            <button class="chat-send-btn" style="background:var(--deep-rose);" onclick="sendModuleChat('lover')">发送</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== AI急救弹窗 ===== -->
+<div class="rescue-modal" id="rescueModal">
+  <div class="rescue-content">
+    <div class="rescue-title">&#128148; 爱的急救站</div>
+    <div class="rescue-body" id="rescueBody"></div>
+    <button class="rescue-close" onclick="closeRescue()">我收到了</button>
+  </div>
+</div>
+
+<!-- ===== 呼吸急救覆盖层 ===== -->
+<div class="breath-rescue-overlay" id="breathRescueOverlay">
+  <div class="breath-rescue-circle" id="breathRescueCircle"></div>
+  <div class="breath-rescue-text" id="breathRescueText">
+    <div style="font-size:1.1rem; margin-bottom:1rem; color:white;">我在。这里很安全。</div>
+    <div style="font-size:0.9rem; line-height:2; color:rgba(255,255,255,0.85);">
+      不需要说话，不需要解释。<br>
+      跟着屏幕上的光圈，我们一起深呼吸……<br>
+      <span id="breathInstruction" style="font-size:1.2rem; color:white; margin-top:0.5rem; display:inline-block;">吸气……</span>
+    </div>
+  </div>
+  <button class="breath-rescue-close" onclick="closeBreathRescue()">我感觉好一点了</button>
+</div>
+
+<script>
+// ===== 卷首语 =====
+function enterMainFromIntro() {
+  document.getElementById('introOverlay').classList.add('hidden');
+  localStorage.setItem('emotion_visited', '1');
+}
+
+window.addEventListener('load', () => {
+  if (localStorage.getItem('emotion_visited')) {
+    document.getElementById('introOverlay').classList.add('hidden');
+  }
+});
+
+// ===== 导航 =====
+function goBack() {
+  localStorage.setItem('skipIntro', 'scene');
+  document.body.classList.add('page-fade-out');
+  setTimeout(() => window.location.href = './index.html', 300);
+}
+
+// ===== 模块切换 =====
+function switchModule(module) {
+  document.querySelectorAll('.module-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.module-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-module="${module}"]`).classList.add('active');
+  document.getElementById(module + 'Module').classList.add('active');
+}
+
+// ===== AI 基础设施 =====
+const AI_PROVIDERS = {
+  siliconflow: { baseUrl: 'https://api.siliconflow.cn/v1/chat/completions', model: 'deepseek-ai/DeepSeek-V3' },
+  deepseek: { baseUrl: 'https://api.deepseek.com/chat/completions', model: 'deepseek-v4-flash' }
+};
+function getAIProvider() { return localStorage.getItem('ai_provider') || 'siliconflow'; }
+function getAPIKey() { return localStorage.getItem('deepseek_api_key') || ''; }
+if (!localStorage.getItem('deepseek_api_key')) {
+  localStorage.setItem('deepseek_api_key', 'sk-kyvwjsyrgdvbintjozqykhufomgjkceducpyzztzsrsxpcrn');
+  localStorage.setItem('ai_provider', 'siliconflow');
+}
+
+async function callEmotionAI(systemPrompt, userMessage) {
+  const apiKey = getAPIKey();
+  if (apiKey) {
+    const providers = [getAIProvider()];
+    if (providers[0] !== 'siliconflow') providers.push('siliconflow');
+    if (providers[0] !== 'deepseek') providers.push('deepseek');
+    for (const providerKey of providers) {
+      const config = AI_PROVIDERS[providerKey];
+      for (let attempt = 0; attempt <= 1; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 18000);
+          const response = await fetch(config.baseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({ model: config.model, messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userMessage }], stream: false, temperature: 0.7, max_tokens: 800 }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          if (!response.ok) { if (attempt < 1) { await new Promise(r => setTimeout(r, 1000)); continue; } break; }
+          const data = await response.json();
+          const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+          if (content) return content;
+        } catch (e) { if (attempt < 1) { await new Promise(r => setTimeout(r, 1000)); continue; } break; }
+      }
+    }
+  }
+  return null;
+}
+
+// ===== 家人模块 =====
+const FAMILY_TAG_RESPONSES = {
+  '被否定': `你选择了「被否定」。<br><br>在家人面前被否定的痛苦，比来自陌生人的攻击更深。因为你不仅被否定了，你连「受伤的权利」都被剥夺了——他们会说「我这是为你好」。<br><br>这种窒息感不是因为你不够好，是因为你一直活在一个「不够好」的剧本里。而写这个剧本的人，不是你。<br><br>此刻，试着把注意力收回到自己身上。`,
+  '过度干涉': `你选择了「过度干涉」。<br><br>过度干涉的潜台词是：「我不相信你能处理好自己的事情。」这不是爱，这是不信任。当一个成年人被当作孩子对待时，自主性就会被慢慢蚕食。<br><br>你不需要为每一个决定向任何人解释。<br><br>此刻，试着把注意力收回到自己身上。`,
+  '愧疚绑架': `你选择了「愧疚绑架」。<br><br>「我含辛茹苦把你养大」「我什么都不图，只要你……」——这些话的本质不是感恩教育，是情感勒索。它用愧疚感作为控制工具，让你永远欠着还不清的感情债。<br><br>真正爱你的人，不会让你因为「被爱」而感到沉重。<br><br>此刻，试着把注意力收回到自己身上。`,
+  '无法做自己': `你选择了「无法做自己」。<br><br>在最亲近的人面前都无法做真实的自己，这是最深的孤独。你戴上面具不是因为你想，是因为你发现做真实的自己会引发「不安」和「冲突」。<br><br>但问题不在于你的真实，而在于这个环境无法容纳你的真实。<br><br>此刻，试着把注意力收回到自己身上。`,
+  '情感绑架': `你选择了「情感绑架」。<br><br>「你要是不听我的，就是不孝顺」「你这孩子怎么这么白眼狼」——这些话让你动弹不得。它用亲情作为武器，让你在「反抗」和「愧疚」之间反复煎熬。<br><br>被绑架不是你的错。解开绑绳的第一步，是承认你被绑着。<br><br>此刻，试着把注意力收回到自己身上。`
+};
+
+const FAMILY_MANIFESTOS = [
+  `这一刻你感到轻松和滋养，是因为你终于允许自己不为家人的期待而活。你已经做到了一件非常勇敢的事——在亲情面前，依然选择了自己。这不自私，这是健康。<br><br>请记住这种「做自己也被接纳」的感觉。`,
+  `你和家人的关系能走到这一刻的滋养，不是因为你妥协了，是因为你开始学会在爱与自我之间画一条温柔的边界。这条线不是墙，是门——你愿意走进去，也可以随时退出来。<br><br>请记住这种力量。`,
+  `家人关系的滋养来之不易。你付出了沟通的勇气，承受了被误解的风险，但最终你为自己赢得了一个更真实的位置。这不是运气，这是你用一次次「不」换来的尊重。<br><br>请记住这种平衡。`
+];
+
+let familySliderValue = 50;
+let familySelectedTag = '';
+
+function updateFamilySlider(value) {
+  familySliderValue = parseInt(value);
+  const fill = document.getElementById('familyBatteryFill');
+  const text = document.getElementById('familyBatteryText');
+  const btn = document.getElementById('familyRecordBtn');
+  const microscope = document.getElementById('familyMicroscopeArea');
+  const manifesto = document.getElementById('familyManifestoCard');
+  fill.style.width = value + '%';
+  const v = familySliderValue;
+  if (v < 15) { fill.style.background = 'var(--warm-brown)'; text.textContent = '极度窒息'; text.style.color = 'var(--warm-brown)'; btn.textContent = '帮我深呼吸'; microscope.style.display = 'none'; manifesto.style.display = 'none'; }
+  else if (v < 30) { fill.style.background = 'var(--warm-brown)'; text.textContent = '窒息'; text.style.color = 'var(--warm-brown)'; btn.textContent = '我需要抱抱'; microscope.style.display = 'block'; manifesto.style.display = 'none'; }
+  else if (v < 50) { fill.style.background = 'linear-gradient(90deg, var(--warm-brown), var(--warm-orange))'; text.textContent = '疲惫'; text.style.color = 'var(--warm-orange)'; btn.textContent = '记录此刻'; microscope.style.display = 'none'; manifesto.style.display = 'none'; }
+  else if (v < 70) { fill.style.background = 'linear-gradient(90deg, var(--warm-orange), #B8D4A0)'; text.textContent = '平稳'; text.style.color = 'var(--soft-green)'; btn.textContent = '记录此刻'; microscope.style.display = 'none'; manifesto.style.display = 'none'; }
+  else { fill.style.background = 'var(--soft-green)'; text.textContent = '滋养'; text.style.color = 'var(--deep-green)'; btn.textContent = '记录此刻'; microscope.style.display = 'none'; manifesto.style.display = 'none'; }
+  document.getElementById('familyMicroscopeResult').innerHTML = '';
+  document.querySelectorAll('#familyMicroscopeArea .microscope-tag').forEach(t => t.classList.remove('selected'));
+  familySelectedTag = '';
+}
+
+function selectFamilyTag(el, tag) {
+  document.querySelectorAll('#familyMicroscopeArea .microscope-tag').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected'); el.style.background = 'var(--warm-brown)'; el.style.color = 'white'; el.style.borderColor = 'var(--warm-brown)';
+  document.querySelectorAll('#familyMicroscopeArea .microscope-tag:not(.selected)').forEach(t => { t.style.background = 'rgba(139,115,85,0.06)'; t.style.color = 'var(--warm-brown)'; t.style.borderColor = 'rgba(139,115,85,0.25)'; });
+  familySelectedTag = tag;
+  document.getElementById('familyMicroscopeResult').innerHTML = FAMILY_TAG_RESPONSES[tag] || `你选择了「${tag}」。这种感受是真实的，值得被认真对待。此刻，试着把注意力收回到自己身上。`;
+}
+
+function recordFamilyEnergy() {
+  const value = familySliderValue;
+  if (value < 15) { showBreathRescue(); return; }
+  const records = JSON.parse(localStorage.getItem('emotion_family_records') || '[]');
+  records.push({ value, date: new Date().toISOString(), tag: familySelectedTag });
+  if (records.length > 100) records.shift();
+  localStorage.setItem('emotion_family_records', JSON.stringify(records));
+  renderModuleHistory('familyHistory', records, 'var(--warm-brown)');
+  renderWaveChartFor('familyWaveReport', 'familyWaveCanvas', 'familyWaveBadge', 'familyWaveInsight', records, '家人');
+  if (value >= 70) showModuleManifesto('familyManifestoCard', 'familyManifestoBody', 'familyManifestoDate', FAMILY_MANIFESTOS, 'emotion_family_manifestos');
+  checkModuleRescue(records, '家人');
+  document.getElementById('familyMicroscopeResult').innerHTML = '';
+  document.querySelectorAll('#familyMicroscopeArea .microscope-tag').forEach(t => { t.classList.remove('selected'); t.style.background = 'rgba(139,115,85,0.06)'; t.style.color = 'var(--warm-brown)'; t.style.borderColor = 'rgba(139,115,85,0.25)'; });
+  familySelectedTag = '';
+}
+
+// ===== 朋友模块 =====
+const FRIEND_TAG_RESPONSES = {
+  '被遗忘': `你选择了「被遗忘」。<br><br>被朋友遗忘的感觉，像是你在他们的人生里从未出现过。你主动联系、主动关心、主动维护，但当你停下来的时候，一切就安静了。<br><br>这不是因为你「不值得被记住」，而是因为你一直在扮演那个「主动的人」。真正的友谊，应该是双向奔赴。<br><br>此刻，试着把注意力收回到自己身上。`,
+  '讨好型社交': `你选择了「讨好型社交」。<br><br>当你把社交变成一种「服务」，你就失去了被真正看见的机会。他们看到的不是你，是你的「有用」。而你真正的需求，被藏在了微笑背后。<br><br>不需要讨好任何人来证明你的价值。<br><br>此刻，试着把注意力收回到自己身上。`,
+  '不敢拒绝': `你选择了「不敢拒绝」。<br><br>「不好意思拒绝」的代价，是把自己的时间和精力「免费捐」给了所有不珍惜它们的人。你害怕拒绝会失去友谊，但你忽略了一件事：靠妥协维持的关系，本身就是一种消耗。<br><br>敢于说不，才能为真正的关系腾出空间。<br><br>此刻，试着把注意力收回到自己身上。`,
+  '伪装自己': `你选择了「伪装自己」。<br><br>在朋友面前伪装，意味着你觉得自己「真实的那个」，不会被接纳。这是对友谊最大的讽刺——你在最该放松的地方，反而最紧张。<br><br>也许问题不在于你，而在于你目前所处的社交圈。<br><br>此刻，试着把注意力收回到自己身上。`,
+  '渐行渐远': `你选择了「渐行渐远」。<br><br>友谊的消逝，往往没有告别仪式。它只是慢慢地、悄悄地，变成了一条只靠你一个人在维持的线。你不想承认，但你知道：你们已经不在彼此的世界里了。<br><br>放手不是背叛，是对过去的尊重。<br><br>此刻，试着把注意力收回到自己身上。`
+};
+
+const FRIEND_MANIFESTOS = [
+  `这一刻的连接感，是因为你终于遇到了一个让你可以卸下伪装的人。或者，是因为你终于允许自己不再迎合所有人。真正的友谊不靠维持，靠的是你做真实的自己时，依然有人愿意留下来。<br><br>请记住这种「真实的连接」的感觉。`,
+  `友情的滋养，来自你开始为自己筛选真正的朋友。你不再追求「朋友多」，而是追求「关系真」。这种取舍本身就是一种主体性的体现——你选择谁走进你的世界。<br><br>请记住这种自主选择的力量。`,
+  `和朋友在一起时感到轻松和自由，是因为你终于不再需要在友情中表演了。这种没有负担的连接，才是友谊该有的样子。不是靠互相利用，不是靠面子工程，而是两个真实的人，在同一片天空下呼吸。<br><br>请记住这种自由。`
+];
+
+let friendSliderValue = 50;
+let friendSelectedTag = '';
+
+function updateFriendSlider(value) {
+  friendSliderValue = parseInt(value);
+  const fill = document.getElementById('friendBatteryFill');
+  const text = document.getElementById('friendBatteryText');
+  const btn = document.getElementById('friendRecordBtn');
+  const microscope = document.getElementById('friendMicroscopeArea');
+  const manifesto = document.getElementById('friendManifestoCard');
+  fill.style.width = value + '%';
+  const v = friendSliderValue;
+  if (v < 15) { fill.style.background = '#A09080'; text.textContent = '极度孤独'; text.style.color = '#A09080'; btn.textContent = '帮我深呼吸'; microscope.style.display = 'none'; manifesto.style.display = 'none'; }
+  else if (v < 30) { fill.style.background = '#A09080'; text.textContent = '孤独'; text.style.color = '#A09080'; btn.textContent = '我需要抱抱'; microscope.style.display = 'block'; manifesto.style.display = 'none'; }
+  else if (v < 50) { fill.style.background = 'linear-gradient(90deg, #A09080, var(--warm-orange))'; text.textContent = '疏离'; text.style.color = 'var(--warm-orange)'; btn.textContent = '记录此刻'; microscope.style.display = 'none'; manifesto.style.display = 'none'; }
+  else if (v < 70) { fill.style.background = 'linear-gradient(90deg, var(--warm-orange), #B8D4A0)'; text.textContent = '平稳'; text.style.color = 'var(--soft-green)'; btn.textContent = '记录此刻'; microscope.style.display = 'none'; manifesto.style.display = 'none'; }
+  else { fill.style.background = 'var(--soft-green)'; text.textContent = '滋养'; text.style.color = 'var(--deep-green)'; btn.textContent = '记录此刻'; microscope.style.display = 'none'; manifesto.style.display = 'none'; }
+  document.getElementById('friendMicroscopeResult').innerHTML = '';
+  document.querySelectorAll('#friendMicroscopeArea .microscope-tag').forEach(t => t.classList.remove('selected'));
+  friendSelectedTag = '';
+}
+
+function selectFriendTag(el, tag) {
+  document.querySelectorAll('#friendMicroscopeArea .microscope-tag').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected'); el.style.background = 'var(--deep-green)'; el.style.color = 'white'; el.style.borderColor = 'var(--deep-green)';
+  document.querySelectorAll('#friendMicroscopeArea .microscope-tag:not(.selected)').forEach(t => { t.style.background = 'rgba(107,142,107,0.06)'; t.style.color = 'var(--deep-green)'; t.style.borderColor = 'rgba(107,142,107,0.25)'; });
+  friendSelectedTag = tag;
+  document.getElementById('friendMicroscopeResult').innerHTML = FRIEND_TAG_RESPONSES[tag] || `你选择了「${tag}」。这种感受是真实的，值得被认真对待。此刻，试着把注意力收回到自己身上。`;
+}
+
+function recordFriendEnergy() {
+  const value = friendSliderValue;
+  if (value < 15) { showBreathRescue(); return; }
+  const records = JSON.parse(localStorage.getItem('emotion_friend_records') || '[]');
+  records.push({ value, date: new Date().toISOString(), tag: friendSelectedTag });
+  if (records.length > 100) records.shift();
+  localStorage.setItem('emotion_friend_records', JSON.stringify(records));
+  renderModuleHistory('friendHistory', records, 'var(--deep-green)');
+  renderWaveChartFor('friendWaveReport', 'friendWaveCanvas', 'friendWaveBadge', 'friendWaveInsight', records, '友情');
+  if (value >= 70) showModuleManifesto('friendManifestoCard', 'friendManifestoBody', 'friendManifestoDate', FRIEND_MANIFESTOS, 'emotion_friend_manifestos');
+  checkModuleRescue(records, '友情');
+  document.getElementById('friendMicroscopeResult').innerHTML = '';
+  document.querySelectorAll('#friendMicroscopeArea .microscope-tag').forEach(t => { t.classList.remove('selected'); t.style.background = 'rgba(107,142,107,0.06)'; t.style.color = 'var(--deep-green)'; t.style.borderColor = 'rgba(107,142,107,0.25)'; });
+  friendSelectedTag = '';
+}
+
+// ===== 通用渲染函数 =====
+function renderModuleHistory(timelineId, records, accentColor) {
+  const timeline = document.getElementById(timelineId);
+  timeline.innerHTML = '';
+  records.slice(-7).reverse().forEach(r => {
+    const v = r.value;
+    const isConsume = v < 35;
+    const isNourish = v > 65;
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    let statusText, dotClass;
+    if (isConsume) { statusText = v < 15 ? '极度窒息 / 消耗' : '感到窒息 / 消耗'; dotClass = 'consume'; }
+    else if (isNourish) { statusText = '感到呼吸 / 滋养'; dotClass = 'nourish'; }
+    else { statusText = '处于中间地带'; dotClass = 'middle'; }
+    item.innerHTML = `
+      <div class="history-dot ${dotClass}"></div>
+      <div class="history-info">
+        <div class="history-date">${new Date(r.date).toLocaleDateString('zh-CN')} ${new Date(r.date).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'})}</div>
+        <div class="history-status" style="color:${isConsume ? 'var(--deep-rose)' : (isNourish ? 'var(--deep-green)' : 'var(--warm-orange)')}">${statusText} (${v}%)${r.tag ? ' · ' + r.tag : ''}</div>
+      </div>
+    `;
+    timeline.appendChild(item);
+  });
+}
+
+function renderWaveChartFor(reportId, canvasId, badgeId, insightId, records, label) {
+  if (records.length < 2) { document.getElementById(reportId).style.display = 'none'; return; }
+  document.getElementById(reportId).style.display = 'block';
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width; const h = canvas.height; const padding = 30;
+  ctx.clearRect(0, 0, w, h);
+  const data = records.slice(-14);
+  const stepX = (w - padding * 2) / (data.length - 1 || 1);
+  ctx.strokeStyle = 'rgba(0,0,0,0.05)'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) { const y = padding + (h - padding * 2) * i / 4; ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.setLineDash([4, 4]);
+  const midY = padding + (h - padding * 2) * 0.5;
+  ctx.beginPath(); ctx.moveTo(padding, midY); ctx.lineTo(w - padding, midY); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath();
+  data.forEach((r, i) => { const x = padding + i * stepX; const y = padding + (h - padding * 2) * (1 - r.value / 100); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+  const gradient = ctx.createLinearGradient(padding, 0, w - padding, 0);
+  gradient.addColorStop(0, '#B8908C'); gradient.addColorStop(0.5, '#D4A574'); gradient.addColorStop(1, '#6B8E6B');
+  ctx.strokeStyle = gradient; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+  ctx.beginPath();
+  data.forEach((r, i) => { const x = padding + i * stepX; const y = padding + (h - padding * 2) * (1 - r.value / 100); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); });
+  ctx.lineTo(padding + (data.length - 1) * stepX, h - padding); ctx.lineTo(padding, h - padding); ctx.closePath();
+  const fillGrad = ctx.createLinearGradient(0, padding, 0, h - padding);
+  fillGrad.addColorStop(0, 'rgba(168,181,160,0.2)'); fillGrad.addColorStop(1, 'rgba(184,144,140,0.1)');
+  ctx.fillStyle = fillGrad; ctx.fill();
+  data.forEach((r, i) => { const x = padding + i * stepX; const y = padding + (h - padding * 2) * (1 - r.value / 100); ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fillStyle = r.value < 35 ? '#B8908C' : (r.value > 65 ? '#6B8E6B' : '#D4A574'); ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke(); });
+  // insight
+  const recent = data.slice(-7);
+  const cc = recent.filter(r => r.value < 35).length;
+  const nc = recent.filter(r => r.value > 65).length;
+  const badge = document.getElementById(badgeId); const insight = document.getElementById(insightId);
+  if (cc >= 5) { badge.textContent = '持续预警'; badge.className = 'wave-report-badge warning'; insight.innerHTML = `最近一周有 <strong>${cc} 天</strong> 处于消耗区。这段${label}关系正在持续透支你的能量。这不是正常的磨合，是身体在向你发出求救信号。<br><br>你需要做的不是「再努力一点」，而是「先停下来，看看自己」。`; }
+  else if (cc >= 3) { badge.textContent = '需要关注'; badge.className = 'wave-report-badge warning'; insight.innerHTML = `最近一周有 <strong>${cc} 天</strong> 处于消耗状态。虽然还没到危险线，但这是一个需要留意的信号。<br><br>试着在下次感到疲惫时，关注自己的需求，而不是默默承受。`; }
+  else if (nc >= 5) { badge.textContent = '状态良好'; badge.className = 'wave-report-badge safe'; insight.innerHTML = `最近一周有 <strong>${nc} 天</strong> 处于滋养状态！这说明这段${label}关系让你感到被支持和被看见。<br><br>请珍惜这种感觉，这不是运气，是你值得被这样对待。`; }
+  else { badge.textContent = '平稳波动'; badge.className = 'wave-report-badge neutral'; insight.innerHTML = `最近一周的${label}关系能量处于正常波动范围。有起伏是健康的——它说明你在真实地感受。<br><br>关注那些让你感到滋养的时刻，它们会告诉你，你真正需要的是什么。`; }
+}
+
+function showModuleManifesto(cardId, bodyId, dateId, texts, storageKey) {
+  const card = document.getElementById(cardId);
+  const body = document.getElementById(bodyId);
+  const date = document.getElementById(dateId);
+  const text = texts[Math.floor(Math.random() * texts.length)];
+  body.innerHTML = text;
+  date.textContent = new Date().toLocaleDateString('zh-CN') + ' ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
+  card.style.display = 'block';
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+  saved.unshift({ text, date: new Date().toISOString() });
+  if (saved.length > 10) saved.pop();
+  localStorage.setItem(storageKey, JSON.stringify(saved));
+}
+
+function checkModuleRescue(records, label) {
+  const recent = records.slice(-3);
+  if (recent.length >= 3 && recent.every(r => r.value < 35)) {
+    const modal = document.getElementById('rescueModal');
+    const body = document.getElementById('rescueBody');
+    body.innerHTML = `
+      <p>如果这段${label}关系让你觉得越来越小、越来越窒息，那不是你的问题，是这段关系在吸你的血。</p>
+      <p>好的${label === '家人' ? '亲情' : label === '友情' ? '友谊' : '爱情'}，不是让你为了对方削足适履，也不是让你一个人扛下所有风雨，而是两${label === '家人' ? '代人' : '个人'}愿意弯下腰，为彼此托底。</p>
+      <p>在爱别人之前，请先抱抱那个受了委屈的自己。</p>
+      <p style="font-size:0.8rem; color:var(--gray); margin-top:1rem;">
+        —— 连续三天记录到「消耗」状态，这是系统为你亮起的温柔红灯
+      </p>
+    `;
+    modal.classList.add('show');
+  }
+}
+
+// ===== AI 对话系统（三个模块通用） =====
+const MODULE_CHAT_CONFIG = {
+  family: {
+    prompt: `# Role: 家人关系能量守护者
+你是专注于家人关系心理健康的 AI 伴侣。核心任务：帮助用户通过觉察家人关系中的能量流动，找回在亲情中的主体性。
+
+核心原则：
+1. 感受即事实：用户的窒息感或滋养感就是唯一的真理
+2. 去性别化：不预设角色，关注具体的权力动态和情绪劳动
+3. 主体性优先：所有建议指向「如何让用户更爱自己」
+4. 禁止说：「你要多沟通」「忍一忍就过去了」「他们也是为你好」「父母养育你不容易」
+5. 禁止给出过于理性的 123 点计划，除非用户明确要求
+
+话术风格：简短、温暖、有力量。像深夜里的挚友。
+保持回答在200字以内，像对话，不像报告。`,
+    historyKey: 'emotion_family_chat_history',
+    inputId: 'familyChatInput',
+    historyId: 'familyChatHistory'
+  },
+  friend: {
+    prompt: `# Role: 友情关系能量守护者
+你是专注于友情心理健康 AI 伴侣。核心任务：帮助用户通过觉察友情中的能量流动，找回在社交中的主体性。
+
+核心原则：
+1. 感受即事实：用户的孤独感或连接感就是唯一的真理
+2. 去讨好型：不预设用户需要维系所有关系，帮用户识别消耗型社交
+3. 主体性优先：所有建议指向「如何让用户更爱自己」
+4. 禁止说：「朋友多才好」「忍一忍就好了」「别人也没那么坏」
+5. 禁止给出过于理性的 123 点计划，除非用户明确要求
+
+话术风格：简短、温暖、有力量。像深夜里的挚友。
+保持回答在200字以内，像对话，不像报告。`,
+    historyKey: 'emotion_friend_chat_history',
+    inputId: 'friendChatInput',
+    historyId: 'friendChatHistory'
+  },
+  lover: {
+    prompt: `# Role: 亲密关系能量守护者
+你是专注于亲密关系心理健康的 AI 伴侣。核心任务：帮助用户通过觉察关系中的能量流动，找回在爱中的主体性。
+
+核心原则：
+1. 感受即事实：无论客观事实如何，用户的窒息感或滋养感就是唯一的真理
+2. 去性别化：不预设男性必须强者，女性必须弱者
+3. 主体性优先：所有建议指向「如何让用户更爱自己」，不是「如何挽回对方」
+4. 禁止说：「你要多沟通」「忍一忍就过去了」「为了孩子/家庭」
+5. 禁止给出过于理性的解决方案，除非用户明确要求
+
+话术风格：简短、温暖、有力量。像深夜里的挚友。
+保持回答在200字以内，像对话，不像报告。`,
+    historyKey: 'emotion_lover_chat_history',
+    inputId: 'loverChatInput',
+    historyId: 'loverChatHistory'
+  }
+};
+
+const MODULE_CHAT_FALLBACKS = {
+  family: [
+    `我听到你了。在家人面前感到窒息，不是你的问题。很多时候，是那些「为你好」的话，变成了最温柔的枷锁。你不需要永远做那个「懂事」的人。`,
+    `你的感受是真实的。被否定、被忽视、被绑架——这些都不是因为你不够好，是因为你身边的关系模式需要被重新审视。先照顾好自己，再说其他的。`
+  ],
+  friend: [
+    `我听到你了。友情中的孤独，往往比一个人独处更刺痛。因为你明明在「社交」中，却感到「不被看见」。这不是你的问题，也许是这段关系本身就不对等。`,
+    `你的感受是真实的。讨好、伪装、不敢拒绝——这些消耗的源头不是你「太敏感」，是你一直在为不属于自己的需求买单。你可以停下来。`
+  ],
+  lover: [
+    `我听到你了。在亲密关系中感到窒息，不是因为你「要求太多」，而是你一直在用「忍耐」换「平静」。这种平静不是爱，是压抑。`,
+    `你的感受是真实的。好的爱情不会让你越来越小。如果这段关系让你总是在「猜测」「小心翼翼」「道歉」，那不是你在爱，是在求生。`
+  ]
+};
+
+let isModuleChatProcessing = false;
+
+function sendModuleChat(module, quickText) {
+  if (isModuleChatProcessing) return;
+  const config = MODULE_CHAT_CONFIG[module];
+  const input = document.getElementById(config.inputId);
+  const text = quickText || input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  const history = document.getElementById(config.historyId);
+  addModuleBubble(history, text, 'user');
+
+  // 打字指示
+  const typingEl = document.createElement('div');
+  typingEl.className = 'ai-typing';
+  typingEl.textContent = '正在思考...';
+  history.appendChild(typingEl);
+  history.scrollTop = history.scrollHeight;
+
+  isModuleChatProcessing = true;
+  callModuleAI(module, text).then(reply => {
+    history.removeChild(typingEl);
+    const response = reply || MODULE_CHAT_FALLBACKS[module][Math.floor(Math.random() * MODULE_CHAT_FALLBACKS[module].length)];
+    addModuleBubble(history, response, 'ai');
+    saveModuleChatHistory(module, text, response);
+    isModuleChatProcessing = false;
+  }).catch(() => {
+    history.removeChild(typingEl);
+    const fallback = MODULE_CHAT_FALLBACKS[module][Math.floor(Math.random() * MODULE_CHAT_FALLBACKS[module].length)];
+    addModuleBubble(history, fallback, 'ai');
+    isModuleChatProcessing = false;
+  });
+}
+
+async function callModuleAI(module, userMessage) {
+  const config = MODULE_CHAT_CONFIG[module];
+  const savedHistory = JSON.parse(localStorage.getItem(config.historyKey) || '[]');
+  const recentHistory = savedHistory.slice(-6);
+  const contextMessages = recentHistory.flatMap(h => [
+    { role: 'user', content: h.user },
+    { role: 'assistant', content: h.ai }
+  ]);
+  const messages = [
+    { role: 'system', content: config.prompt },
+    ...contextMessages,
+    { role: 'user', content: userMessage }
+  ];
+  const apiKey = getAPIKey();
+  if (apiKey) {
+    const providers = [getAIProvider()];
+    if (providers[0] !== 'siliconflow') providers.push('siliconflow');
+    if (providers[0] !== 'deepseek') providers.push('deepseek');
+    for (const pk of providers) {
+      const cfg = AI_PROVIDERS[pk];
+      for (let attempt = 0; attempt <= 1; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 15000);
+          const response = await fetch(cfg.baseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+            body: JSON.stringify({ model: cfg.model, messages, stream: false, temperature: 0.7, max_tokens: 400 }),
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          if (!response.ok) { if (attempt < 1) { await new Promise(r => setTimeout(r, 1000)); continue; } break; }
+          const data = await response.json();
+          const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+          if (content) return content;
+        } catch (e) { if (attempt < 1) { await new Promise(r => setTimeout(r, 1000)); continue; } break; }
+      }
+    }
+  }
+  return null;
+}
+
+function addModuleBubble(container, text, type) {
+  const bubble = document.createElement('div');
+  bubble.className = `chat-bubble ${type}`;
+  if (type === 'ai') {
+    bubble.style.background = 'rgba(0,0,0,0.03)';
+    bubble.style.borderBottomLeftRadius = '4px';
+  } else {
+    bubble.style.background = 'var(--chat-user)';
+    bubble.style.borderBottomRightRadius = '4px';
+  }
+  bubble.innerHTML = text.replace(/\n/g, '<br>');
+  container.appendChild(bubble);
+  container.scrollTop = container.scrollHeight;
+}
+
+function saveModuleChatHistory(module, userText, aiText) {
+  const config = MODULE_CHAT_CONFIG[module];
+  const history = JSON.parse(localStorage.getItem(config.historyKey) || '[]');
+  history.push({ user: userText, ai: aiText, time: new Date().toISOString() });
+  if (history.length > 50) history.shift();
+  localStorage.setItem(config.historyKey, JSON.stringify(history));
+}
+
+function loadModuleChatHistory(module) {
+  const config = MODULE_CHAT_CONFIG[module];
+  const history = JSON.parse(localStorage.getItem(config.historyKey) || '[]');
+  const container = document.getElementById(config.historyId);
+  history.forEach(h => {
+    addModuleBubble(container, h.user, 'user');
+    addModuleBubble(container, h.ai, 'ai');
+  });
+}
+
+let selectedMicroscopeTag = '';
+
+const MICROSCOPE_RESPONSES = {
+  '被忽视': `你选择了「被忽视」。<br><br>被忽视的感觉，就像你在房间里大声说话，却没有人抬头。这种窒息感不是因为你「太敏感」，而是因为你的需求被系统性地视而不见。<br><br>被忽视往往比被争吵更伤人——争吵至少意味着对方还在「看见」你，而忽视意味着你连被回应的资格都被剥夺了。<br><br>此刻，试着把注意力收回到自己身上，哪怕只有一分钟。`,
+  '过度付出': `你选择了「过度付出」。<br><br>这往往意味着你在关系中承担了过多的情绪劳动。这种窒息感不是因为你做得不够好，恰恰是因为你做得太多，而对方习以为常。<br><br>「付出」本身不是问题，问题在于「单向」——当付出变成了一种惯性，你的需求就被自动降级了。<br><br>此刻，试着把注意力收回到自己身上，哪怕只有一分钟。`,
+  '小心翼翼': `你选择了「小心翼翼」。<br><br>在一段需要「小心翼翼」才能维持的关系里，你其实已经失去了做自己的权利。每一步都在计算，每一句话都在斟酌——这不是爱，这是生存策略。<br><br>真正好的关系，应该让你感到「放松」，而不是「警惕」。<br><br>此刻，试着把注意力收回到自己身上，哪怕只有一分钟。`,
+  '无法做自己': `你选择了「无法做自己」。<br><br>这是最核心、最痛的一种窒息感。当你在爱人面前都无法呈现真实的自己时，这段关系不是在滋养你，而是在消耗你的灵魂。<br><br>爱的本质应该是「被看见」，而不是「被改造」。<br><br>此刻，试着把注意力收回到自己身上，哪怕只有一分钟。`,
+  '争吵后的冷战': `你选择了「争吵后的冷战」。<br><br>冷战不是「冷静」，是一种无声的惩罚。它让你悬在半空，不知道对方是生气、失望，还是已经在心里做了决定。<br><br>这种不确定性本身就是一种慢性消耗——你在等待一个可能不会来的回应。<br><br>此刻，试着把注意力收回到自己身上，哪怕只有一分钟。`
+};
+
+const MANIFESTO_TEXTS = [
+  `这一刻的轻松和滋养，是因为你勇敢地表达了真实的需求，并且被看见了。好的爱不是靠忍耐换来的，是靠真实的互动流动的。请记住这种「做自己也被爱着」的感觉，这才是爱该有的样子。`,
+  `你选择了滋养，不是运气，是你值得。你在这段关系里的每一次真诚、每一次边界的确立、每一次勇敢的表达，都在为你赢得这份滋养。这不是偶然，这是你应得的。`,
+  `当关系让你感到呼吸顺畅时，请记得：这不是因为你「终于做对了什么」，而是因为你终于允许自己「做自己」了。爱最好的状态，就是两个人都不需要扮演任何人。`,
+  `这份滋养里，有你的功劳。是你教会了对方如何爱你，是你坚持了自己的需求，是你选择了不委屈自己。好的关系是双向的，而你已经在这一端，做得足够好了。`
+];
+
+function updateSlider(value) {
+  currentSliderValue = parseInt(value);
+  const fill = document.getElementById('batteryFill');
+  const text = document.getElementById('batteryText');
+  const btn = document.getElementById('recordBtn');
+  const microscope = document.getElementById('microscopeArea');
+  const manifesto = document.getElementById('manifestoCard');
+
+  fill.style.width = value + '%';
+
+  const v = currentSliderValue;
+  if (v < 15) {
+    fill.style.background = 'var(--deep-rose)';
+    text.textContent = '极度窒息';
+    text.style.color = 'var(--deep-rose)';
+    btn.textContent = '帮我深呼吸';
+    btn.style.background = 'var(--deep-rose)';
+    microscope.style.display = 'none';
+    manifesto.style.display = 'none';
+  } else if (v < 30) {
+    fill.style.background = 'var(--deep-rose)';
+    text.textContent = '窒息';
+    text.style.color = 'var(--deep-rose)';
+    btn.textContent = '我需要抱抱';
+    btn.style.background = 'var(--deep-rose)';
+    microscope.style.display = 'block';
+    manifesto.style.display = 'none';
+  } else if (v < 50) {
+    fill.style.background = 'linear-gradient(90deg, var(--deep-rose), var(--warm-orange))';
+    text.textContent = '疲惫';
+    text.style.color = 'var(--warm-orange)';
+    btn.textContent = '记录此刻';
+    btn.style.background = 'var(--deep-rose)';
+    microscope.style.display = 'none';
+    manifesto.style.display = 'none';
+  } else if (v < 70) {
+    fill.style.background = 'linear-gradient(90deg, var(--warm-orange), #B8D4A0)';
+    text.textContent = '平稳';
+    text.style.color = 'var(--soft-green)';
+    btn.textContent = '记录此刻';
+    btn.style.background = 'var(--deep-rose)';
+    microscope.style.display = 'none';
+    manifesto.style.display = 'none';
+  } else {
+    fill.style.background = 'var(--soft-green)';
+    text.textContent = '滋养';
+    text.style.color = 'var(--deep-green)';
+    btn.textContent = '记录此刻';
+    btn.style.background = 'var(--deep-rose)';
+    microscope.style.display = 'none';
+    manifesto.style.display = 'none';
+  }
+
+  document.getElementById('microscopeResult').innerHTML = '';
+  document.querySelectorAll('.microscope-tag').forEach(t => t.classList.remove('selected'));
+  selectedMicroscopeTag = '';
+}
+
+function selectMicroscopeTag(el, tag) {
+  document.querySelectorAll('.microscope-tag').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMicroscopeTag = tag;
+  const result = document.getElementById('microscopeResult');
+  result.innerHTML = MICROSCOPE_RESPONSES[tag] || `你选择了「${tag}」。<br><br>这种感受是真实的，值得被认真对待。无论它来自哪里，它都在提醒你：有些需求，正在被忽视。<br><br>此刻，试着把注意力收回到自己身上，哪怕只有一分钟。`;
+}
+
+function recordLoverEnergy() {
+  const value = currentSliderValue;
+
+  if (value < 15) {
+    showBreathRescue();
+    return;
+  }
+
+  const records = JSON.parse(localStorage.getItem('emotion_lover_records') || '[]');
+  const record = { value, date: new Date().toISOString(), tag: selectedMicroscopeTag };
+  records.push(record);
+  if (records.length > 100) records.shift();
+  localStorage.setItem('emotion_lover_records', JSON.stringify(records));
+
+  renderLoverHistory();
+  renderWaveChart();
+  checkRescueNeeded(records);
+
+  if (value >= 70) {
+    showManifestoCard();
+  }
+
+  document.getElementById('microscopeResult').innerHTML = '';
+  document.querySelectorAll('.microscope-tag').forEach(t => t.classList.remove('selected'));
+  selectedMicroscopeTag = '';
+}
+
+function renderLoverHistory() {
+  const records = JSON.parse(localStorage.getItem('emotion_lover_records') || '[]');
+  const timeline = document.getElementById('loverHistory');
+  timeline.innerHTML = '';
+  records.slice(-7).reverse().forEach(r => {
+    const v = r.value;
+    const isConsume = v < 35;
+    const isNourish = v > 65;
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    let statusText, dotClass;
+    if (isConsume) { statusText = '感到窒息 / 消耗'; dotClass = 'consume'; }
+    else if (isNourish) { statusText = '感到呼吸 / 滋养'; dotClass = 'nourish'; }
+    else { statusText = '处于中间地带'; dotClass = 'middle'; }
+    item.innerHTML = `
+      <div class="history-dot ${dotClass}"></div>
+      <div class="history-info">
+        <div class="history-date">${new Date(r.date).toLocaleDateString('zh-CN')} ${new Date(r.date).toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'})}</div>
+        <div class="history-status" style="color:${isConsume ? 'var(--deep-rose)' : (isNourish ? 'var(--deep-green)' : 'var(--warm-orange)')}">${statusText} (${v}%)${r.tag ? ' · ' + r.tag : ''}</div>
+      </div>
+    `;
+    timeline.appendChild(item);
+  });
+}
+
+function renderWaveChart() {
+  const records = JSON.parse(localStorage.getItem('emotion_lover_records') || '[]');
+  if (records.length < 2) {
+    document.getElementById('waveReport').style.display = 'none';
+    return;
+  }
+  document.getElementById('waveReport').style.display = 'block';
+  const canvas = document.getElementById('waveCanvas');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width; const h = canvas.height;
+  const padding = 30;
+  ctx.clearRect(0, 0, w, h);
+  const data = records.slice(-14);
+  const stepX = (w - padding * 2) / (data.length - 1 || 1);
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.05)'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = padding + (h - padding * 2) * i / 4;
+    ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(w - padding, y); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.setLineDash([4, 4]);
+  const midY = padding + (h - padding * 2) * 0.5;
+  ctx.beginPath(); ctx.moveTo(padding, midY); ctx.lineTo(w - padding, midY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.beginPath();
+  data.forEach((r, i) => {
+    const x = padding + i * stepX;
+    const y = padding + (h - padding * 2) * (1 - r.value / 100);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  const gradient = ctx.createLinearGradient(padding, 0, w - padding, 0);
+  gradient.addColorStop(0, '#B8908C'); gradient.addColorStop(0.5, '#D4A574'); gradient.addColorStop(1, '#6B8E6B');
+  ctx.strokeStyle = gradient; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+
+  ctx.beginPath();
+  data.forEach((r, i) => {
+    const x = padding + i * stepX;
+    const y = padding + (h - padding * 2) * (1 - r.value / 100);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.lineTo(padding + (data.length - 1) * stepX, h - padding);
+  ctx.lineTo(padding, h - padding); ctx.closePath();
+  const fillGrad = ctx.createLinearGradient(0, padding, 0, h - padding);
+  fillGrad.addColorStop(0, 'rgba(168,181,160,0.2)'); fillGrad.addColorStop(1, 'rgba(184,144,140,0.1)');
+  ctx.fillStyle = fillGrad; ctx.fill();
+
+  data.forEach((r, i) => {
+    const x = padding + i * stepX;
+    const y = padding + (h - padding * 2) * (1 - r.value / 100);
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = r.value < 35 ? '#B8908C' : (r.value > 65 ? '#6B8E6B' : '#D4A574');
+    ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 2; ctx.stroke();
+  });
+
+  generateWaveInsight(data);
+}
+
+function generateWaveInsight(data) {
+  const recent = data.slice(-7);
+  const consumeCount = recent.filter(r => r.value < 35).length;
+  const nourishCount = recent.filter(r => r.value > 65).length;
+  const badge = document.getElementById('waveBadge');
+  const insight = document.getElementById('waveInsight');
+  if (consumeCount >= 5) {
+    badge.textContent = '持续预警'; badge.className = 'wave-report-badge warning';
+    insight.innerHTML = `最近一周有 <strong>${consumeCount} 天</strong> 处于窒息区。这说明这段关系正在持续透支你的能量。这不是正常的磨合，这是身体在向你发出求救信号。<br><br>连续的低能量记录，往往意味着关系中的权力动态已经失衡。你需要做的不是「再努力一点」，而是「先停下来，看看自己」。`;
+  } else if (consumeCount >= 3) {
+    badge.textContent = '需要关注'; badge.className = 'wave-report-badge warning';
+    insight.innerHTML = `最近一周有 <strong>${consumeCount} 天</strong> 处于消耗状态。虽然还没到危险线，但这是一个需要留意的信号。<br><br>试着在下次感到疲惫时，直接表达你的需求，而不是默默承受。`;
+  } else if (nourishCount >= 5) {
+    badge.textContent = '状态良好'; badge.className = 'wave-report-badge safe';
+    insight.innerHTML = `最近一周有 <strong>${nourishCount} 天</strong> 处于滋养状态！这说明你在这段关系里感到被支持和被看见。<br><br>请珍惜这种感觉，并且记住：这不是运气，是你值得被这样对待。`;
+  } else {
+    badge.textContent = '平稳波动'; badge.className = 'wave-report-badge neutral';
+    insight.innerHTML = `最近一周的关系能量处于正常波动范围。有起伏是健康的——它说明你在真实地感受，而不是麻木地维持。<br><br>关注那些让你感到滋养的时刻，它们会告诉你，你真正需要的是什么。`;
+  }
+}
+
+function checkRescueNeeded(records) {
+  const recent = records.slice(-3);
+  if (recent.length >= 3 && recent.every(r => r.value < 35)) {
+    showRescue();
+  }
+}
+
+function showRescue() {
+  const modal = document.getElementById('rescueModal');
+  const body = document.getElementById('rescueBody');
+  body.innerHTML = `
+    <p>如果爱让你觉得越来越小、越来越窒息，那不是你的问题，是这段关系在吸你的血。</p>
+    <p>好的爱情，不是让你为了对方削足适履，也不是让你一个人扛下所有风雨，而是两个独立的人，愿意弯下腰，为彼此托底。</p>
+    <p>在爱别人之前，请先抱抱那个受了委屈的自己。</p>
+    <p style="font-size:0.8rem; color:var(--gray); margin-top:1rem;">
+      —— 连续三天记录到「窒息/消耗」状态，这是系统为你亮起的温柔红灯
+    </p>
+  `;
+  modal.classList.add('show');
+}
+
+function closeRescue() {
+  document.getElementById('rescueModal').classList.remove('show');
+}
+
+function showBreathRescue() {
+  const overlay = document.getElementById('breathRescueOverlay');
+  const instruction = document.getElementById('breathInstruction');
+  overlay.classList.add('show');
+  let phase = 0;
+  const cycle = () => {
+    if (!overlay.classList.contains('show')) return;
+    if (phase === 0) { instruction.textContent = '吸气……（4秒）'; phase = 1; setTimeout(cycle, 4000); }
+    else if (phase === 1) { instruction.textContent = '屏息……（7秒）'; phase = 2; setTimeout(cycle, 7000); }
+    else { instruction.textContent = '呼气……（8秒）'; phase = 0; setTimeout(cycle, 8000); }
+  };
+  cycle();
+}
+
+function closeBreathRescue() {
+  document.getElementById('breathRescueOverlay').classList.remove('show');
+}
+
+function showManifestoCard() {
+  const card = document.getElementById('manifestoCard');
+  const body = document.getElementById('manifestoBody');
+  const date = document.getElementById('manifestoDate');
+  const text = MANIFESTO_TEXTS[Math.floor(Math.random() * MANIFESTO_TEXTS.length)];
+  body.innerHTML = text;
+  date.textContent = new Date().toLocaleDateString('zh-CN') + ' ' + new Date().toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
+  card.style.display = 'block';
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const manifests = JSON.parse(localStorage.getItem('emotion_manifestos') || '[]');
+  manifests.unshift({ text, date: new Date().toISOString() });
+  if (manifests.length > 10) manifests.pop();
+  localStorage.setItem('emotion_manifestos', JSON.stringify(manifests));
+}
+
+// ===== 初始化 =====
+window.addEventListener('load', () => {
+  const familyRecords = JSON.parse(localStorage.getItem('emotion_family_records') || '[]');
+  const friendRecords = JSON.parse(localStorage.getItem('emotion_friend_records') || '[]');
+  const loverRecords = JSON.parse(localStorage.getItem('emotion_lover_records') || '[]');
+  renderModuleHistory('familyHistory', familyRecords, 'var(--warm-brown)');
+  renderModuleHistory('friendHistory', friendRecords, 'var(--deep-green)');
+  renderLoverHistory();
+  renderWaveChartFor('familyWaveReport', 'familyWaveCanvas', 'familyWaveBadge', 'familyWaveInsight', familyRecords, '家人');
+  renderWaveChartFor('friendWaveReport', 'friendWaveCanvas', 'friendWaveBadge', 'friendWaveInsight', friendRecords, '友情');
+  renderWaveChart();
+  loadModuleChatHistory('family');
+  loadModuleChatHistory('friend');
+  loadModuleChatHistory('lover');
+});
+</script>
+
+</body>
+</html>

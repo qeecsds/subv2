@@ -1,0 +1,2448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>生活 — 找到天赋与生活的平衡</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        'soft-blue': '#F0F7FA',
+        'deep-blue': '#2C5F7C',
+        'card-white': 'rgba(255,255,255,0.85)',
+        'whale-pink': '#E8A5B4',
+        'whale-belly': '#F4A6A6',
+        'whale-fin': '#C98FA8',
+        'lantern-orange': '#E07A5F',
+        'lantern-pink': '#F4A6A6',
+        'gold': '#F4D35E',
+        'gold-light': '#FFE4B5',
+      },
+      fontFamily: {
+        serif: ['Noto Serif SC', 'serif'],
+      }
+    }
+  }
+}
+</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Noto Serif SC', serif; overflow-x: hidden; background: #F0F7FA; }
+
+  /* ===== Page Transitions ===== */
+  .page-section {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .page-section.active {
+    display: block;
+    opacity: 1;
+  }
+
+  /* ===== Home Animations ===== */
+  .layer-sky   { opacity: 0; animation: layerFadeIn 1.2s ease forwards; }
+  .layer-cloud { opacity: 0; animation: layerFadeIn 1s ease 0.5s forwards; }
+  .layer-star  { opacity: 0; animation: layerFadeIn 1.2s ease 1.0s forwards; }
+  .layer-whale { opacity: 0; animation: layerFadeIn 1.4s ease 1.5s forwards; }
+  .layer-arc   { opacity: 0; animation: layerFadeIn 1s ease 2.0s forwards; }
+  .layer-water { opacity: 0; animation: layerFadeIn 1.2s ease 2.3s forwards; }
+  .layer-lantern { opacity: 0; animation: layerFadeIn 1s ease 2.6s forwards; }
+
+  @keyframes layerFadeIn { to { opacity: 1; } }
+
+  .sky-breathe { animation: skyHue 20s ease-in-out infinite; }
+  @keyframes skyHue {
+    0%, 100% { filter: hue-rotate(0deg) saturate(1); }
+    50% { filter: hue-rotate(10deg) saturate(1.05); }
+  }
+
+  .star-twinkle {
+    animation: twinkle var(--dur, 3s) ease-in-out infinite;
+    animation-delay: var(--del, 0s);
+    will-change: opacity, transform;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: var(--min, 0.2); transform: scale(1); }
+    50% { opacity: var(--max, 1); transform: scale(var(--scl, 1.15)); }
+  }
+
+  .shooting-star {
+    animation: shoot 1.1s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    will-change: transform, opacity;
+  }
+  @keyframes shoot {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(-110px, 78px) scale(0.5); opacity: 0; }
+  }
+
+  .cloud-drift {
+    animation: cloudMove var(--dur, 50s) linear infinite;
+    will-change: transform;
+  }
+  @keyframes cloudMove {
+    0% { transform: translateX(var(--start, 0px)); }
+    100% { transform: translateX(var(--end, 420px)); }
+  }
+
+  .whale-float {
+    animation: whaleBob 6s ease-in-out infinite;
+    will-change: transform;
+  }
+  @keyframes whaleBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+
+  .whale-float-reflect {
+    animation: whaleBobReflect 6s ease-in-out infinite;
+    animation-delay: 0.35s;
+    will-change: transform;
+  }
+  @keyframes whaleBobReflect {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+  }
+
+  .whale-tail-wag {
+    animation: tailWag 4s ease-in-out infinite;
+    transform-origin: 72px 252px;
+    will-change: transform;
+  }
+  @keyframes tailWag {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-5deg); }
+    75% { transform: rotate(4deg); }
+  }
+
+  .whale-glow-pulse {
+    animation: glowPulse 3s ease-in-out infinite;
+  }
+  @keyframes glowPulse {
+    0%, 100% { opacity: 0.035; }
+    50% { opacity: 0.11; }
+  }
+
+  .inner-star {
+    animation: innerFlow 4s ease-in-out infinite;
+    animation-delay: var(--del, 0s);
+    will-change: opacity, transform;
+  }
+  @keyframes innerFlow {
+    0%, 100% { opacity: 0.12; transform: translate(0, 0); }
+    50% { opacity: 0.55; transform: translate(var(--tx, 3px), var(--ty, -2px)); }
+  }
+
+  .arc-breathe {
+    animation: arcGlow 8s ease-in-out infinite;
+  }
+  @keyframes arcGlow {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 0.85; }
+  }
+
+  .wave-anim {
+    animation: waveSlide var(--dur, 6s) linear infinite;
+    will-change: transform;
+  }
+  @keyframes waveSlide {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-187px); }
+  }
+
+  .lantern-inner-glow {
+    animation: lanternPulse 3s ease-in-out infinite;
+  }
+  @keyframes lanternPulse {
+    0%, 100% { opacity: 0.18; }
+    50% { opacity: 0.5; }
+  }
+
+  /* ===== Cards ===== */
+  .card-enter {
+    opacity: 0;
+    animation: cardSlideUp 0.9s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    will-change: transform, opacity;
+  }
+  .card-enter:nth-child(1) { animation-delay: 3s; }
+  .card-enter:nth-child(2) { animation-delay: 3.25s; }
+
+  @keyframes cardSlideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-hover {
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
+    cursor: pointer;
+  }
+  .card-hover:active { transform: scale(0.96) !important; }
+  @media (hover: hover) {
+    .card-hover:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+    }
+  }
+
+  /* ===== Content Cards ===== */
+  .content-card {
+    background: rgba(255,255,255,0.9);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(44,95,124,0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .content-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(44,95,124,0.1);
+  }
+
+  /* ===== Breathing Animation for Digital Detox ===== */
+  .breathing-circle {
+    animation: breathe 4s ease-in-out infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.5); opacity: 0.3; }
+  }
+
+  /* ===== Energy Ring ===== */
+  .energy-ring {
+    transition: stroke-dashoffset 1s ease;
+  }
+
+  /* ===== Custom Checkbox ===== */
+  .custom-checkbox {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #2C5F7C;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .custom-checkbox:checked {
+    background: #2C5F7C;
+  }
+  .custom-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 6px;
+    height: 11px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  /* ===== Progress Bar ===== */
+  .progress-step {
+    transition: all 0.5s ease;
+  }
+
+  /* ===== Input Styles ===== */
+  .soft-input {
+    border: none;
+    border-bottom: 2px solid #D0E8F2;
+    background: transparent;
+    padding: 8px 0;
+    font-family: 'Noto Serif SC', serif;
+    transition: border-color 0.3s ease;
+    outline: none;
+    width: 100%;
+  }
+  .soft-input:focus {
+    border-bottom-color: #2C5F7C;
+  }
+
+  .quick-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    background: #F0F7FA;
+    border: 1px solid #D0E8F2;
+    border-radius: 12px;
+    font-size: 10px;
+    color: #6B8FA3;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+  }
+  .quick-tag:hover {
+    background: #D0E8F2;
+    color: #2C5F7C;
+    border-color: #2C5F7C;
+    transform: translateY(-1px);
+  }
+  .quick-tag:active {
+    transform: scale(0.95);
+  }
+
+  /* ===== 充电动画 ===== */
+  @keyframes chargeFill {
+    0% { stroke-dashoffset: 94.2; }
+    100% { stroke-dashoffset: 0; }
+  }
+  .charge-animate {
+    animation: chargeFill 1.2s ease-out forwards;
+  }
+  @keyframes chargePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.8; }
+  }
+  .charge-pulse {
+    animation: chargePulse 0.6s ease-in-out 2;
+  }
+  @keyframes chargeFadeOut {
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-10px); }
+  }
+  .charge-fade-out {
+    animation: chargeFadeOut 0.5s ease forwards;
+  }
+
+  /* ===== Reduced Motion ===== */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* ===== Scrollbar ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #D0E8F2; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2C5F7C; }
+
+  /* ===== AI Insight Fade In ===== */
+  .ai-insight-fade {
+    animation: aiInsightFadeIn 0.6s ease forwards;
+  }
+  @keyframes aiInsightFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Audit Report Modal ===== */
+  .audit-modal-enter {
+    animation: auditModalIn 0.4s ease forwards;
+  }
+  @keyframes auditModalIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* ===== Diary Modal ===== */
+  .diary-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(240, 247, 250, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .diary-modal.show {
+    display: block;
+    opacity: 1;
+  }
+  .diary-card {
+    background: white;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .diary-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .diary-card.active {
+    border-left: 3px solid #2C5F7C;
+  }
+
+  /* ===== AI锦囊按钮 ===== */
+  .ai-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border: 1px solid #F4D35E;
+    border-radius: 999px;
+    background: transparent;
+    color: #B8954A;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: 'Noto Serif SC', serif;
+  }
+  .ai-pill-btn:hover {
+    background: #F4D35E;
+    color: #5C4A1F;
+  }
+  .ai-pill-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* ===== AI建议卡片 ===== */
+  .ai-suggestion-card {
+    background: white;
+    border-left: 4px solid #F4D35E;
+    border-radius: 12px;
+    padding: 12px;
+    margin-top: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    animation: aiCardFadeIn 0.5s ease forwards;
+  }
+  @keyframes aiCardFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== AI加载动画 ===== */
+  .ai-loading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6B8FA3;
+    font-size: 12px;
+    margin-top: 8px;
+  }
+  .ai-loading-dot {
+    width: 6px;
+    height: 6px;
+    background: #F4D35E;
+    border-radius: 50%;
+    animation: aiDotBounce 1.4s infinite ease-in-out both;
+  }
+  .ai-loading-dot:nth-child(1) { animation-delay: -0.32s; }
+  .ai-loading-dot:nth-child(2) { animation-delay: -0.16s; }
+  @keyframes aiDotBounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+
+  /* ===== MVP阶段输入区 ===== */
+  .mvp-ai-input-wrap {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #D0E8F2;
+  }
+</style>
+</head>
+<body class="font-serif text-gray-700">
+
+<!-- ==================== HOME PAGE ==================== -->
+<section id="page-home" class="page-section active fixed inset-0 w-full h-full">
+  <!-- 返回四板块 -->
+  <button onclick="goBackToScene()" class="absolute top-4 left-4 z-30 text-[#2C5F7C]/70 text-sm tracking-wider hover:text-[#2C5F7C] transition-colors" style="background:none;border:none;font-family:inherit;cursor:pointer;">&#8592; 返回</button>
+  <div class="absolute inset-0 w-full h-full">
+    <svg class="w-full h-full" viewBox="0 0 375 450" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Sky Gradient -->
+        <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#E8F4F8"/>
+          <stop offset="30%" stop-color="#D0E8F2"/>
+          <stop offset="60%" stop-color="#B8DCEC"/>
+          <stop offset="85%" stop-color="#A0D0E6"/>
+          <stop offset="100%" stop-color="#88C4E0"/>
+        </linearGradient>
+        <!-- Water Gradient -->
+        <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#A0D0E6" stop-opacity="0.35"/>
+          <stop offset="50%" stop-color="#88C4E0" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="#6BB3D9" stop-opacity="0.75"/>
+        </linearGradient>
+        <!-- Noise Filter -->
+        <filter id="noiseFilter" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch" result="noise"/>
+          <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.035 0" in="noise" result="coloredNoise"/>
+        </filter>
+        <!-- Soft Glow -->
+        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <!-- Whale Glow -->
+        <filter id="whaleGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="9" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <!-- Water Blur -->
+        <filter id="waterBlur" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2"/>
+        </filter>
+        <!-- Cloud Blur -->
+        <filter id="cloudBlur" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="1.8"/>
+        </filter>
+        <!-- Water Clip -->
+        <clipPath id="waterClip">
+          <rect x="0" y="340" width="375" height="110"/>
+        </clipPath>
+        <!-- Whale Body -->
+        <g id="whale-body">
+          <path d="M 72 252 C 58 222, 82 188, 130 173 C 178 158, 230 162, 278 178 C 318 193, 340 222, 330 252 C 320 286, 282 314, 228 320 C 168 327, 112 318, 80 295 C 65 280, 67 265, 72 252 Z" fill="#E8A5B4" opacity="0.82"/>
+          <path d="M 95 282 C 140 292, 195 295, 245 287 C 285 279, 310 266, 298 272 C 260 292, 200 302, 140 297 C 105 292, 92 285, 95 282 Z" fill="#F4A6A6" opacity="0.45"/>
+          <path d="M 170 166 C 165 140, 180 128, 196 138 C 206 148, 196 160, 186 166 Z" fill="#C98FA8" opacity="0.68"/>
+          <path d="M 208 270 C 222 290, 238 305, 228 310 C 214 300, 200 284, 208 270 Z" fill="#C98FA8" opacity="0.48"/>
+        </g>
+        <!-- Whale Tail -->
+        <g id="whale-tail-shape">
+          <path d="M 72 252 C 46 242, 22 228, 10 216 C 16 236, 24 256, 14 272 C 30 264, 52 256, 72 252 Z" fill="#E8A5B4" opacity="0.78"/>
+        </g>
+      </defs>
+
+      <!-- 1. Sky Background -->
+      <rect class="layer-sky sky-breathe" x="0" y="0" width="375" height="450" fill="url(#skyGrad)"/>
+      <rect class="layer-sky" x="0" y="0" width="375" height="450" fill="transparent" filter="url(#noiseFilter)" opacity="0.6" style="pointer-events: none;"/>
+
+      <!-- 2. Clouds -->
+      <g id="clouds" class="layer-cloud" filter="url(#cloudBlur)"></g>
+
+      <!-- 3. Stars -->
+      <g id="stars-far" class="layer-star"></g>
+      <g id="stars-mid" class="layer-star"></g>
+      <g id="stars-near" class="layer-star"></g>
+      <g id="constellations" class="layer-star" opacity="0.18"></g>
+      <g id="shooting-stars"></g>
+
+      <!-- 4. Whale -->
+      <g class="layer-whale whale-float">
+        <g class="whale-glow-pulse">
+          <use href="#whale-body" transform="translate(-1, -2) scale(1.07)" fill="#F4D35E" filter="url(#whaleGlowFilter)"/>
+          <use href="#whale-tail-shape" transform="translate(-1, -2) scale(1.07)" fill="#F4D35E" filter="url(#whaleGlowFilter)"/>
+        </g>
+        <use href="#whale-body"/>
+        <g id="inner-stars"></g>
+        <g transform="translate(305, 228)">
+          <ellipse cx="0" cy="0" rx="3" ry="1.8" fill="#8B5A6B" opacity="0.42"/>
+          <path d="M -3 -0.2 Q 0 1.3, 3 -0.2" stroke="#8B5A6B" stroke-width="0.65" fill="none" opacity="0.48" stroke-linecap="round"/>
+          <circle cx="1.2" cy="-0.6" r="0.8" fill="#FFE4B5" opacity="0.55"/>
+        </g>
+        <g transform="translate(184, 124) scale(0.55)">
+          <circle cx="0" cy="0" r="3" fill="#1A0B2E"/>
+          <path d="M -3.5 3 Q 0 1.5, 3.5 3 L 2.5 11 Q 0 9.5, -2.5 11 Z" fill="#1A0B2E"/>
+          <path d="M -1.5 11 L -2 17 M 1.5 11 L 2 17" stroke="#1A0B2E" stroke-width="1.8" stroke-linecap="round"/>
+        </g>
+        <g class="whale-tail-wag">
+          <use href="#whale-tail-shape"/>
+        </g>
+      </g>
+
+      <!-- 5. Golden Arc -->
+      <g class="layer-arc arc-breathe" opacity="0.7">
+        <path d="M 52 342 Q 187 292, 323 342" fill="none" stroke="#F4D35E" stroke-width="0.9" stroke-linecap="round"/>
+        <circle cx="52" cy="342" r="4" fill="#FFE4B5" filter="url(#softGlow)"/>
+        <circle cx="52" cy="342" r="1.6" fill="#FFFFFF"/>
+        <g transform="translate(323, 342)">
+          <ellipse rx="3.5" ry="4.5" fill="#E07A5F" opacity="0.8"/>
+          <rect x="-2" y="4" width="4" height="1" rx="0.3" fill="#C96B52"/>
+          <circle cy="-0.5" r="1.5" fill="#FFE4B5" opacity="0.45" filter="url(#softGlow)"/>
+        </g>
+        <circle r="1.5" fill="#F4D35E">
+          <animateMotion dur="10s" repeatCount="indefinite" path="M 52 342 Q 187 292, 323 342"/>
+        </circle>
+      </g>
+
+      <!-- 6. Lanterns -->
+      <g id="lanterns" class="layer-lantern"></g>
+
+      <!-- 7. Water -->
+      <g class="layer-water">
+        <rect x="0" y="340" width="375" height="110" fill="url(#waterGrad)"/>
+        <g clip-path="url(#waterClip)">
+          <g class="whale-float-reflect" opacity="0.1" filter="url(#waterBlur)">
+            <use href="#whale-body" transform="translate(0, 560) scale(1, -0.58)"/>
+            <use href="#whale-tail-shape" transform="translate(0, 560) scale(1, -0.58)"/>
+          </g>
+          <g id="water-sparkles"></g>
+          <g id="water-waves" opacity="0.2"></g>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Title Overlay -->
+  <div class="absolute top-8 left-0 right-0 z-10 text-center">
+    <h1 class="text-[#2C5F7C] text-xl font-semibold tracking-[0.2em] opacity-0" style="animation: layerFadeIn 1s ease 2.8s forwards;">找到生活的根，长出天赋的叶</h1>
+    <p class="text-[#2C5F7C]/60 text-xs mt-2 tracking-[0.15em] opacity-0" style="animation: layerFadeIn 1s ease 3s forwards;">像植物一样，先扎根，再长叶，最后结果</p>
+  </div>
+
+  <!-- Entry Cards -->
+  <div class="absolute bottom-[88px] left-0 right-0 z-20 flex justify-center gap-3 px-4" style="padding-bottom: env(safe-area-inset-bottom);">
+    <!-- My Life -->
+    <div onclick="showPage('life')" class="card-enter card-hover flex-1 max-w-[200px] h-[110px] flex flex-col items-center justify-center gap-1.5 rounded-3xl border border-[rgba(255,228,181,0.25)] bg-[rgba(255,255,255,0.12)] backdrop-blur-lg" style="-webkit-backdrop-filter: blur(16px) saturate(1.2);">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" fill="#E89F7C" opacity="0.85"/>
+      </svg>
+      <span class="text-[13px] font-semibold tracking-[0.15em] text-[#2C5F7C]/90">我的生活</span>
+      <span class="text-[9px] tracking-[0.1em] text-[#2C5F7C]/50 text-center px-2">找回在场感与能量平衡</span>
+    </div>
+    <!-- My Talent -->
+    <div onclick="showPage('talent')" class="card-enter card-hover flex-1 max-w-[200px] h-[110px] flex flex-col items-center justify-center gap-1.5 rounded-3xl border border-[rgba(255,228,181,0.25)] bg-[rgba(255,255,255,0.12)] backdrop-blur-lg" style="-webkit-backdrop-filter: blur(16px) saturate(1.2);">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L13.5 9.5L21 12L13.5 14.5L12 22L10.5 14.5L3 12L10.5 9.5L12 2Z" fill="#F4D35E" opacity="0.85"/>
+      </svg>
+      <span class="text-[13px] font-semibold tracking-[0.15em] text-[#2C5F7C]/90">我的天赋</span>
+      <span class="text-[9px] tracking-[0.1em] text-[#2C5F7C]/50 text-center px-2">将模糊兴趣转化为现实筹码</span>
+    </div>
+  </div>
+
+  <!-- Subtitles -->
+  <div class="absolute bottom-6 left-0 right-0 z-10 text-center opacity-0" style="animation: layerFadeIn 1s ease 3.5s forwards;">
+    <p class="text-[#2C5F7C]/40 text-[10px] tracking-wider">对抗数字时代的虚无感，重建身体的在场感</p>
+  </div>
+</section>
+
+<!-- ==================== MY LIFE PAGE ==================== -->
+<section id="page-life" class="page-section min-h-screen bg-soft-blue pb-20">
+  <!-- Header -->
+  <div class="sticky top-0 z-30 bg-soft-blue/90 backdrop-blur-md border-b border-[#D0E8F2]/50">
+    <div class="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button onclick="showPage('home')" class="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C5F7C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div>
+          <h2 class="text-deep-blue text-lg font-semibold tracking-wide">我的生活</h2>
+          <p class="text-deep-blue/50 text-xs">找回在场感与能量平衡</p>
+        </div>
+      </div>
+      <button onclick="showDiaryModal()" class="text-deep-blue text-xs tracking-wider hover:opacity-70 transition-opacity">日记</button>
+    </div>
+  </div>
+
+  <div class="max-w-lg mx-auto px-4 pt-6 space-y-8">
+    <!-- ===== Section 1: Grounding ===== -->
+    <div>
+      <div class="mb-4">
+        <div class="flex items-center gap-2 mb-1">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B8C5A" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <h3 class="text-deep-blue text-base font-semibold">实体锚点</h3>
+          <span id="current-date-label" class="text-gray-400 text-[10px] ml-auto cursor-pointer hover:text-deep-blue transition-colors" onclick="showDiaryModal()">6月26日</span>
+        </div>
+        <p class="text-deep-blue/60 text-sm ml-6">让身体先落地，找回物理世界的在场感</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Sensory Awakening -->
+        <div class="content-card p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E89F7C" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <h4 class="text-deep-blue font-medium text-sm">感官唤醒任务</h4>
+          </div>
+          <p class="text-gray-500 text-xs mb-3">你可以试试，不用打卡，只是感受</p>
+          <div class="space-y-2" id="sensory-tasks">
+            <label class="flex items-start gap-3 cursor-pointer group">
+              <input type="checkbox" class="custom-checkbox mt-0.5 flex-shrink-0" data-task="walk">
+              <span class="text-sm text-gray-600 group-hover:text-deep-blue transition-colors">不带手机散步20分钟</span>
+            </label>
+            <label class="flex items-start gap-3 cursor-pointer group">
+              <input type="checkbox" class="custom-checkbox mt-0.5 flex-shrink-0" data-task="cook">
+              <span class="text-sm text-gray-600 group-hover:text-deep-blue transition-colors">认真为自己做一顿饭</span>
+            </label>
+            <label class="flex items-start gap-3 cursor-pointer group">
+              <input type="checkbox" class="custom-checkbox mt-0.5 flex-shrink-0" data-task="organize">
+              <span class="text-sm text-gray-600 group-hover:text-deep-blue transition-colors">整理一个抽屉</span>
+            </label>
+            <label class="flex items-start gap-3 cursor-pointer group">
+              <input type="checkbox" class="custom-checkbox mt-0.5 flex-shrink-0" data-task="touch">
+              <span class="text-sm text-gray-600 group-hover:text-deep-blue transition-colors">触摸三种不同质地的物体</span>
+            </label>
+            <label class="flex items-start gap-3 cursor-pointer group">
+              <input type="checkbox" class="custom-checkbox mt-0.5 flex-shrink-0" data-task="listen">
+              <span class="text-sm text-gray-600 group-hover:text-deep-blue transition-colors">听一段环境白噪音</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Flow Capture -->
+        <div class="content-card p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F4D35E" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <h4 class="text-deep-blue font-medium text-sm">心流体验捕捉</h4>
+          </div>
+          <p class="text-gray-500 text-xs mb-3">记录那些你忘记时间的时刻</p>
+          <input type="text" id="flow-input" class="soft-input text-sm mb-2" placeholder="今天有没有哪一刻，你忘记了时间？">
+          <div class="flex flex-wrap gap-1.5 mb-3">
+            <span class="quick-tag" onclick="fillInput('flow','帮同事解决问题时很投入')">帮同事解决问题时很投入</span>
+            <span class="quick-tag" onclick="fillInput('flow','做饭时完全没看手机')">做饭时完全没看手机</span>
+            <span class="quick-tag" onclick="fillInput('flow','看书忘了时间')">看书忘了时间</span>
+            <span class="quick-tag" onclick="fillInput('flow','写东西进入状态')">写东西进入状态</span>
+            <span class="quick-tag" onclick="fillInput('flow','沉迷项目无法自拔')">沉迷项目无法自拔</span>
+          </div>
+          <div class="flex gap-2 mb-3">
+            <button onclick="addFlow()" class="px-4 py-2 bg-deep-blue text-white text-xs rounded-full hover:bg-opacity-90 transition-colors">记录这一刻</button>
+          </div>
+
+          <!-- 充电动画 -->
+          <div id="flow-charge" class="hidden flex-col items-center justify-center py-4 mb-2">
+            <div class="relative w-16 h-16 mb-2">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15" fill="none" stroke="#E8D5C0" stroke-width="3"/>
+                <circle id="charge-ring" cx="18" cy="18" r="15" fill="none" stroke="#F4D35E" stroke-width="3" stroke-dasharray="94.2" stroke-dashoffset="94.2" stroke-linecap="round"/>
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#F4D35E" stroke="none">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+              </div>
+            </div>
+            <p id="charge-text" class="text-[#F4D35E] text-xs font-medium">能量注入中...</p>
+          </div>
+
+          <div class="space-y-2" id="flow-list">
+            <p class="text-gray-400 text-xs italic">示例：帮同事调好复杂表格时，我很投入</p>
+            <p class="text-gray-400 text-xs italic">示例：做饭时完全没看手机</p>
+          </div>
+        </div>
+
+        <!-- Digital Detox -->
+        <div class="content-card p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B7CB3" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+            <h4 class="text-deep-blue font-medium text-sm">数字断舍离空间</h4>
+          </div>
+          <p class="text-gray-500 text-xs mb-4">给自己一段无屏幕的时间，重新感受物理世界的真实反馈</p>
+          <div id="detox-controls" class="flex flex-wrap gap-2 mb-4">
+            <button onclick="startDetox(3)" class="flex-1 min-w-[52px] py-2 border-2 border-deep-blue/20 text-deep-blue text-xs rounded-xl hover:bg-deep-blue hover:text-white transition-all">3分钟</button>
+            <button onclick="startDetox(5)" class="flex-1 min-w-[52px] py-2 border-2 border-deep-blue/20 text-deep-blue text-xs rounded-xl hover:bg-deep-blue hover:text-white transition-all">5分钟</button>
+            <button onclick="startDetox(15)" class="flex-1 min-w-[52px] py-2 border-2 border-deep-blue/20 text-deep-blue text-xs rounded-xl hover:bg-deep-blue hover:text-white transition-all">15分钟</button>
+            <button onclick="startDetox(30)" class="flex-1 min-w-[52px] py-2 border-2 border-deep-blue/20 text-deep-blue text-xs rounded-xl hover:bg-deep-blue hover:text-white transition-all">30分钟</button>
+            <button onclick="startDetox(60)" class="flex-1 min-w-[52px] py-2 border-2 border-deep-blue/20 text-deep-blue text-xs rounded-xl hover:bg-deep-blue hover:text-white transition-all">60分钟</button>
+          </div>
+          <div id="detox-active" class="hidden flex-col items-center justify-center py-8">
+            <div class="relative w-32 h-32 flex items-center justify-center mb-4">
+              <div class="absolute inset-0 rounded-full bg-deep-blue/20 breathing-circle"></div>
+              <div class="absolute inset-4 rounded-full bg-deep-blue/30 breathing-circle" style="animation-delay: 0.5s"></div>
+              <div class="absolute inset-8 rounded-full bg-deep-blue/40 breathing-circle" style="animation-delay: 1s"></div>
+              <span id="detox-timer" class="relative text-deep-blue text-2xl font-semibold z-10">15:00</span>
+            </div>
+            <p class="text-deep-blue/60 text-xs mb-4">深呼吸，感受此刻</p>
+            <button onclick="stopDetox()" class="px-6 py-2 border border-deep-blue/30 text-deep-blue text-xs rounded-full hover:bg-deep-blue hover:text-white transition-all">结束</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Section 2: Energy Ledger ===== -->
+    <div>
+      <div class="mb-4">
+        <div class="flex items-center gap-2 mb-1">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M2 12h20"/></svg>
+          <h3 class="text-deep-blue text-base font-semibold">能量账本</h3>
+        </div>
+        <p class="text-deep-blue/60 text-sm ml-6">今天，你的能量流向了哪里？</p>
+      </div>
+
+      <!-- Energy Dashboard -->
+      <div class="content-card p-5 mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <p class="text-deep-blue text-xs font-medium">本周能量比例</p>
+            <p class="text-gray-400 text-[10px]">滋养 / 总能量</p>
+          </div>
+          <div class="flex flex-col items-center gap-1 cursor-pointer" onclick="showAuditReport()">
+            <div class="relative w-16 h-16">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15" fill="none" stroke="#D0E8F2" stroke-width="3"/>
+                <circle id="energy-ring" cx="18" cy="18" r="15" fill="none" stroke="#5B8C5A" stroke-width="3" stroke-dasharray="94.2" stroke-dashoffset="94.2" stroke-linecap="round" class="energy-ring"/>
+              </svg>
+              <span id="energy-percent" class="absolute inset-0 flex items-center justify-center text-deep-blue text-xs font-semibold">0%</span>
+            </div>
+            <span class="text-[10px] text-gray-400">点击查看主体性审计报告</span>
+          </div>
+        </div>
+        <div id="energy-warning" class="hidden bg-[#E07A5F]/10 border border-[#E07A5F]/20 rounded-xl p-3">
+          <p class="text-[#D4846A] text-xs">最近你的能量净流出有点多。要不要试试实体锚点里的某个活动？</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Consume -->
+        <div class="content-card p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <h4 class="text-deep-blue font-medium text-xs">消耗</h4>
+          </div>
+          <p class="text-gray-400 text-[10px] mb-3">做完觉得被掏空的事</p>
+          <div class="flex gap-2 mb-2">
+            <input type="text" id="consume-input" class="soft-input text-xs" placeholder="输入...">
+            <button onclick="addEnergyItem('consume')" class="w-8 h-8 flex-shrink-0 bg-deep-blue text-white rounded-full flex items-center justify-center text-lg hover:bg-opacity-90">+</button>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mb-3">
+            <span class="quick-tag" onclick="fillInput('consume','无意义的会议')">无意义的会议</span>
+            <span class="quick-tag" onclick="fillInput('consume','没有意义的作业')">没有意义的作业</span>
+            <span class="quick-tag" onclick="fillInput('consume','被迫社交')">被迫社交</span>
+            <span class="quick-tag" onclick="fillInput('consume','加班')">加班</span>
+            <span class="quick-tag" onclick="fillInput('consume','被催促')">被催促</span>
+          </div>
+          <div id="ai-insight-consume" class="hidden mb-2 bg-gray-50 rounded-lg p-2.5">
+            <div class="ai-loading flex items-center gap-1.5 text-[#6B7B8A] text-[11px] italic">
+              <span class="w-1.5 h-1.5 bg-[#6B7B8A] rounded-full animate-bounce"></span>
+              <span class="w-1.5 h-1.5 bg-[#6B7B8A] rounded-full animate-bounce" style="animation-delay:0.1s"></span>
+              <span class="w-1.5 h-1.5 bg-[#6B7B8A] rounded-full animate-bounce" style="animation-delay:0.2s"></span>
+              <span>正在感知你的能量...</span>
+            </div>
+            <p class="ai-text text-[#6B7B8A] text-[11px] italic leading-relaxed"></p>
+          </div>
+          <ul id="consume-list" class="space-y-2 max-h-40 overflow-y-auto">
+            <li class="text-gray-500 text-xs py-1 border-b border-gray-100">无意义的会议</li>
+          </ul>
+        </div>
+
+        <!-- Nourish -->
+        <div class="content-card p-4">
+          <div class="flex items-center gap-2 mb-3">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5B8C5A" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            <h4 class="text-deep-blue font-medium text-xs">滋养</h4>
+          </div>
+          <p class="text-gray-400 text-[10px] mb-3">做完觉得心里很满的事</p>
+          <div class="flex gap-2 mb-2">
+            <input type="text" id="nourish-input" class="soft-input text-xs" placeholder="输入...">
+            <button onclick="addEnergyItem('nourish')" class="w-8 h-8 flex-shrink-0 bg-deep-blue text-white rounded-full flex items-center justify-center text-lg hover:bg-opacity-90">+</button>
+          </div>
+          <div class="flex flex-wrap gap-1.5 mb-3">
+            <span class="quick-tag" onclick="fillInput('nourish','傍晚散步')">傍晚散步</span>
+            <span class="quick-tag" onclick="fillInput('nourish','独自喝咖啡')">独自喝咖啡</span>
+            <span class="quick-tag" onclick="fillInput('nourish','和朋友吐槽')">和朋友吐槽</span>
+            <span class="quick-tag" onclick="fillInput('nourish','听音乐')">听音乐</span>
+            <span class="quick-tag" onclick="fillInput('nourish','整理房间')">整理房间</span>
+          </div>
+          <div id="ai-insight-nourish" class="hidden mb-2 bg-gray-50 rounded-lg p-2.5">
+            <div class="ai-loading flex items-center gap-1.5 text-[#6B7B8A] text-[11px] italic">
+              <span class="w-1.5 h-1.5 bg-[#6B7B8A] rounded-full animate-bounce"></span>
+              <span class="w-1.5 h-1.5 bg-[#6B7B8A] rounded-full animate-bounce" style="animation-delay:0.1s"></span>
+              <span class="w-1.5 h-1.5 bg-[#6B7B8A] rounded-full animate-bounce" style="animation-delay:0.2s"></span>
+              <span>正在感知你的能量...</span>
+            </div>
+            <p class="ai-text text-[#6B7B8A] text-[11px] italic leading-relaxed"></p>
+          </div>
+          <ul id="nourish-list" class="space-y-2 max-h-40 overflow-y-auto">
+            <li class="text-gray-500 text-xs py-1 border-b border-gray-100">傍晚散步</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audit Report Modal -->
+  <div id="audit-modal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-start justify-center p-4" onclick="if(event.target===this)closeAuditReport()">
+    <div class="audit-modal-enter bg-white rounded-2xl max-w-md w-full mx-auto mt-20 p-6 shadow-2xl relative">
+      <button onclick="closeAuditReport()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-deep-blue transition-colors">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="mb-4">
+        <div class="w-10 h-10 rounded-full bg-deep-blue/10 flex items-center justify-center mb-3">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C5F7C" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3 class="text-deep-blue text-base font-semibold" id="audit-title">致 辛苦维持平衡的你</h3>
+      </div>
+      <div id="audit-loading" class="flex items-center gap-2 text-gray-400 text-sm mb-4">
+        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0.1s"></span>
+        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style="animation-delay:0.2s"></span>
+        <span>正在生成审计报告...</span>
+      </div>
+      <p id="audit-content" class="text-gray-600 text-sm leading-relaxed hidden"></p>
+    </div>
+  </div>
+
+  <!-- Diary Modal -->
+  <div id="diary-modal" class="diary-modal" onclick="if(event.target===this)closeDiaryModal()">
+    <div class="max-w-lg mx-auto h-full flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-5 pt-6 pb-3">
+        <div>
+          <h3 class="text-deep-blue text-lg font-semibold tracking-wide">我的日记</h3>
+          <p class="text-gray-400 text-xs mt-0.5">每一天都值得被记录</p>
+        </div>
+        <button onclick="closeDiaryModal()" class="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2C5F7C" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <!-- Date List -->
+      <div id="diary-list" class="flex-1 overflow-y-auto px-5 py-3 space-y-2">
+        <!-- Diary cards will be inserted here -->
+      </div>
+      <!-- Footer -->
+      <div class="px-5 pb-6 pt-2 bg-gradient-to-t from-[#F0F7FA] to-transparent">
+        <button onclick="createTodayRecord()" class="w-full py-3 bg-deep-blue text-white text-sm rounded-full hover:bg-opacity-90 transition-colors shadow-md">
+          + 记录今天
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MY TALENT PAGE ==================== -->
+<section id="page-talent" class="page-section min-h-screen bg-soft-blue pb-20">
+  <!-- Header -->
+  <div class="sticky top-0 z-30 bg-soft-blue/90 backdrop-blur-md border-b border-[#D0E8F2]/50">
+    <div class="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <button onclick="showPage('home')" class="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C5F7C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div>
+          <h2 class="text-deep-blue text-lg font-semibold tracking-wide">我的天赋</h2>
+          <p class="text-deep-blue/50 text-xs">将模糊兴趣转化为现实筹码</p>
+        </div>
+      </div>
+      <button onclick="showTalentDiaryModal()" class="text-deep-blue text-xs tracking-wider hover:opacity-70 transition-opacity">日记</button>
+    </div>
+  </div>
+
+  <div class="max-w-lg mx-auto px-4 pt-6 space-y-8">
+    <!-- ===== Section 1: Talent Radar ===== -->
+    <div>
+      <div class="mb-4">
+        <div class="flex items-center gap-2 mb-1">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4D35E" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <h3 class="text-deep-blue text-base font-semibold">天赋雷达</h3>
+        </div>
+        <p class="text-deep-blue/60 text-sm ml-6">你的高光时刻，就是天赋的线索</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Highlight Diary -->
+        <div class="content-card p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F4D35E" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            <h4 class="text-deep-blue font-medium text-sm">高光时刻日记</h4>
+          </div>
+          <input type="text" id="highlight-input" class="soft-input text-sm mb-3" placeholder="今天有没有哪个瞬间，你觉得自己「很在状态」？">
+          <div class="flex gap-2 mb-3">
+            <button onclick="analyzeTalent()" class="px-4 py-2 bg-deep-blue text-white text-xs rounded-full hover:bg-opacity-90 transition-colors">分析我的天赋</button>
+          </div>
+          <p class="text-gray-400 text-xs italic mb-3">示例：帮同事调好复杂表格时，我觉得很爽</p>
+
+          <!-- AI Analysis Result -->
+          <div id="ai-analysis" class="hidden bg-gradient-to-br from-[#F4D35E]/10 to-[#E8A5B4]/10 rounded-xl p-4 border border-[#F4D35E]/20">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-6 h-6 rounded-full bg-deep-blue/10 flex items-center justify-center">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2C5F7C" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <span class="text-deep-blue text-xs font-medium">能力解码</span>
+            </div>
+            <div id="analysis-tags" class="flex flex-wrap gap-2 mb-3">
+              <!-- Tags will be inserted here -->
+            </div>
+            <p id="analysis-text" class="text-gray-600 text-xs leading-relaxed"></p>
+          </div>
+        </div>
+
+        <!-- Micro Trial Field -->
+        <div class="content-card p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B8C5A" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <h4 class="text-deep-blue font-medium text-sm">微小试错场</h4>
+          </div>
+          <div class="bg-[#5B8C5A]/5 rounded-xl p-4 mb-3">
+            <p class="text-gray-600 text-xs leading-relaxed mb-2">这个周末，你可以试试：</p>
+            <p class="text-deep-blue text-sm font-medium">花2小时做一件你一直想试但没做的事。不需要完美，只需要开始。</p>
+          </div>
+          <textarea id="trial-input" class="w-full bg-transparent border border-[#D0E8F2] rounded-xl p-3 text-xs resize-none focus:border-deep-blue focus:outline-none transition-colors" rows="3" placeholder="记录你的试错反馈..."></textarea>
+          <button onclick="saveTrial()" class="mt-2 px-4 py-2 bg-deep-blue/10 text-deep-blue text-xs rounded-full hover:bg-deep-blue hover:text-white transition-colors">保存记录</button>
+          <div id="trial-list" class="mt-3 space-y-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Section 2: Reality Translator ===== -->
+    <div>
+      <div class="mb-4">
+        <div class="flex items-center gap-2 mb-1">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2C5F7C" stroke-width="2" stroke-linecap="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          <h3 class="text-deep-blue text-base font-semibold">现实翻译器</h3>
+        </div>
+        <p class="text-deep-blue/60 text-sm ml-6">热爱不必立刻变成主业，但可以先变成筹码</p>
+      </div>
+
+      <div class="space-y-4">
+        <!-- Survival Calculator -->
+        <div class="content-card p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E07A5F" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M6 12h.01M6 16h.01M10 8h8M10 12h8M10 16h8"/></svg>
+            <h4 class="text-deep-blue font-medium text-sm">生存底线计算器</h4>
+          </div>
+          <p class="text-gray-500 text-xs mb-4">数字清晰了，焦虑就会少一些</p>
+          <div class="space-y-3 mb-4">
+            <div class="flex items-center justify-between">
+              <label class="text-gray-600 text-xs">房租/房贷</label>
+              <input type="number" id="cost-rent" class="w-24 text-right soft-input text-xs" placeholder="0" onchange="calculateSurvival()">
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="text-gray-600 text-xs">餐饮</label>
+              <input type="number" id="cost-food" class="w-24 text-right soft-input text-xs" placeholder="0" onchange="calculateSurvival()">
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="text-gray-600 text-xs">交通</label>
+              <input type="number" id="cost-transport" class="w-24 text-right soft-input text-xs" placeholder="0" onchange="calculateSurvival()">
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="text-gray-600 text-xs">其他</label>
+              <input type="number" id="cost-other" class="w-24 text-right soft-input text-xs" placeholder="0" onchange="calculateSurvival()">
+            </div>
+          </div>
+          <div class="bg-deep-blue/5 rounded-xl p-4 text-center">
+            <p class="text-gray-500 text-xs mb-1">维持体面生活的最低月成本</p>
+            <p class="text-deep-blue text-xl font-bold">¥<span id="survival-total">0</span></p>
+          </div>
+        </div>
+
+        <!-- Skill Monetization Path -->
+        <div class="content-card p-5">
+          <div class="flex items-center gap-2 mb-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B7CB3" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            <h4 class="text-deep-blue font-medium text-sm">软技能变现路径</h4>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <label class="text-deep-blue text-xs font-medium block mb-2">你喜欢做什么？</label>
+              <input type="text" id="skill-like" class="soft-input text-xs" placeholder="比如：画画、写代码、教人做某事...">
+            </div>
+            <div>
+              <label class="text-deep-blue text-xs font-medium block mb-2">这件事能解决别人的什么问题？</label>
+              <input type="text" id="skill-problem" class="soft-input text-xs" placeholder="比如：帮别人设计头像、解决技术难题...">
+            </div>
+            <div>
+              <label class="text-deep-blue text-xs font-medium block mb-2">谁能为此付费？</label>
+              <input type="text" id="skill-customer" class="soft-input text-xs" placeholder="比如：小红书用户、小企业主、学生...">
+            </div>
+            <button onclick="saveSkillPath()" class="w-full py-2 bg-deep-blue text-white text-xs rounded-xl hover:bg-opacity-90 transition-colors">保存路径</button>
+          </div>
+        </div>
+
+        <!-- Side Hustle MVP Progress -->
+        <div class="content-card p-5">
+          <div class="flex items-center gap-2 mb-4">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5B8C5A" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <h4 class="text-deep-blue font-medium text-sm">副业/斜杠 MVP</h4>
+          </div>
+          <p class="text-gray-500 text-xs mb-4">从兴趣到收入的渐进路径</p>
+
+          <div class="relative">
+            <!-- Progress Bar Background -->
+            <div class="absolute top-5 left-0 right-0 h-1 bg-[#D0E8F2] rounded-full"></div>
+            <div id="mvp-progress-bar" class="absolute top-5 left-0 h-1 bg-gradient-to-r from-[#5B8C5A] to-[#F4D35E] rounded-full transition-all duration-700" style="width: 20%"></div>
+
+            <!-- Steps -->
+            <div class="relative flex justify-between">
+              <div class="flex flex-col items-center cursor-pointer" onclick="setMvpStep(0)">
+                <div id="mvp-step-0" class="w-10 h-10 rounded-full bg-[#5B8C5A] text-white flex items-center justify-center text-xs font-medium shadow-md transition-all z-10">兴趣</div>
+                <span class="text-[10px] text-gray-500 mt-2 text-center w-16">模糊喜欢</span>
+                <button onclick="event.stopPropagation();showAiHint(0)" class="ai-pill-btn mt-1.5">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  AI锦囊
+                </button>
+              </div>
+              <div class="flex flex-col items-center cursor-pointer" onclick="setMvpStep(1)">
+                <div id="mvp-step-1" class="w-10 h-10 rounded-full bg-white border-2 border-[#D0E8F2] text-gray-400 flex items-center justify-center text-xs font-medium transition-all z-10">尝试</div>
+                <span class="text-[10px] text-gray-500 mt-2 text-center w-16">最小尝试</span>
+                <button onclick="event.stopPropagation();showAiHint(1)" class="ai-pill-btn mt-1.5">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  AI锦囊
+                </button>
+              </div>
+              <div class="flex flex-col items-center cursor-pointer" onclick="setMvpStep(2)">
+                <div id="mvp-step-2" class="w-10 h-10 rounded-full bg-white border-2 border-[#D0E8F2] text-gray-400 flex items-center justify-center text-xs font-medium transition-all z-10">验证</div>
+                <span class="text-[10px] text-gray-500 mt-2 text-center w-16">获取反馈</span>
+                <button onclick="event.stopPropagation();showAiHint(2)" class="ai-pill-btn mt-1.5">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  AI锦囊
+                </button>
+              </div>
+              <div class="flex flex-col items-center cursor-pointer" onclick="setMvpStep(3)">
+                <div id="mvp-step-3" class="w-10 h-10 rounded-full bg-white border-2 border-[#D0E8F2] text-gray-400 flex items-center justify-center text-xs font-medium transition-all z-10">变现</div>
+                <span class="text-[10px] text-gray-500 mt-2 text-center w-16">小范围变现</span>
+                <button onclick="event.stopPropagation();showAiHint(3)" class="ai-pill-btn mt-1.5">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  AI锦囊
+                </button>
+              </div>
+              <div class="flex flex-col items-center cursor-pointer" onclick="setMvpStep(4)">
+                <div id="mvp-step-4" class="w-10 h-10 rounded-full bg-white border-2 border-[#D0E8F2] text-gray-400 flex items-center justify-center text-xs font-medium transition-all z-10">稳定</div>
+                <span class="text-[10px] text-gray-500 mt-2 text-center w-16">稳定收入</span>
+                <button onclick="event.stopPropagation();showAiHint(4)" class="ai-pill-btn mt-1.5">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                  AI锦囊
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="mvp-description" class="mt-6 bg-[#F4D35E]/10 rounded-xl p-4">
+            <p class="text-deep-blue text-xs font-medium mb-1">当前阶段：兴趣</p>
+            <p class="text-gray-600 text-xs leading-relaxed">你还处在探索期，这是很好的开始。试着写下你平时最愿意花时间做的事，不需要考虑能不能赚钱。</p>
+          </div>
+
+          <!-- AI交互区 -->
+          <div class="mvp-ai-input-wrap">
+            <textarea id="mvp-ai-input" class="w-full bg-transparent border border-[#D0E8F2] rounded-xl p-3 text-xs resize-none focus:border-deep-blue focus:outline-none transition-colors" rows="2" placeholder="说说你最近沉迷的一件事..."></textarea>
+            <div class="flex items-center justify-between mt-2">
+              <span class="text-gray-400 text-[10px]">AI将根据当前阶段给出建议</span>
+              <button onclick="getMvpAiAdvice()" class="px-4 py-2 bg-deep-blue text-white text-xs rounded-full hover:bg-opacity-90 transition-colors">获取AI建议</button>
+            </div>
+            <div id="mvp-ai-loading" class="ai-loading hidden">
+              <div class="ai-loading-dot"></div>
+              <div class="ai-loading-dot"></div>
+              <div class="ai-loading-dot"></div>
+              <span>正在生成锦囊...</span>
+            </div>
+            <div id="mvp-ai-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Talent Diary Modal -->
+  <div id="talent-diary-modal" class="diary-modal" onclick="if(event.target===this)closeTalentDiaryModal()">
+    <div class="max-w-lg mx-auto h-full flex flex-col">
+      <div class="flex items-center justify-between px-5 pt-6 pb-3">
+        <div>
+          <h3 class="text-deep-blue text-lg font-semibold tracking-wide">天赋日记</h3>
+          <p class="text-gray-400 text-xs mt-0.5">记录每一天的高光与试错</p>
+        </div>
+        <button onclick="closeTalentDiaryModal()" class="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2C5F7C" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="talent-diary-list" class="flex-1 overflow-y-auto px-5 py-3 space-y-2"></div>
+      <div class="px-5 pb-6 pt-2 bg-gradient-to-t from-[#F0F7FA] to-transparent">
+        <button onclick="createTodayTalentRecord()" class="w-full py-3 bg-deep-blue text-white text-sm rounded-full hover:bg-opacity-90 transition-colors shadow-md">
+          + 记录今天
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// ==================== PAGE NAVIGATION ====================
+function goBackToScene() {
+  localStorage.setItem('skipIntro', 'scene');
+  window.location.href = './index.html';
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page-section').forEach(s => {
+    s.classList.remove('active');
+    setTimeout(() => {
+      if (!s.classList.contains('active')) s.style.display = 'none';
+    }, 500);
+  });
+  const target = document.getElementById('page-' + page);
+  target.style.display = 'block';
+  // Force reflow
+  void target.offsetWidth;
+  target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ==================== LOCAL STORAGE HELPERS ====================
+function loadData(key, defaultVal) {
+  try {
+    const data = localStorage.getItem('life_balance_' + key);
+    return data ? JSON.parse(data) : defaultVal;
+  } catch(e) { return defaultVal; }
+}
+function saveData(key, val) {
+  localStorage.setItem('life_balance_' + key, JSON.stringify(val));
+}
+
+// ==================== TALENT DAILY RECORDS SYSTEM ====================
+let talentDailyRecords = {};
+let talentCurrentDate = '';
+let talentFlowMoments = [];
+let talentAbilityTags = [];
+let talentTrialNotes = [];
+let talentCostCalc = {rent: 0, food: 0, transport: 0, other: 0};
+let talentSkillPath = {like: '', problem: '', customer: ''};
+let talentMvpStage = 0;
+
+function migrateOldTalentData() {
+  const records = {};
+  const today = getTodayKey();
+
+  const oldFlow = localStorage.getItem('life_balance_talent_flow_moments');
+  const oldAbility = localStorage.getItem('life_balance_talent_ability_tags');
+  const oldTrial = localStorage.getItem('life_balance_talent_trial_notes');
+  const oldCost = localStorage.getItem('life_balance_talent_cost_calc');
+  const oldSkill = localStorage.getItem('life_balance_talent_skill_path');
+  const oldMvp = localStorage.getItem('life_balance_talent_mvp_stage');
+
+  if (oldFlow || oldAbility || oldTrial || oldCost || oldSkill || oldMvp) {
+    records[today] = {
+      flow: oldFlow ? JSON.parse(oldFlow) : [],
+      abilityTags: oldAbility ? JSON.parse(oldAbility) : [],
+      trialNotes: oldTrial ? JSON.parse(oldTrial) : [],
+      costCalc: oldCost ? JSON.parse(oldCost) : {rent: 0, food: 0, transport: 0, other: 0},
+      skillPath: oldSkill ? JSON.parse(oldSkill) : {like: '', problem: '', customer: ''},
+      mvpStage: oldMvp ? parseInt(oldMvp) : 0
+    };
+    localStorage.setItem('talent_daily_records', JSON.stringify(records));
+    localStorage.removeItem('life_balance_talent_flow_moments');
+    localStorage.removeItem('life_balance_talent_ability_tags');
+    localStorage.removeItem('life_balance_talent_trial_notes');
+    localStorage.removeItem('life_balance_talent_cost_calc');
+    localStorage.removeItem('life_balance_talent_skill_path');
+    localStorage.removeItem('life_balance_talent_mvp_stage');
+  }
+  return records;
+}
+
+function loadAllTalentRecords() {
+  try {
+    const data = localStorage.getItem('talent_daily_records');
+    if (data) {
+      talentDailyRecords = JSON.parse(data);
+    } else {
+      talentDailyRecords = migrateOldTalentData();
+    }
+  } catch(e) {
+    talentDailyRecords = {};
+  }
+  if (Object.keys(talentDailyRecords).length === 0) {
+    talentDailyRecords = {};
+  }
+}
+
+function getTalentRecord(dateKey) {
+  if (!talentDailyRecords[dateKey]) {
+    talentDailyRecords[dateKey] = {
+      flow: [],
+      abilityTags: [],
+      trialNotes: [],
+      costCalc: {rent: 0, food: 0, transport: 0, other: 0},
+      skillPath: {like: '', problem: '', customer: ''},
+      mvpStage: 0
+    };
+  }
+  return talentDailyRecords[dateKey];
+}
+
+function saveAllTalentRecords() {
+  localStorage.setItem('talent_daily_records', JSON.stringify(talentDailyRecords));
+}
+
+function switchTalentDate(dateKey) {
+  talentCurrentDate = dateKey;
+  const rec = getTalentRecord(dateKey);
+  talentFlowMoments = rec.flow || [];
+  talentAbilityTags = rec.abilityTags || [];
+  talentTrialNotes = rec.trialNotes || [];
+  talentCostCalc = rec.costCalc || {rent: 0, food: 0, transport: 0, other: 0};
+  talentSkillPath = rec.skillPath || {like: '', problem: '', customer: ''};
+  talentMvpStage = rec.mvpStage || 0;
+
+  // Update UI
+  document.getElementById('highlight-input').value = talentFlowMoments[0] || '';
+  document.getElementById('trial-input').value = talentTrialNotes[0] || '';
+  document.getElementById('cost-rent').value = talentCostCalc.rent || '';
+  document.getElementById('cost-food').value = talentCostCalc.food || '';
+  document.getElementById('cost-transport').value = talentCostCalc.transport || '';
+  document.getElementById('cost-other').value = talentCostCalc.other || '';
+  document.getElementById('skill-like').value = talentSkillPath.like || '';
+  document.getElementById('skill-problem').value = talentSkillPath.problem || '';
+  document.getElementById('skill-customer').value = talentSkillPath.customer || '';
+  mvpStep = talentMvpStage;
+  renderMvp();
+  calculateSurvival();
+  renderTrials();
+}
+
+function getTalentDateSummary(dateKey) {
+  const rec = talentDailyRecords[dateKey];
+  if (!rec) return '无记录';
+  const parts = [];
+  if (rec.flow?.length > 0) parts.push(rec.flow.length + '条高光');
+  if (rec.trialNotes?.length > 0) parts.push(rec.trialNotes.length + '条试错');
+  if (rec.mvpStage > 0) parts.push('MVP阶段' + rec.mvpStage);
+  return parts.length > 0 ? parts.join(' / ') : '无记录';
+}
+
+function showTalentDiaryModal() {
+  renderTalentDiaryList();
+  document.getElementById('talent-diary-modal').classList.add('show');
+}
+
+function closeTalentDiaryModal() {
+  document.getElementById('talent-diary-modal').classList.remove('show');
+}
+
+function renderTalentDiaryList() {
+  const list = document.getElementById('talent-diary-list');
+  const dates = Object.keys(talentDailyRecords).sort((a, b) => b.localeCompare(a));
+
+  if (dates.length === 0) {
+    list.innerHTML = '<p class="text-gray-400 text-xs text-center py-8">还没有天赋日记记录，点击下方按钮开始记录今天</p>';
+    return;
+  }
+
+  list.innerHTML = dates.map(dateKey => {
+    const isActive = dateKey === talentCurrentDate;
+    return `
+      <div class="diary-card ${isActive ? 'active' : ''}" onclick="selectTalentDate('${dateKey}')">
+        <div class="flex items-center justify-between">
+          <span class="text-deep-blue text-sm font-medium">${formatDateLabel(dateKey)}</span>
+          ${isActive ? '<span class="text-deep-blue text-[10px] bg-deep-blue/10 px-2 py-0.5 rounded-full">当前</span>' : ''}
+        </div>
+        <p class="text-gray-400 text-xs mt-1">${getTalentDateSummary(dateKey)}</p>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectTalentDate(dateKey) {
+  switchTalentDate(dateKey);
+  closeTalentDiaryModal();
+}
+
+function createTodayTalentRecord() {
+  const today = getTodayKey();
+  switchTalentDate(today);
+  closeTalentDiaryModal();
+}
+
+// ==================== DAILY RECORDS SYSTEM ====================
+let dailyRecords = {};
+let currentDate = '';
+let energyData = {consume: [], nourish: []};
+let flowMoments = [];
+let groundingTasks = {walk: false, cook: false, drawer: false, touch: false, listen: false};
+
+function getTodayKey() {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return year + '-' + month + '-' + day;
+}
+
+function migrateOldData() {
+  const records = {};
+  const today = getTodayKey();
+
+  const oldEnergy = localStorage.getItem('life_balance_energy');
+  const oldFlow = localStorage.getItem('life_balance_flow_moments');
+  const oldSensory = localStorage.getItem('life_balance_sensory_tasks');
+
+  if (oldEnergy || oldFlow || oldSensory) {
+    const parsedEnergy = oldEnergy ? JSON.parse(oldEnergy) : {consume: [], nourish: []};
+    const parsedFlow = oldFlow ? JSON.parse(oldFlow) : [];
+    const parsedSensory = oldSensory ? JSON.parse(oldSensory) : {};
+
+    records[today] = {
+      energy: parsedEnergy,
+      flow: parsedFlow,
+      grounding: {
+        walk: !!parsedSensory.walk,
+        cook: !!parsedSensory.cook,
+        drawer: !!parsedSensory.organize,
+        touch: !!parsedSensory.touch,
+        listen: !!parsedSensory.listen
+      }
+    };
+    localStorage.setItem('life_daily_records', JSON.stringify(records));
+    localStorage.removeItem('life_balance_energy');
+    localStorage.removeItem('life_balance_flow_moments');
+    localStorage.removeItem('life_balance_sensory_tasks');
+  }
+  return records;
+}
+
+function loadAllRecords() {
+  try {
+    const data = localStorage.getItem('life_daily_records');
+    if (data) {
+      dailyRecords = JSON.parse(data);
+    } else {
+      dailyRecords = migrateOldData();
+    }
+  } catch(e) {
+    dailyRecords = {};
+  }
+  if (Object.keys(dailyRecords).length === 0) {
+    dailyRecords = {};
+  }
+}
+
+function getRecord(dateKey) {
+  if (!dailyRecords[dateKey]) {
+    dailyRecords[dateKey] = {
+      energy: {consume: [], nourish: []},
+      flow: [],
+      grounding: {walk: false, cook: false, drawer: false, touch: false, listen: false}
+    };
+  }
+  return dailyRecords[dateKey];
+}
+
+function saveAllRecords() {
+  localStorage.setItem('life_daily_records', JSON.stringify(dailyRecords));
+}
+
+function switchDate(dateKey) {
+  currentDate = dateKey;
+  const rec = getRecord(dateKey);
+  energyData = rec.energy;
+  flowMoments = rec.flow;
+  groundingTasks = rec.grounding;
+  renderEnergyLists();
+  renderFlowList();
+  renderGroundingTasks();
+  updateDateLabel();
+}
+
+function updateDateLabel() {
+  const label = document.getElementById('current-date-label');
+  if (!label || !currentDate) return;
+  const parts = currentDate.split('-');
+  const month = parseInt(parts[1], 10);
+  const day = parseInt(parts[2], 10);
+  label.textContent = month + '月' + day + '日';
+}
+
+function formatDateLabel(dateKey) {
+  const parts = dateKey.split('-');
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  const day = parseInt(parts[2], 10);
+  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const weekday = weekdays[new Date(year, month - 1, day).getDay()];
+  return month + '月' + day + '日 ' + weekday;
+}
+
+function getDateSummary(dateKey) {
+  const rec = dailyRecords[dateKey];
+  if (!rec) return '无记录';
+  const cCount = rec.energy?.consume?.length || 0;
+  const nCount = rec.energy?.nourish?.length || 0;
+  const fCount = rec.flow?.length || 0;
+  const parts = [];
+  if (cCount > 0) parts.push(cCount + '条消耗');
+  if (nCount > 0) parts.push(nCount + '条滋养');
+  if (fCount > 0) parts.push(fCount + '条心流');
+  return parts.length > 0 ? parts.join(' / ') : '无记录';
+}
+
+function showDiaryModal() {
+  renderDiaryList();
+  document.getElementById('diary-modal').classList.add('show');
+}
+
+function closeDiaryModal() {
+  document.getElementById('diary-modal').classList.remove('show');
+}
+
+function renderDiaryList() {
+  const list = document.getElementById('diary-list');
+  const dates = Object.keys(dailyRecords).sort((a, b) => b.localeCompare(a));
+
+  if (dates.length === 0) {
+    list.innerHTML = '<p class="text-gray-400 text-xs text-center py-8">还没有日记记录，点击下方按钮开始记录今天</p>';
+    return;
+  }
+
+  list.innerHTML = dates.map(dateKey => {
+    const isActive = dateKey === currentDate;
+    return `
+      <div class="diary-card ${isActive ? 'active' : ''}" onclick="selectDate('${dateKey}')">
+        <div class="flex items-center justify-between">
+          <span class="text-deep-blue text-sm font-medium">${formatDateLabel(dateKey)}</span>
+          ${isActive ? '<span class="text-deep-blue text-[10px] bg-deep-blue/10 px-2 py-0.5 rounded-full">当前</span>' : ''}
+        </div>
+        <p class="text-gray-400 text-xs mt-1">${getDateSummary(dateKey)}</p>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectDate(dateKey) {
+  switchDate(dateKey);
+  closeDiaryModal();
+}
+
+function createTodayRecord() {
+  const today = getTodayKey();
+  switchDate(today);
+  closeDiaryModal();
+}
+
+function renderGroundingTasks() {
+  document.querySelectorAll('#sensory-tasks input[type="checkbox"]').forEach(cb => {
+    const task = cb.dataset.task;
+    const key = task === 'organize' ? 'drawer' : task;
+    cb.checked = !!groundingTasks[key];
+  });
+}
+
+// ==================== HOME: WHALE ANIMATION ====================
+const ns = 'http://www.w3.org/2000/svg';
+const starColors = ['#FFE4B5', '#FFD700', '#FFCDB2'];
+const isWide = window.innerWidth > 768;
+const wFactor = Math.min(2.5, Math.max(1, window.innerWidth / 375));
+
+function createStarLayer(group, count, minR, maxR, minOp, maxOp, areaY) {
+  const positions = [];
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * 375;
+    const y = Math.random() * areaY;
+    const r = minR + Math.random() * (maxR - minR);
+    const color = starColors[Math.floor(Math.random() * starColors.length)];
+    const circle = document.createElementNS(ns, 'circle');
+    circle.setAttribute('cx', x);
+    circle.setAttribute('cy', y);
+    circle.setAttribute('r', r);
+    circle.setAttribute('fill', color);
+    circle.classList.add('star-twinkle');
+    circle.style.setProperty('--dur', `${2 + Math.random() * 2.5}s`);
+    circle.style.setProperty('--del', `${Math.random() * 5}s`);
+    circle.style.setProperty('--min', `${minOp + Math.random() * 0.15}`);
+    circle.style.setProperty('--max', `${maxOp - Math.random() * 0.15}`);
+    circle.style.setProperty('--scl', `${1 + Math.random() * 0.6}`);
+    if (maxR > 1.2) circle.setAttribute('filter', 'url(#softGlow)');
+    group.appendChild(circle);
+    positions.push({x, y});
+  }
+  return positions;
+}
+
+const farGroup = document.getElementById('stars-far');
+const midGroup = document.getElementById('stars-mid');
+const nearGroup = document.getElementById('stars-near');
+const constGroup = document.getElementById('constellations');
+
+createStarLayer(farGroup, Math.floor(200 * wFactor), 0.12, 0.55, 0.1, 0.5, 260);
+const midPos = createStarLayer(midGroup, Math.floor(50 * wFactor), 0.6, 1.1, 0.08, 0.75, 240);
+const nearPos = createStarLayer(nearGroup, Math.floor(16 * wFactor), 1.1, 1.8, 0.05, 0.9, 220);
+
+// Constellations
+const allPos = [...midPos, ...nearPos];
+for (let i = 0; i < allPos.length; i++) {
+  if (Math.random() > 0.82) {
+    const j = Math.floor(Math.random() * allPos.length);
+    if (i !== j) {
+      const a = allPos[i], b = allPos[j];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      if (dist < 52) {
+        const line = document.createElementNS(ns, 'line');
+        line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
+        line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+        line.setAttribute('stroke', '#FFE4B5');
+        line.setAttribute('stroke-width', '0.22');
+        line.setAttribute('opacity', '0.18');
+        line.setAttribute('stroke-linecap', 'round');
+        constGroup.appendChild(line);
+      }
+    }
+  }
+}
+
+// Shooting stars
+const shootingGroup = document.getElementById('shooting-stars');
+function createShootingStar() {
+  const wrapper = document.createElementNS(ns, 'g');
+  const sx = 50 + Math.random() * 270;
+  const sy = 8 + Math.random() * 110;
+  wrapper.setAttribute('transform', `translate(${sx}, ${sy})`);
+  const g = document.createElementNS(ns, 'g');
+  g.classList.add('shooting-star');
+  const line = document.createElementNS(ns, 'line');
+  line.setAttribute('x1', 0); line.setAttribute('y1', 0);
+  line.setAttribute('x2', 26); line.setAttribute('y2', 19);
+  line.setAttribute('stroke', '#FFE4B5');
+  line.setAttribute('stroke-width', '0.9');
+  line.setAttribute('stroke-linecap', 'round');
+  g.appendChild(line);
+  wrapper.appendChild(g);
+  shootingGroup.appendChild(wrapper);
+  setTimeout(() => wrapper.remove(), 1500);
+}
+function scheduleShootingStar() {
+  setTimeout(() => { createShootingStar(); scheduleShootingStar(); }, 8000 + Math.random() * 7000);
+}
+setTimeout(scheduleShootingStar, 3500);
+
+// Clouds
+const cloudGroup = document.getElementById('clouds');
+const cloudDefs = [
+  {x: 30, y: 75, scale: 0.95, dur: 52, delay: -8},
+  {x: 150, y: 50, scale: 0.72, dur: 62, delay: -22},
+  {x: 290, y: 90, scale: 1.05, dur: 48, delay: -4},
+  {x: 95, y: 125, scale: 0.62, dur: 58, delay: -33},
+  {x: 330, y: 55, scale: 0.48, dur: 66, delay: -45},
+];
+cloudDefs.forEach(def => {
+  const g = document.createElementNS(ns, 'g');
+  g.classList.add('cloud-drift');
+  g.style.setProperty('--dur', `${def.dur}s`);
+  g.style.setProperty('--start', `${-160 * def.scale}px`);
+  g.style.setProperty('--end', `${460 * def.scale}px`);
+  g.style.animationDelay = `${def.delay}s`;
+  const parts = [
+    {cx: 0, cy: 0, rx: 28, ry: 14, fill: '#F5D0A9', op: 0.52},
+    {cx: 20, cy: -6, rx: 22, ry: 16, fill: '#FFF5E8', op: 0.32},
+    {cx: -18, cy: 4, rx: 20, ry: 11, fill: '#E8A5B4', op: 0.28},
+    {cx: 10, cy: 7, rx: 24, ry: 10, fill: '#F5D0A9', op: 0.42},
+    {cx: 32, cy: 0, rx: 16, ry: 12, fill: '#F5D0A9', op: 0.38},
+    {cx: -8, cy: -9, rx: 18, ry: 10, fill: '#FFF0E0', op: 0.28},
+    {cx: 22, cy: 8, rx: 14, ry: 8, fill: '#D4A59A', op: 0.22},
+  ];
+  parts.forEach(p => {
+    const el = document.createElementNS(ns, 'ellipse');
+    el.setAttribute('cx', p.cx); el.setAttribute('cy', p.cy);
+    el.setAttribute('rx', p.rx); el.setAttribute('ry', p.ry);
+    el.setAttribute('fill', p.fill); el.setAttribute('opacity', p.op);
+    g.appendChild(el);
+  });
+  g.setAttribute('transform', `translate(${def.x}, ${def.y}) scale(${def.scale})`);
+  cloudGroup.appendChild(g);
+});
+
+// Inner stars
+const innerGroup = document.getElementById('inner-stars');
+for (let i = 0; i < 25; i++) {
+  const dot = document.createElementNS(ns, 'circle');
+  const bx = 105 + Math.random() * 175;
+  const by = 275 + Math.random() * 30;
+  dot.setAttribute('cx', bx); dot.setAttribute('cy', by);
+  dot.setAttribute('r', Math.random() * 0.65 + 0.2);
+  dot.setAttribute('fill', '#FFE4B5');
+  dot.classList.add('inner-star');
+  dot.style.setProperty('--del', `${Math.random() * 4}s`);
+  dot.style.setProperty('--tx', `${(Math.random() - 0.5) * 10}px`);
+  dot.style.setProperty('--ty', `${(Math.random() - 0.5) * 7}px`);
+  innerGroup.appendChild(dot);
+}
+
+// Water sparkles
+const sparkleGroup = document.getElementById('water-sparkles');
+const sparkleColors = ['#FFE4B5', '#FFD700', '#F4D35E'];
+for (let i = 0; i < 55; i++) {
+  const dot = document.createElementNS(ns, 'circle');
+  dot.setAttribute('cx', Math.random() * 375);
+  dot.setAttribute('cy', 348 + Math.random() * 102);
+  dot.setAttribute('r', 0.25 + Math.random() * 1.3);
+  dot.setAttribute('fill', sparkleColors[Math.floor(Math.random() * sparkleColors.length)]);
+  dot.classList.add('star-twinkle');
+  dot.style.setProperty('--dur', `${3 + Math.random() * 4}s`);
+  dot.style.setProperty('--del', `${Math.random() * 4}s`);
+  dot.style.setProperty('--min', '0.04');
+  dot.style.setProperty('--max', `${0.15 + Math.random() * 0.35}`);
+  sparkleGroup.appendChild(dot);
+}
+
+// Waves
+const waveGroup = document.getElementById('water-waves');
+for (let i = 0; i < 5; i++) {
+  const y = 345 + i * 7;
+  const wave = document.createElementNS(ns, 'path');
+  wave.setAttribute('d', `M -187 ${y} Q 0 ${y - 2}, 187 ${y} T 562 ${y}`);
+  wave.setAttribute('fill', 'none');
+  wave.setAttribute('stroke', 'rgba(255,255,255,0.07)');
+  wave.setAttribute('stroke-width', '0.7');
+  wave.classList.add('wave-anim');
+  wave.style.setProperty('--dur', `${5 + i * 1.1}s`);
+  wave.style.animationDelay = `${-i * 1.8}s`;
+  waveGroup.appendChild(wave);
+}
+
+// Lanterns
+const lanternGroup = document.getElementById('lanterns');
+const lanternConfigs = [
+  {x: 55, scale: 0.78, color: '#E07A5F', speed: 0.07},
+  {x: 175, scale: 1.05, color: '#F4A6A6', speed: 0.095},
+  {x: 298, scale: 0.62, color: '#E07A5F', speed: 0.055},
+];
+function buildLantern(config) {
+  const g = document.createElementNS(ns, 'g');
+  const s = config.scale;
+  const body = document.createElementNS(ns, 'path');
+  body.setAttribute('d', 'M -7 -10 C -7 -15, 7 -15, 7 -10 C 7 2, 4 11, 0 12 C -4 11, -7 2, -7 -10 Z');
+  body.setAttribute('fill', config.color);
+  body.setAttribute('opacity', '0.72');
+  g.appendChild(body);
+  const folds = [
+    'M -3.5 -13 Q -1.5 0, -3.5 11',
+    'M 0 -13.5 Q 2 0, 0 12',
+    'M 3.5 -13 Q 1.5 0, 3.5 11',
+  ];
+  folds.forEach(d => {
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('stroke', '#C96B52');
+    path.setAttribute('stroke-width', '0.4');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('opacity', '0.35');
+    path.setAttribute('stroke-linecap', 'round');
+    g.appendChild(path);
+  });
+  const base = document.createElementNS(ns, 'rect');
+  base.setAttribute('x', '-4'); base.setAttribute('y', '10');
+  base.setAttribute('width', '8'); base.setAttribute('height', '1.6');
+  base.setAttribute('rx', '0.6'); base.setAttribute('fill', '#C96B52');
+  base.setAttribute('opacity', '0.8');
+  g.appendChild(base);
+  const glow = document.createElementNS(ns, 'circle');
+  glow.setAttribute('cy', '-1'); glow.setAttribute('r', '4');
+  glow.setAttribute('fill', '#FFE4B5');
+  glow.classList.add('lantern-inner-glow');
+  glow.setAttribute('filter', 'url(#softGlow)');
+  g.appendChild(glow);
+  return g;
+}
+lanternConfigs.forEach((config, idx) => {
+  const g = buildLantern(config);
+  lanternGroup.appendChild(g);
+  let y = 395 + idx * 22 + Math.random() * 15;
+  const phase = Math.random() * Math.PI * 2;
+  function animateLantern() {
+    y -= config.speed;
+    const sway = Math.sin(y * 0.022 + phase) * 3.5;
+    let fade = 1;
+    if (y < 90) fade = Math.max(0, y / 90);
+    if (y > 430) fade = Math.max(0, (450 - y) / 20);
+    g.setAttribute('transform', `translate(${config.x + sway}, ${y}) scale(${config.scale})`);
+    g.setAttribute('opacity', fade * 0.82);
+    if (y < -35) y = 430 + Math.random() * 20;
+    requestAnimationFrame(animateLantern);
+  }
+  animateLantern();
+});
+
+// ==================== LIFE: GROUNDING ====================
+// Sensory tasks - initialized via switchDate
+document.querySelectorAll('#sensory-tasks input[type="checkbox"]').forEach(cb => {
+  const task = cb.dataset.task;
+  cb.addEventListener('change', () => {
+    const key = task === 'organize' ? 'drawer' : task;
+    groundingTasks[key] = cb.checked;
+    saveAllRecords();
+  });
+});
+
+// Flow moments
+function renderFlowList() {
+  const list = document.getElementById('flow-list');
+  if (flowMoments.length === 0) {
+    list.innerHTML = '<p class="text-gray-400 text-xs italic">还没有记录，写下你的第一个心流时刻吧</p>';
+    return;
+  }
+  list.innerHTML = flowMoments.map((m, i) => `
+    <div class="flex items-center justify-between bg-deep-blue/5 rounded-lg px-3 py-2">
+      <span class="text-gray-600 text-xs">${m}</span>
+      <button onclick="deleteFlow(${i})" class="text-gray-400 hover:text-[#E07A5F] text-xs">&times;</button>
+    </div>
+  `).join('');
+}
+function addFlow() {
+  const input = document.getElementById('flow-input');
+  const val = input.value.trim();
+  if (!val) return;
+  flowMoments.unshift(val);
+  saveAllRecords();
+  input.value = '';
+  renderFlowList();
+  showChargeAnimation();
+}
+
+function showChargeAnimation() {
+  const chargeEl = document.getElementById('flow-charge');
+  const ring = document.getElementById('charge-ring');
+  const text = document.getElementById('charge-text');
+
+  // 重置状态
+  text.textContent = '能量注入中...';
+  chargeEl.classList.remove('hidden', 'charge-pulse');
+  chargeEl.classList.add('flex');
+  ring.classList.remove('charge-animate');
+  void ring.offsetWidth;
+  ring.classList.add('charge-animate');
+
+  // 1.2秒后显示完成，保持显示不消失
+  setTimeout(() => {
+    text.textContent = '能量已记录 ✓';
+    chargeEl.classList.add('charge-pulse');
+  }, 1200);
+}
+function deleteFlow(idx) {
+  flowMoments.splice(idx, 1);
+  saveAllRecords();
+  renderFlowList();
+}
+
+// Digital Detox
+let detoxInterval = null;
+let detoxSeconds = 0;
+function playDetoxEndSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+    oscillator.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.2);
+    oscillator.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.4);
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+    oscillator.start(audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + 0.8);
+  } catch(e) {}
+}
+function startDetox(minutes) {
+  detoxSeconds = minutes * 60;
+  document.getElementById('detox-controls').classList.add('hidden');
+  document.getElementById('detox-active').classList.remove('hidden');
+  document.getElementById('detox-active').classList.add('flex');
+  updateDetoxDisplay();
+  detoxInterval = setInterval(() => {
+    detoxSeconds--;
+    updateDetoxDisplay();
+    if (detoxSeconds <= 0) {
+      playDetoxEndSound();
+      stopDetox();
+    }
+  }, 1000);
+}
+function updateDetoxDisplay() {
+  const m = Math.floor(detoxSeconds / 60);
+  const s = detoxSeconds % 60;
+  document.getElementById('detox-timer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+}
+function stopDetox() {
+  if (detoxInterval) clearInterval(detoxInterval);
+  detoxInterval = null;
+  document.getElementById('detox-controls').classList.remove('hidden');
+  document.getElementById('detox-active').classList.add('hidden');
+  document.getElementById('detox-active').classList.remove('flex');
+}
+
+// ==================== LIFE: ENERGY LEDGER ====================
+function renderEnergyLists() {
+  const consumeList = document.getElementById('consume-list');
+  const nourishList = document.getElementById('nourish-list');
+  consumeList.innerHTML = energyData.consume.map((item, i) => `
+    <li class="flex items-center justify-between text-gray-600 text-xs py-1 border-b border-gray-100">
+      <span>${item}</span>
+      <button onclick="removeEnergy('consume', ${i})" class="text-gray-400 hover:text-[#E07A5F]">&times;</button>
+    </li>
+  `).join('');
+  nourishList.innerHTML = energyData.nourish.map((item, i) => `
+    <li class="flex items-center justify-between text-gray-600 text-xs py-1 border-b border-gray-100">
+      <span>${item}</span>
+      <button onclick="removeEnergy('nourish', ${i})" class="text-gray-400 hover:text-[#E07A5F]">&times;</button>
+    </li>
+  `).join('');
+  updateEnergyRing();
+}
+function fillInput(type, text) {
+  const input = document.getElementById(type + '-input');
+  input.value = text;
+  input.focus();
+}
+function addEnergyItem(type) {
+  const input = document.getElementById(type + '-input');
+  const val = input.value.trim();
+  if (!val) return;
+  energyData[type].push(val);
+  saveAllRecords();
+  input.value = '';
+  renderEnergyLists();
+  fetchAIInsight(type, val);
+}
+function removeEnergy(type, idx) {
+  energyData[type].splice(idx, 1);
+  saveAllRecords();
+  renderEnergyLists();
+}
+function updateEnergyRing() {
+  const total = energyData.consume.length + energyData.nourish.length;
+  const pct = total === 0 ? 0 : Math.round((energyData.nourish.length / total) * 100);
+  const circumference = 2 * Math.PI * 15; // ~94.2
+  const offset = circumference - (pct / 100) * circumference;
+  document.getElementById('energy-ring').style.strokeDashoffset = offset;
+  document.getElementById('energy-percent').textContent = pct + '%';
+
+  // Show warning if consume > nourish for logic simulation (using simple ratio check)
+  const warning = document.getElementById('energy-warning');
+  if (energyData.consume.length > energyData.nourish.length * 1.5) {
+    warning.classList.remove('hidden');
+  } else {
+    warning.classList.add('hidden');
+  }
+}
+
+// ==================== AI ENERGY INSIGHTS ====================
+const API_KEY = 'sk-yonocmrlffdjwbrgzxwefoevhlphdmlyodnvhsofauvurpcp';
+const API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
+const MODEL = 'deepseek-ai/DeepSeek-V3';
+
+const consumeFallbacks = [
+  '这种消耗感很真实。你的能量不是被事情本身耗尽，而是被"表演"掏空。此刻的厌倦，是内心真实自我在抗议。',
+  '在这个场合里，你被迫扮演着某种角色。你的疲惫不是脆弱，而是身体在提醒：该卸下盔甲了。'
+];
+const nourishFallbacks = [
+  '这一刻真美。在这段独处的时间里，你只是一个感受着晚风的鲜活生命。请记住这种掌控自己节奏的感觉。',
+  '这种平静不是逃避，而是你在为自己充电。这是你主动争取的空间，别人夺不走。'
+];
+
+function simpleHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h).toString(36);
+}
+
+function sanitizeKey(str) {
+  return str.trim().replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '_').slice(0, 32);
+}
+
+function getCacheKey(type, item) {
+  return 'ai_insight_' + type + '_' + simpleHash(item) + '_' + sanitizeKey(item);
+}
+
+function getCachedInsight(type, item) {
+  try {
+    const key = getCacheKey(type, item);
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.ts > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return data.text;
+  } catch (e) { return null; }
+}
+
+function setCachedInsight(type, item, text) {
+  try {
+    const key = getCacheKey(type, item);
+    localStorage.setItem(key, JSON.stringify({ text, ts: Date.now() }));
+  } catch (e) {}
+}
+
+function showInsightLoading(type) {
+  const container = document.getElementById('ai-insight-' + type);
+  const loading = container.querySelector('.ai-loading');
+  const text = container.querySelector('.ai-text');
+  container.classList.remove('hidden');
+  container.classList.remove('ai-insight-fade');
+  loading.classList.remove('hidden');
+  text.classList.add('hidden');
+}
+
+function showInsightText(type, insightText) {
+  const container = document.getElementById('ai-insight-' + type);
+  const loading = container.querySelector('.ai-loading');
+  const text = container.querySelector('.ai-text');
+  loading.classList.add('hidden');
+  text.textContent = insightText;
+  text.classList.remove('hidden');
+  container.classList.add('ai-insight-fade');
+}
+
+function hideInsight(type) {
+  const container = document.getElementById('ai-insight-' + type);
+  container.classList.add('hidden');
+}
+
+function buildPrompt(type, item) {
+  if (type === 'consume') {
+    return `用户输入了一项消耗："${item}"
+
+请作为心理能量审计师，给出3-5句话的回应：
+1. 确认感受：用一句话精准描述这种被掏空的感觉
+2. 剥离期待：指出这种消耗往往来自外界的某种规训（如"必须成功"、"必须顾家"）
+3. 温柔撑腰：告诉用户，感到厌烦是正常的，甚至是一种自我保护的信号
+
+语气：深沉温暖，像认识多年的老友。简洁有力，控制在80字以内。
+禁止使用："你应该"、"建议你"、"沟通一下"、"太脆弱"等说教词汇。`;
+  }
+  return `用户输入了一项滋养："${item}"
+
+请帮助用户确认这是属于"我"的高光时刻：
+1. 提炼特质：从这个行为中提炼出用户身上美好的特质
+2. 确认主权：强调这是用户主动为自己争取的空间
+3. 镜像反馈：让用户看到这个瞬间的自己有多珍贵
+
+语气：温暖确认，像一面镜子。控制在80字以内。`;
+}
+
+async function fetchAIInsight(type, item) {
+  const cached = getCachedInsight(type, item);
+  if (cached) {
+    showInsightText(type, cached);
+    return;
+  }
+
+  showInsightLoading(type);
+
+  const fallbackList = type === 'consume' ? consumeFallbacks : nourishFallbacks;
+  const fallback = fallbackList[Math.floor(Math.random() * fallbackList.length)];
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + API_KEY
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: '你是心理能量审计师。温暖、敏锐、有洞察力。不是教时间管理，而是帮用户进行情绪与主体性的清算。去性别化，不预设身份。拒绝说教，不用"你应该"。看见痛苦，确认感受真实。确认主体，强化这是"自己"的选择。' },
+          { role: 'user', content: buildPrompt(type, item) }
+        ],
+        temperature: 0.8,
+        max_tokens: 200
+      })
+    });
+
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (!text) throw new Error('Empty response');
+
+    setCachedInsight(type, item, text);
+    showInsightText(type, text);
+  } catch (e) {
+    showInsightText(type, fallback);
+  }
+}
+
+function closeAuditReport() {
+  document.getElementById('audit-modal').classList.add('hidden');
+}
+
+function showAuditReport() {
+  const modal = document.getElementById('audit-modal');
+  const loading = document.getElementById('audit-loading');
+  const content = document.getElementById('audit-content');
+  const title = document.getElementById('audit-title');
+
+  modal.classList.remove('hidden');
+  loading.classList.remove('hidden');
+  content.classList.add('hidden');
+  title.textContent = '致 辛苦维持平衡的你';
+
+  const total = energyData.consume.length + energyData.nourish.length;
+  const pct = total === 0 ? 0 : Math.round((energyData.nourish.length / total) * 100);
+
+  fetchAuditReport(pct);
+}
+
+async function fetchAuditReport(pct) {
+  const loading = document.getElementById('audit-loading');
+  const content = document.getElementById('audit-content');
+
+  const consumeList = energyData.consume.length > 0 ? energyData.consume : ['暂无记录'];
+  const nourishList = energyData.nourish.length > 0 ? energyData.nourish : ['暂无记录'];
+
+  const prompt = `用户本周能量数据：
+- 消耗项：${consumeList.join(', ')}
+- 滋养项：${nourishList.join(', ')}
+- 滋养比例：${pct}%
+
+请生成一份「主体性审计报告」，格式：
+
+标题：致 辛苦维持平衡的你
+
+正文（5-8句话）：
+- 如果消耗>滋养：不说"不会休息"，而是说"承担了太多不属于你的重量，有权利自私一点"
+- 如果滋养>消耗：肯定"这些微小的快乐才是真正的燃料"
+- 如果平衡：提醒"愿你在应对世界的同时，别忘了留一只眼睛看着自己"
+
+加入1-2个隐喻（如"盔甲"、"面具"、"呼吸"、"土壤"）。
+语气深沉温暖，像一位睿智的心理咨询师。控制在150字以内。`;
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + API_KEY
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          { role: 'system', content: '你是心理能量审计师。温暖、敏锐、有洞察力。不是教时间管理，而是帮用户进行情绪与主体性的清算。去性别化，不预设身份。拒绝说教，不用"你应该"。看见痛苦，确认感受真实。确认主体，强化这是"自己"的选择。' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 300
+      })
+    });
+
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content?.trim();
+    if (!text) throw new Error('Empty response');
+
+    loading.classList.add('hidden');
+    content.textContent = text;
+    content.classList.remove('hidden');
+  } catch (e) {
+    loading.classList.add('hidden');
+    let fallbackText = '';
+    if (pct < 40) {
+      fallbackText = '你承担了太多不属于你的重量，像穿着湿透的棉衣在行走。那些"应该"和"必须"，很多其实是别人的剧本。你不必一直做那个可靠的人，偶尔自私一点，是盔甲也是呼吸。';
+    } else if (pct > 60) {
+      fallbackText = '这些微小的快乐才是真正的燃料。你在土壤里悄悄扎根，别人看不见，但你知道。请继续守护这些只属于自己的时刻，它们是你面对世界的底气。';
+    } else {
+      fallbackText = '愿你在应对世界的同时，别忘了留一只眼睛看着自己。平衡是一种动态的美，像走钢丝的人手中的长杆。你已经在做得很好了，别忘了给自己的呼吸留一点空间。';
+    }
+    content.textContent = fallbackText;
+    content.classList.remove('hidden');
+  }
+}
+
+// ==================== TALENT: RADAR ====================
+// AI Analysis simulation
+const talentKeywords = {
+  '表格': ['逻辑梳理', '耐心', '工具运用'],
+  '同事': ['沟通协调', '团队协作', '服务意识'],
+  '讲': ['表达清晰', '知识传递', '结构化思维'],
+  '画': ['视觉表达', '审美', '创意'],
+  '写': ['文字表达', '逻辑思维', '共情'],
+  '教': ['知识传递', '耐心', '结构化思维'],
+  '调': ['细节把控', '耐心', '技术敏感'],
+  '设计': ['审美', '用户思维', '创意'],
+  '代码': ['逻辑思维', '问题解决', '抽象能力'],
+  '摄影': ['审美', '观察力', '技术运用'],
+  '做饭': ['多任务处理', '感官敏锐', '创造力'],
+  '整理': ['条理清晰', '分类思维', '细节把控'],
+};
+function analyzeTalent() {
+  const input = document.getElementById('highlight-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  // Save to current date record
+  talentFlowMoments = [text];
+  if (!talentDailyRecords[talentCurrentDate]) {
+    talentDailyRecords[talentCurrentDate] = getTalentRecord(talentCurrentDate);
+  }
+  talentDailyRecords[talentCurrentDate].flow = talentFlowMoments;
+  saveAllTalentRecords();
+
+  const analysisDiv = document.getElementById('ai-analysis');
+  const tagsDiv = document.getElementById('analysis-tags');
+  const textDiv = document.getElementById('analysis-text');
+
+  analysisDiv.classList.remove('hidden');
+  tagsDiv.innerHTML = '<span class="text-gray-400 text-xs">分析中...</span>';
+  textDiv.textContent = '';
+
+  // Simulate delay
+  setTimeout(() => {
+    const foundTags = new Set();
+    Object.keys(talentKeywords).forEach(key => {
+      if (text.includes(key)) {
+        talentKeywords[key].forEach(t => foundTags.add(t));
+      }
+    });
+    if (foundTags.size === 0) {
+      foundTags.add('觉察力');
+      foundTags.add('自我认知');
+    }
+    const tags = Array.from(foundTags).slice(0, 4);
+    tagsDiv.innerHTML = tags.map(t => `<span class="px-3 py-1 bg-deep-blue/10 text-deep-blue text-xs rounded-full">${t}</span>`).join('');
+    textDiv.textContent = `从这个高光时刻中，我们看到了你的「${tags.join('」和「')}」。这些能力在日常生活里可能很隐形，但在关键时刻让你闪闪发光。你可以试着想想，还有哪些场景会用到这些能力？`;
+  }, 1200);
+}
+
+// Trial records
+let trialRecords = [];
+function renderTrials() {
+  const list = document.getElementById('trial-list');
+  if (trialRecords.length === 0) {
+    list.innerHTML = '';
+    return;
+  }
+  list.innerHTML = trialRecords.map((r, i) => `
+    <div class="bg-deep-blue/5 rounded-lg px-3 py-2">
+      <p class="text-gray-600 text-xs">${r}</p>
+    </div>
+  `).join('');
+}
+function saveTrial() {
+  const input = document.getElementById('trial-input');
+  const val = input.value.trim();
+  if (!val) return;
+  trialRecords.unshift(val);
+  if (!talentDailyRecords[talentCurrentDate]) {
+    talentDailyRecords[talentCurrentDate] = getTalentRecord(talentCurrentDate);
+  }
+  talentDailyRecords[talentCurrentDate].trialNotes = trialRecords;
+  saveAllTalentRecords();
+  input.value = '';
+  renderTrials();
+}
+
+// ==================== TALENT: REALITY TRANSLATOR ====================
+// Survival calculator
+function calculateSurvival() {
+  const rent = parseFloat(document.getElementById('cost-rent').value) || 0;
+  const food = parseFloat(document.getElementById('cost-food').value) || 0;
+  const transport = parseFloat(document.getElementById('cost-transport').value) || 0;
+  const other = parseFloat(document.getElementById('cost-other').value) || 0;
+  const total = rent + food + transport + other;
+  document.getElementById('survival-total').textContent = total.toLocaleString();
+  talentCostCalc = {rent, food, transport, other};
+  if (!talentDailyRecords[talentCurrentDate]) {
+    talentDailyRecords[talentCurrentDate] = getTalentRecord(talentCurrentDate);
+  }
+  talentDailyRecords[talentCurrentDate].costCalc = talentCostCalc;
+  saveAllTalentRecords();
+}
+
+function saveSkillPath() {
+  talentSkillPath = {
+    like: document.getElementById('skill-like').value,
+    problem: document.getElementById('skill-problem').value,
+    customer: document.getElementById('skill-customer').value,
+  };
+  if (!talentDailyRecords[talentCurrentDate]) {
+    talentDailyRecords[talentCurrentDate] = getTalentRecord(talentCurrentDate);
+  }
+  talentDailyRecords[talentCurrentDate].skillPath = talentSkillPath;
+  saveAllTalentRecords();
+  alert('路径已保存');
+}
+
+// MVP Progress
+const mvpDescriptions = [
+  { title: '兴趣', desc: '你还处在探索期，这是很好的开始。试着写下你平时最愿意花时间做的事，不需要考虑能不能赚钱。' },
+  { title: '尝试', desc: '这个阶段的的关键是「低成本试错」。画一组表情包、写一篇文章、帮朋友解决一个小问题。不需要完美，只需要开始。' },
+  { title: '验证', desc: '把你做的东西展示给10个人，听听他们的真实反馈。不要害怕批评，那是你最宝贵的养分。' },
+  { title: '变现', desc: '开始尝试收费，哪怕只是一杯咖啡的钱。收费是对自己价值的确认，也是筛选真正需要你的人。' },
+  { title: '稳定', desc: '你已经跑通了从兴趣到收入的最小闭环。现在可以思考如何扩大规模，或者让它成为主业的备选。' },
+];
+let mvpStep = 0;
+function setMvpStep(step) {
+  mvpStep = step;
+  if (!talentDailyRecords[talentCurrentDate]) {
+    talentDailyRecords[talentCurrentDate] = getTalentRecord(talentCurrentDate);
+  }
+  talentDailyRecords[talentCurrentDate].mvpStage = mvpStep;
+  saveAllTalentRecords();
+  renderMvp();
+}
+function renderMvp() {
+  for (let i = 0; i <= 4; i++) {
+    const el = document.getElementById('mvp-step-' + i);
+    if (i <= mvpStep) {
+      el.className = 'w-10 h-10 rounded-full bg-[#5B8C5A] text-white flex items-center justify-center text-xs font-medium shadow-md transition-all z-10';
+    } else {
+      el.className = 'w-10 h-10 rounded-full bg-white border-2 border-[#D0E8F2] text-gray-400 flex items-center justify-center text-xs font-medium transition-all z-10';
+    }
+  }
+  document.getElementById('mvp-progress-bar').style.width = (mvpStep / 4 * 100) + '%';
+  const desc = mvpDescriptions[mvpStep];
+  document.getElementById('mvp-description').innerHTML = `
+    <p class="text-deep-blue text-xs font-medium mb-1">当前阶段：${desc.title}</p>
+    <p class="text-gray-600 text-xs leading-relaxed">${desc.desc}</p>
+  `;
+  // Update input placeholder based on stage
+  const input = document.getElementById('mvp-ai-input');
+  if (input) {
+    const placeholders = [
+      '说说你最近沉迷的一件事...',
+      '你本周打算做的最小测试是什么？',
+      '最近收到了什么反馈？好的坏的都可以...',
+      '有人为你的服务询价了吗？',
+      '哪个环节最让你感到重复和耗时？'
+    ];
+    input.placeholder = placeholders[mvpStep] || placeholders[0];
+  }
+}
+
+// ==================== AI 锦囊系统 ====================
+const SILICONFLOW_API_KEY = 'sk-yonocmrlffdjwbrgzxwefoevhlphdmlyodnvhsofauvurpcp';
+const SILICONFLOW_API_URL = 'https://api.siliconflow.cn/v1/chat/completions';
+const SILICONFLOW_MODEL = 'deepseek-ai/DeepSeek-V3';
+
+const mvpAiSystemPrompts = [
+  `# Role: 个人商业模式设计师 / 斜杠青年导师
+# Task: 用户处于阶段0（兴趣），提供极具实操性的下一步行动指南
+- 不要直接给建议，先提问引导
+- 询问用户平时花时间最多、且做完后感到有成就感的事情
+- 帮用户分析兴趣背后的"可迁移技能"
+- 输出格式："你的兴趣是 [X]，这其实对应了市场上的 [Y] 需求。你可以试着把它看作一种服务。"
+- 控制在150字以内，简洁有力`,
+  `# Role: 个人商业模式设计师 / 斜杠青年导师
+# Task: 用户处于阶段1（尝试），提供极具实操性的下一步行动指南
+- 目标是让用户动起来
+- 帮用户设计一个成本最低、甚至零成本的测试方案
+- 拒绝宏大叙事：劝阻"做大号"，建议"先发一篇笔记"
+- 话术："别急着辞职或投入资金。你这周能不能只做一件事：[具体的微小行动]，看看有没有人感兴趣？"
+- 控制在150字以内，简洁有力`,
+  `# Role: 个人商业模式设计师 / 斜杠青年导师
+# Task: 用户处于阶段2（验证），提供极具实操性的下一步行动指南
+- 重点在于解读反馈
+- 教用户分辨无效反馈（亲友客套）vs 有效市场反馈（陌生人点赞、询问价格）
+- 如果反馈不好，分析原因（标题？定价？人群？）
+- 金句："早期的失败不是因为你不行，而是因为你在排除错误答案。每一个'不'都让你离'是'更近一步。"
+- 控制在150字以内，简洁有力`,
+  `# Role: 个人商业模式设计师 / 斜杠青年导师
+# Task: 用户处于阶段3（变现），提供极具实操性的下一步行动指南
+- 要推一把
+- 给出合理的定价区间建议（低价引流款 vs 高价利润款）
+- 提供具体的"谈钱话术"
+- 告诉用户：收钱是对服务的尊重
+- 行动呼吁："试着发出你的第一个收款码/商品链接。"
+- 控制在150字以内，简洁有力`,
+  `# Role: 个人商业模式设计师 / 斜杠青年导师
+# Task: 用户处于阶段4（稳定），提供极具实操性的下一步行动指南
+- 关注点转向效率
+- 询问哪些环节最耗时？建议标准化（SOP）或外包
+- 引导思考模式能不能复制？能不能开发更高客单价的产品？
+- 探讨是否要将副业转正
+- 控制在150字以内，简洁有力`
+];
+
+const mvpAiFallbacks = [
+  '根据经验来看，大多数人在兴趣阶段最容易陷入"想太多做太少"。我们可以试试：接下来24小时，记录你自发想做的3件事，不用考虑能不能赚钱。',
+  '别急着辞职或投入资金。你这周能不能只做一件事：发一条关于你擅长领域的笔记/朋友圈，看看有没有人点赞或评论？',
+  '早期的失败不是因为你不行，而是因为你在排除错误答案。每一个"不"都让你离"是"更近一步。试着把反馈分类：哪些是噪音，哪些是信号？',
+  '试着发出你的第一个收款码/商品链接。定价可以从一杯咖啡开始，关键是验证有人愿意为你付费。收钱是对服务的尊重。',
+  '建议把重复环节列出来，看看哪些可以标准化成SOP，哪些可以外包。你的时间应该花在最有价值的环节上。'
+];
+
+const mvpAiPlaceholders = [
+  '说说你最近沉迷的一件事...',
+  '你本周打算做的最小测试是什么？',
+  '最近收到了什么反馈？好的坏的都可以...',
+  '有人为你的服务询价了吗？',
+  '哪个环节最让你感到重复和耗时？'
+];
+
+function getTalentAiCacheKey(stage) {
+  const today = getTodayKey();
+  return 'talent_mvp_ai_' + today + '_' + stage;
+}
+
+function getCachedAiAdvice(stage) {
+  try {
+    const key = getTalentAiCacheKey(stage);
+    const data = localStorage.getItem(key);
+    if (!data) return null;
+    const parsed = JSON.parse(data);
+    const now = Date.now();
+    if (now - parsed.time > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return parsed.content;
+  } catch(e) { return null; }
+}
+
+function setCachedAiAdvice(stage, content) {
+  try {
+    const key = getTalentAiCacheKey(stage);
+    localStorage.setItem(key, JSON.stringify({time: Date.now(), content}));
+  } catch(e) {}
+}
+
+function showAiHint(stage) {
+  const cached = getCachedAiAdvice(stage);
+  if (cached) {
+    renderAiResult(cached);
+    return;
+  }
+  // Auto-trigger AI advice with empty input for hint mode
+  fetchAiAdvice(stage, '');
+}
+
+function getMvpAiAdvice() {
+  const input = document.getElementById('mvp-ai-input');
+  const userInput = input.value.trim();
+  fetchAiAdvice(mvpStep, userInput);
+}
+
+async function fetchAiAdvice(stage, userInput) {
+  const loadingEl = document.getElementById('mvp-ai-loading');
+  const resultEl = document.getElementById('mvp-ai-result');
+
+  loadingEl.classList.remove('hidden');
+  resultEl.innerHTML = '';
+
+  const systemPrompt = mvpAiSystemPrompts[stage] || mvpAiSystemPrompts[0];
+  const messages = [
+    {role: 'system', content: systemPrompt},
+    {role: 'user', content: userInput || '请给我这个阶段的建议'}
+  ];
+
+  try {
+    const response = await fetch(SILICONFLOW_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SILICONFLOW_API_KEY
+      },
+      body: JSON.stringify({
+        model: SILICONFLOW_MODEL,
+        messages: messages,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) throw new Error('API error');
+    const data = await response.json();
+    const advice = data.choices?.[0]?.message?.content || mvpAiFallbacks[stage];
+    setCachedAiAdvice(stage, advice);
+    renderAiResult(advice);
+  } catch(err) {
+    renderAiResult(mvpAiFallbacks[stage]);
+  } finally {
+    loadingEl.classList.add('hidden');
+  }
+}
+
+function renderAiResult(text) {
+  const resultEl = document.getElementById('mvp-ai-result');
+  resultEl.innerHTML = `
+    <div class="ai-suggestion-card">
+      <div class="flex items-center gap-2 mb-2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B8954A" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <span class="text-[#B8954A] text-xs font-medium">AI锦囊</span>
+      </div>
+      <p class="text-gray-600 text-xs leading-relaxed">${text}</p>
+    </div>
+  `;
+}
+
+// ==================== INIT: LIFE DAILY RECORDS ====================
+loadAllRecords();
+switchDate(getTodayKey());
+
+// ==================== INIT: TALENT DAILY RECORDS ====================
+loadAllTalentRecords();
+switchTalentDate(getTodayKey());
+</script>
+</body>
+</html>

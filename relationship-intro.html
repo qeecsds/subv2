@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>情感 — 你的精神避难所</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #1A1A1A;
+    --gray: #888888;
+    --light-gray: #E5E5E5;
+    --bg: #FAFAFA;
+    --warm: #8B7355;
+  }
+  body {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', 'STSong', 'Songti SC', serif;
+    background: var(--bg);
+    color: var(--ink);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    opacity: 0;
+    animation: pageFadeIn 0.8s ease forwards;
+  }
+  @keyframes pageFadeIn { to { opacity: 1; } }
+  body.page-fade-out {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .nav-back {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--gray);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    background: none;
+    border: none;
+    font-family: inherit;
+    padding: 0.3rem 0;
+    z-index: 10;
+    transition: color 0.3s ease;
+  }
+  .nav-back:hover { color: var(--ink); }
+
+  .intro-core {
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.6s ease;
+    padding: 2rem;
+  }
+  .intro-core:hover {
+    transform: scale(1.02);
+  }
+
+  .intro-line {
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 900;
+    letter-spacing: 0.15em;
+    line-height: 1.6;
+    color: var(--ink);
+    opacity: 0;
+    animation: textReveal 1.2s ease 0.3s forwards;
+  }
+  @keyframes textReveal {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  .intro-subline {
+    font-size: clamp(0.8rem, 1.4vw, 1rem);
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    margin-top: 1.5rem;
+    opacity: 0;
+    animation: textReveal 1.2s ease 0.8s forwards;
+    font-weight: 300;
+  }
+
+  .deco-line {
+    width: 40px;
+    height: 1px;
+    background: var(--light-gray);
+    margin: 2rem auto 0;
+    opacity: 0;
+    animation: textReveal 1.2s ease 1.2s forwards;
+  }
+
+  .intro-tags {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2.5rem;
+    opacity: 0;
+    animation: textReveal 1.2s ease 1.5s forwards;
+  }
+  .intro-tag {
+    font-size: 0.8rem;
+    color: var(--warm);
+    letter-spacing: 0.15em;
+    font-weight: 400;
+  }
+  .intro-tag::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--warm);
+    margin-right: 0.5rem;
+    vertical-align: middle;
+    opacity: 0.5;
+  }
+
+  .enter-hint {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    color: #CCCCCC;
+    letter-spacing: 0.2em;
+    opacity: 0;
+    animation: hintFade 1.5s ease 2s forwards;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border: 1px solid transparent;
+    transition: all 0.4s ease;
+  }
+  .enter-hint:hover {
+    color: var(--gray);
+    border-color: var(--light-gray);
+  }
+  @keyframes hintFade {
+    0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    .intro-core { padding: 1.5rem; }
+    .enter-hint { bottom: 2rem; }
+    .intro-tags { gap: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<button class="nav-back" onclick="goBack()">&#8592; 返回</button>
+
+<div class="intro-core" onclick="enterMain()">
+  <div class="intro-line">不用假装坚强，<br>不用字斟句酌。</div>
+  <div class="deco-line"></div>
+  <div class="intro-subline">在这里，我们接住你所有的破碎</div>
+  <div class="intro-tags">
+    <span class="intro-tag">家人</span>
+    <span class="intro-tag">朋友</span>
+    <span class="intro-tag">爱人</span>
+  </div>
+</div>
+
+<div class="enter-hint" onclick="enterMain()">点击进入 &#8594;</div>
+
+<script>
+function navigateTo(url) {
+  document.body.classList.add('page-fade-out');
+  setTimeout(() => { window.location.href = url; }, 400);
+}
+
+function goBack() {
+  localStorage.setItem('skipIntro', 'scene');
+  navigateTo('./index.html');
+}
+
+function enterMain() {
+  navigateTo('./relationship.html');
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    enterMain();
+  }
+});
+</script>
+
+</body>
+</html>

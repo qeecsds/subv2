@@ -1,0 +1,2533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>主体性 — 拒绝外包，做回自己</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #1A1A1A;
+    --gray: #888888;
+    --light-gray: #E5E5E5;
+    --bg: #FAFAFA;
+    --accent: #69DB7C;
+    --amber: #F59E0B;
+    --gold: #D4AF37;
+  }
+  body {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', 'STSong', 'Songti SC', serif;
+    background: var(--bg);
+    color: var(--ink);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* 进度条 */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--light-gray);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--ink);
+    transition: width 0.8s ease;
+    width: 0%;
+  }
+
+  /* 题目容器 */
+  .question-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+    pointer-events: none;
+  }
+  .question-container.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+  .question-container.leave {
+    opacity: 0;
+    transform: translateY(-30px);
+    pointer-events: none;
+  }
+
+  .q-number {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.2em;
+    margin-bottom: 2rem;
+  }
+  .q-title {
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 3rem;
+    text-align: center;
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* ===== 双极滑动条 ===== */
+  .slider-container {
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+  }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--gray);
+    line-height: 1.5;
+  }
+  .slider-label-left { text-align: left; max-width: 40%; }
+  .slider-label-right { text-align: right; max-width: 40%; }
+  .slider-track {
+    width: 100%;
+    height: 2px;
+    background: var(--light-gray);
+    position: relative;
+    cursor: pointer;
+  }
+  .slider-fill {
+    height: 100%;
+    background: var(--ink);
+    width: 0%;
+    transition: width 0.1s ease;
+  }
+  .slider-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--ink);
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 0%;
+    cursor: grab;
+    transition: box-shadow 0.3s ease, background 0.3s ease;
+  }
+  .slider-thumb.dragging {
+    cursor: grabbing;
+  }
+  .slider-thumb.glow {
+    box-shadow: 0 0 12px var(--amber), 0 0 24px rgba(245, 158, 11, 0.3);
+    background: var(--amber);
+  }
+  .slider-hint {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    color: var(--light-gray);
+    letter-spacing: 0.1em;
+  }
+
+  /* ===== 直觉二选一 ===== */
+  .choice-container {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    max-width: 700px;
+  }
+  .choice-card {
+    flex: 1;
+    padding: 3rem 2rem;
+    border: 1px solid var(--light-gray);
+    background: #FFFFFF;
+    cursor: pointer;
+    transition: all 0.5s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .choice-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-2px);
+  }
+  .choice-card.selected {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: #FFFFFF;
+  }
+  .choice-card.unselected {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+  .choice-card.fade-away {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+  }
+  .choice-text {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    letter-spacing: 0.03em;
+  }
+
+  /* ===== 自由文本输入 ===== */
+  .text-input-container {
+    width: 100%;
+    max-width: 500px;
+  }
+  .text-input {
+    width: 100%;
+    padding: 1.5rem;
+    border: 1px solid var(--light-gray);
+    background: #FFFFFF;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    min-height: 120px;
+  }
+  .text-input:focus {
+    border-color: var(--ink);
+  }
+  .text-input.gold-glow {
+    border-color: var(--gold);
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
+  }
+  .text-hint {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    color: var(--gray);
+    transition: all 0.4s ease;
+  }
+  .text-hint.warning {
+    color: #E07A5F;
+    font-size: 0.82rem;
+  }
+  .text-input.low-quality {
+    border-color: #E07A5F;
+    box-shadow: 0 0 8px rgba(224, 122, 95, 0.15);
+  }
+
+  /* ===== 二维坐标系 ===== */
+  .coord-container {
+    width: 100%;
+    max-width: 500px;
+    aspect-ratio: 1;
+    position: relative;
+    border: 1px solid var(--light-gray);
+    background: #FFFFFF;
+    cursor: crosshair;
+  }
+  .coord-axis-x {
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: var(--light-gray);
+  }
+  .coord-axis-y {
+    position: absolute;
+    left: 50%;
+    top: 10%;
+    bottom: 10%;
+    width: 1px;
+    background: var(--light-gray);
+  }
+  .coord-label {
+    position: absolute;
+    font-size: 0.7rem;
+    color: var(--gray);
+    letter-spacing: 0.05em;
+  }
+  .coord-label.top { top: 5%; left: 50%; transform: translateX(-50%); }
+  .coord-label.bottom { bottom: 5%; left: 50%; transform: translateX(-50%); }
+  .coord-label.left { left: 3%; top: 50%; transform: translateY(-50%) rotate(-90deg); }
+  .coord-label.right { right: 3%; top: 50%; transform: translateY(-50%) rotate(90deg); }
+  .coord-star {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--ink);
+    transform: translate(-50%, -50%) rotate(45deg);
+    transition: all 0.5s ease;
+    opacity: 0;
+  }
+  .coord-star.show {
+    opacity: 1;
+  }
+
+  /* 下一步按钮 */
+  .next-btn {
+    margin-top: 3rem;
+    padding: 0.9rem 3rem;
+    background: var(--ink);
+    color: #FFFFFF;
+    border: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    font-family: inherit;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .next-btn.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .next-btn:hover {
+    background: #333333;
+  }
+
+  /* 题目底部导航 */
+  .q-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .q-nav-btn {
+    padding: 0.6rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--light-gray);
+    color: var(--gray);
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+  }
+  .q-nav-btn:hover:not(:disabled) {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .q-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .q-nav-current {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.15em;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  /* 最终结果页 */
+  .result-container {
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+    overflow-y: auto;
+  }
+  .result-container.show {
+    display: flex;
+    opacity: 1;
+  }
+  .result-archetype {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 1s ease 0.3s;
+  }
+  .result-container.show .result-archetype {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .result-subtitle {
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    color: var(--gray);
+    letter-spacing: 0.15em;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 1s ease 0.6s;
+  }
+  .result-container.show .result-subtitle {
+    opacity: 1;
+  }
+  .result-chart {
+    width: 280px;
+    height: 280px;
+    position: relative;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: all 1s ease 0.9s;
+  }
+  .result-container.show .result-chart {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .result-desc {
+    font-size: 0.9rem;
+    color: var(--gray);
+    line-height: 2;
+    text-align: center;
+    max-width: 520px;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    transition: opacity 1s ease 1.2s;
+  }
+  .result-container.show .result-desc {
+    opacity: 1;
+  }
+  .result-cta-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    opacity: 0;
+    transition: opacity 1s ease 1.5s;
+  }
+  .result-container.show .result-cta-group {
+    opacity: 1;
+  }
+  .result-cta {
+    padding: 1rem 3rem;
+    background: var(--ink);
+    color: #FFFFFF;
+    border: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.4s ease;
+    text-align: center;
+  }
+  .result-cta:hover {
+    background: #333333;
+  }
+  .result-cta-secondary {
+    padding: 0.8rem 3rem;
+    background: transparent;
+    color: var(--gray);
+    border: 1px solid var(--light-gray);
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.4s ease;
+    text-align: center;
+  }
+  .result-cta-secondary:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .result-page-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    opacity: 0;
+    transition: opacity 1s ease 1.8s;
+  }
+  .result-container.show .result-page-nav {
+    opacity: 1;
+  }
+  .result-nav-btn {
+    padding: 0.6rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--light-gray);
+    color: var(--gray);
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+  }
+  .result-nav-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .result-dimensions {
+    display: flex;
+    gap: 2.5rem;
+    margin-bottom: 2rem;
+    opacity: 0;
+    transition: opacity 1s ease 1.1s;
+  }
+  .result-container.show .result-dimensions {
+    opacity: 1;
+  }
+  .dim-item {
+    text-align: center;
+  }
+  .dim-label {
+    font-size: 0.7rem;
+    color: var(--gray);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.3rem;
+  }
+  .dim-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* ===== AI 设置按钮 ===== */
+  .ai-settings-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 1px solid var(--light-gray);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    z-index: 200;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .ai-settings-btn:hover {
+    border-color: var(--ink);
+    transform: rotate(30deg);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  .ai-settings-btn.active {
+    background: var(--amber);
+    border-color: var(--amber);
+  }
+
+  /* ===== AI 设置模态框 ===== */
+  .ai-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .ai-modal.show {
+    display: flex;
+    opacity: 1;
+  }
+  .ai-modal-content {
+    background: #FFFFFF;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+  }
+  .ai-modal.show .ai-modal-content {
+    transform: translateY(0);
+  }
+  .ai-modal-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+  .ai-modal-desc {
+    font-size: 0.85rem;
+    color: var(--gray);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+  .ai-modal-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.3s ease;
+    margin-bottom: 0.8rem;
+  }
+  .ai-modal-input:focus {
+    border-color: var(--ink);
+  }
+  .ai-modal-hint {
+    font-size: 0.75rem;
+    color: var(--gray);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  .ai-modal-hint a {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+  .ai-provider-select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--light-gray);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    background: #FFFFFF;
+    cursor: pointer;
+    margin-bottom: 0.8rem;
+    transition: border-color 0.3s ease;
+    appearance: auto;
+  }
+  .ai-provider-select:focus {
+    border-color: var(--ink);
+  }
+  .ai-provider-label {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-bottom: 0.3rem;
+    display: block;
+  }
+  .ai-modal-buttons {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: flex-end;
+  }
+  .ai-modal-btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--light-gray);
+    background: transparent;
+    color: var(--gray);
+  }
+  .ai-modal-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .ai-modal-btn.primary {
+    background: var(--ink);
+    color: #FFFFFF;
+    border-color: var(--ink);
+  }
+  .ai-modal-btn.primary:hover {
+    background: #333333;
+  }
+  .ai-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    padding: 0.6rem 0.8rem;
+    background: #F5F5F5;
+    border-radius: 6px;
+  }
+  .ai-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gray);
+  }
+  .ai-status-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+  .ai-status-text {
+    color: var(--gray);
+  }
+
+  /* ===== AI 加载动画 ===== */
+  .ai-loading {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+  }
+  .ai-loading.show {
+    display: flex;
+  }
+  .ai-loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--light-gray);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .ai-loading-text {
+    font-size: 0.85rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+  }
+
+  /* ===== AI 标签 ===== */
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--amber);
+    font-size: 0.7rem;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+  /* ===== 角色选择页面 ===== */
+  #roleSelectPage {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.8s ease;
+  }
+  #roleSelectPage.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .role-select-title {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    margin-bottom: 0.8rem;
+    text-align: center;
+  }
+  .role-select-sub {
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    margin-bottom: 3.5rem;
+    text-align: center;
+  }
+  .role-select-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 240px);
+    gap: 1.5rem;
+  }
+  .role-select-card {
+    background: #FFFFFF;
+    border: 1px solid var(--light-gray);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.5s ease;
+  }
+  .role-select-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .role-select-card .role-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  .role-select-card .role-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .role-select-card .role-desc {
+    font-size: 0.75rem;
+    color: #999999;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+  .role-current-tag {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 90;
+    font-size: 0.7rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .role-current-tag.show {
+    opacity: 1;
+  }
+  .switch-role-btn {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 90;
+    padding: 0.4rem 0.8rem;
+    background: transparent;
+    border: 1px solid var(--light-gray);
+    color: var(--gray);
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .switch-role-btn.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .switch-role-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+</style>
+</head>
+<body>
+
+<!-- 角色选择页面 -->
+<div id="roleSelectPage">
+  <h2 class="role-select-title">选择你的身份</h2>
+  <p class="role-select-sub">获取专属的主体性觉醒路径</p>
+  <div class="role-select-grid">
+    <div class="role-select-card" data-role="worker" onclick="selectRole('worker')">
+      <div class="role-icon">&#128188;</div>
+      <div class="role-name">职场人</div>
+      <div class="role-desc">在算法与KPI之间<br>找回自己的节奏</div>
+    </div>
+    <div class="role-select-card" data-role="student" onclick="selectRole('student')">
+      <div class="role-icon">&#127891;</div>
+      <div class="role-name">学生 / 学习者</div>
+      <div class="role-desc">在信息洪流中<br>建立独立思考</div>
+    </div>
+    <div class="role-select-card" data-role="creator" onclick="selectRole('creator')">
+      <div class="role-icon">&#9999;&#65039;</div>
+      <div class="role-name">自由职业 / 创作者</div>
+      <div class="role-desc">在创作与商业之间<br>守住表达的底线</div>
+    </div>
+    <div class="role-select-card" data-role="leader" onclick="selectRole('leader')">
+      <div class="role-icon">&#128640;</div>
+      <div class="role-name">管理者 / Leader</div>
+      <div class="role-desc">在决策与执行之间<br>保持清醒的判断</div>
+    </div>
+  </div>
+</div>
+
+<!-- 当前角色标签 -->
+<div class="role-current-tag" id="roleCurrentTag"></div>
+<button class="switch-role-btn" id="switchRoleBtn" onclick="backToRoleSelect()">切换身份</button>
+
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<!-- 题目1: 双极滑动条 -->
+<div class="question-container active" id="q1">
+  <div class="q-number">01 / 07</div>
+  <div class="q-title" id="q1Title">当你在工位上连续开了两个小时的会，或者盯了一上午屏幕后，你的第一反应是？</div>
+  <div class="slider-container">
+    <div class="slider-labels">
+      <div class="slider-label-left" id="q1Left">大脑空白，极度疲惫，只想刷手机麻痹自己</div>
+      <div class="slider-label-right" id="q1Right">意识到身体僵硬，会主动站起来接水，感受双脚踩在地上的重力</div>
+    </div>
+    <div class="slider-track" id="sliderTrack1">
+      <div class="slider-fill" id="sliderFill1"></div>
+      <div class="slider-thumb" id="sliderThumb1"></div>
+    </div>
+    <div class="slider-hint" id="q1Hint">拖动滑块，找到你的真实状态</div>
+  </div>
+  <div class="q-nav">
+    <button class="q-nav-btn" id="prevBtn1" onclick="goPrevQ()">&#8592; 上一页</button>
+    <div class="q-nav-current">01 / 07</div>
+    <button class="q-nav-btn" id="nextBtnNav1" onclick="goNextQ()">下一题 &#8594;</button>
+  </div>
+  <button class="next-btn" id="nextBtn1">继续</button>
+</div>
+
+<!-- 题目2: 直觉二选一 -->
+<div class="question-container" id="q2">
+  <div class="q-number">02 / 07</div>
+  <div class="q-title" id="q2Title">面对一项紧急但不重要的任务，你的内心OS是？</div>
+  <div class="choice-container">
+    <div class="choice-card" data-choice="left">
+      <div class="choice-text" id="q2Left">虽然烦，但只能先做完再说</div>
+    </div>
+    <div class="choice-card" data-choice="right">
+      <div class="choice-text" id="q2Right">停下来评估一下，这真的是我必须亲自处理的吗？</div>
+    </div>
+  </div>
+  <div class="q-nav">
+    <button class="q-nav-btn" onclick="goPrevQ()">&#8592; 上一题</button>
+    <div class="q-nav-current">02 / 07</div>
+    <button class="q-nav-btn" onclick="goNextQ()">下一题 &#8594;</button>
+  </div>
+  <button class="next-btn" id="nextBtn2">继续</button>
+</div>
+
+<!-- 题目3: 自由文本输入 -->
+<div class="question-container" id="q3">
+  <div class="q-number">03 / 07</div>
+  <div class="q-title" id="q3Title">领导在下班前突然@你安排非紧急任务，你的真实反应是？</div>
+  <div class="text-input-container">
+    <textarea class="text-input" id="textInput3" placeholder="写下你此刻最真实的内心OS"></textarea>
+    <div class="text-hint" id="q3Hint">写下你此刻最真实的内心OS，随便写什么都可以</div>
+  </div>
+  <div class="q-nav">
+    <button class="q-nav-btn" onclick="goPrevQ()">&#8592; 上一题</button>
+    <div class="q-nav-current">03 / 07</div>
+    <button class="q-nav-btn" onclick="goNextQ()">下一题 &#8594;</button>
+  </div>
+  <button class="next-btn" id="nextBtn3">继续</button>
+</div>
+
+<!-- 题目4: 二维坐标系 -->
+<div class="question-container" id="q4">
+  <div class="q-number">04 / 07</div>
+  <div class="q-title" id="q4Title">回想你最近一周完成的一项核心工作，它的主要驱动力是？</div>
+  <div class="coord-container" id="coordContainer">
+    <div class="coord-axis-x"></div>
+    <div class="coord-axis-y"></div>
+    <div class="coord-label top" id="q4Top">我加入了思考和重构</div>
+    <div class="coord-label bottom" id="q4Bottom">机械执行标准流程</div>
+    <div class="coord-label left" id="q4Left">为了应付KPI/老板期待</div>
+    <div class="coord-label right" id="q4Right">为了达成我自己的职业目标</div>
+    <div class="coord-star" id="coordStar"></div>
+  </div>
+  <div class="q-nav">
+    <button class="q-nav-btn" onclick="goPrevQ()">&#8592; 上一题</button>
+    <div class="q-nav-current">04 / 07</div>
+    <button class="q-nav-btn" onclick="goNextQ()">下一题 &#8594;</button>
+  </div>
+  <button class="next-btn" id="nextBtn4">继续</button>
+</div>
+
+<!-- 题目5: 直觉二选一 -->
+<div class="question-container" id="q5">
+  <div class="q-number">05 / 07</div>
+  <div class="q-title" id="q5Title">当你发现一个更好的工作方法，但团队一直沿用旧流程时，你会？</div>
+  <div class="choice-container">
+    <div class="choice-card" data-choice="left">
+      <div class="choice-text" id="q5Left">按部就班，不做出头鸟</div>
+    </div>
+    <div class="choice-card" data-choice="right">
+      <div class="choice-text" id="q5Right">整理好思路，主动提出优化建议</div>
+    </div>
+  </div>
+  <div class="q-nav">
+    <button class="q-nav-btn" onclick="goPrevQ()">&#8592; 上一题</button>
+    <div class="q-nav-current">05 / 07</div>
+    <button class="q-nav-btn" onclick="goNextQ()">下一题 &#8594;</button>
+  </div>
+  <button class="next-btn" id="nextBtn5">继续</button>
+</div>
+
+<!-- 题目6: 双极滑动条 -->
+<div class="question-container" id="q6">
+  <div class="q-number">06 / 07</div>
+  <div class="q-title" id="q6Title">在会议上，当你的观点与多数人不同时，你的第一反应是？</div>
+  <div class="slider-container">
+    <div class="slider-labels">
+      <div class="slider-label-left" id="q6Left">咽回去，毕竟枪打出头鸟</div>
+      <div class="slider-label-right" id="q6Right">温和但坚定地表达我的视角</div>
+    </div>
+    <div class="slider-track" id="sliderTrack6">
+      <div class="slider-fill" id="sliderFill6"></div>
+      <div class="slider-thumb" id="sliderThumb6"></div>
+    </div>
+    <div class="slider-hint" id="q6Hint">拖动滑块，找到你的真实状态</div>
+  </div>
+  <div class="q-nav">
+    <button class="q-nav-btn" onclick="goPrevQ()">&#8592; 上一题</button>
+    <div class="q-nav-current">06 / 07</div>
+    <button class="q-nav-btn" onclick="goNextQ()">下一题 &#8594;</button>
+  </div>
+  <button class="next-btn" id="nextBtn6">继续</button>
+</div>
+
+<!-- 题目7: 自由文本输入 -->
+<div class="question-container" id="q7">
+  <div class="q-number">07 / 07</div>
+  <div class="q-title" id="q7Title">如果现在让你用一句话描述你目前的工作状态，你会说什么？</div>
+  <div class="text-input-container">
+    <textarea class="text-input" id="textInput7" placeholder="不要写官话，写下你最真实的感受"></textarea>
+    <div class="text-hint" id="q7Hint"></div>
+  </div>
+  <div class="q-nav">
+    <button class="q-nav-btn" onclick="goPrevQ()">&#8592; 上一题</button>
+    <div class="q-nav-current">07 / 07</div>
+    <button class="q-nav-btn" onclick="goNextQ()" disabled>下一题 &#8594;</button>
+  </div>
+  <button class="next-btn" id="nextBtn7">生成我的主体性画像</button>
+</div>
+
+<!-- 结果页 -->
+<div class="result-container" id="resultPage">
+  <div class="result-archetype" id="resultArchetype"></div>
+  <div class="result-subtitle" id="resultSubtitle"></div>
+  <div class="result-chart">
+    <canvas id="radarCanvas" width="280" height="280"></canvas>
+  </div>
+  <div class="result-dimensions">
+    <div class="dim-item">
+      <div class="dim-label">在 场</div>
+      <div class="dim-value" id="dimPresence">—</div>
+    </div>
+    <div class="dim-item">
+      <div class="dim-label">守 界</div>
+      <div class="dim-value" id="dimBoundary">—</div>
+    </div>
+    <div class="dim-item">
+      <div class="dim-label">主 宰</div>
+      <div class="dim-value" id="dimDominion">—</div>
+    </div>
+  </div>
+  <div class="result-desc" id="resultDesc"></div>
+  <div class="result-cta-group">
+    <button class="result-cta" id="resultCta"></button>
+    <button class="result-cta-secondary" id="resultCtaFast">开启极速版练习</button>
+  </div>
+  <div class="result-page-nav">
+    <button class="result-nav-btn" onclick="goBackToQuiz()">&#8592; 返回题目</button>
+    <button class="result-nav-btn" id="resultNavPractice">查看练习 &#8594;</button>
+  </div>
+</div>
+
+<!-- AI 设置按钮 -->
+<button class="ai-settings-btn" id="aiSettingsBtn" onclick="toggleAISettings()" title="AI 深度分析">⚙</button>
+
+<!-- AI 设置模态框 -->
+<div class="ai-modal" id="aiModal" onclick="if(event.target === this) toggleAISettings()">
+  <div class="ai-modal-content">
+    <div class="ai-modal-title">AI 深度分析设置</div>
+    <div class="ai-modal-desc">接入 DeepSeek 大模型，让测评结果更精准、更个性化。</div>
+    
+    <div class="ai-status" id="aiStatus">
+      <div class="ai-status-dot" id="aiStatusDot"></div>
+      <div class="ai-status-text" id="aiStatusText">未启用 AI 分析</div>
+    </div>
+    
+    <label class="ai-provider-label">选择 API 提供商</label>
+    <select class="ai-provider-select" id="aiProviderSelect" onchange="onProviderChange()">
+      <option value="siliconflow">硅基流动 SiliconFlow（推荐，新用户送2000万token）</option>
+      <option value="deepseek">DeepSeek 官方</option>
+    </select>
+    
+    <input type="password" class="ai-modal-input" id="apiKeyInput" placeholder="输入你的 API Key">
+    <div class="ai-modal-hint" id="aiHintText">
+      免费获取：前往 <a href="https://cloud.siliconflow.cn/" target="_blank">硅基流动</a> 注册，新用户赠送 2000 万 token，可使用 DeepSeek-V3 等模型。<br>
+      🔒 你的 API Key 仅保存在本地浏览器中，不会上传到任何服务器。
+    </div>
+    
+    <div class="ai-modal-buttons">
+      <button class="ai-modal-btn" onclick="toggleAISettings()">取消</button>
+      <button class="ai-modal-btn primary" onclick="saveAPIKey()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 当前角色 =====
+let currentRole = null;
+
+// ===== 角色配置 =====
+const ROLE_DATA = {
+  worker: {
+    name: '职场人',
+    resultBtn: '生成我的主体性画像',
+    questions: {
+      q1: { title: '当你在工位上连续开了两个小时的会，或者盯了一上午屏幕后，你的第一反应是？', left: '大脑空白，极度疲惫，只想刷手机麻痹自己', right: '意识到身体僵硬，会主动站起来接水，感受双脚踩在地上的重力', hint: '拖动滑块，找到你的真实状态' },
+      q2: { title: '面对一项紧急但不重要的任务，你的内心OS是？', left: '虽然烦，但只能先做完再说', right: '停下来评估一下，这真的是我必须亲自处理的吗？' },
+      q3: { title: '领导在下班前突然@你安排非紧急任务，你的真实反应是？', placeholder: '写下你此刻最真实的内心OS', hint: '写下你此刻最真实的内心OS，随便写什么都可以' },
+      q4: { title: '回想你最近一周完成的一项核心工作，它的主要驱动力是？', top: '我加入了思考和重构', bottom: '机械执行标准流程', left: '为了应付KPI/老板期待', right: '为了达成我自己的职业目标' },
+      q5: { title: '当你发现一个更好的工作方法，但团队一直沿用旧流程时，你会？', left: '按部就班，不做出头鸟', right: '整理好思路，主动提出优化建议' },
+      q6: { title: '在会议上，当你的观点与多数人不同时，你的第一反应是？', left: '咽回去，毕竟枪打出头鸟', right: '温和但坚定地表达我的视角', hint: '拖动滑块，找到你的真实状态' },
+      q7: { title: '如果现在让你用一句话描述你目前的工作状态，你会说什么？', placeholder: '不要写官话，写下你最真实的感受', hint: '' }
+    }
+  },
+  student: {
+    name: '学生 / 学习者',
+    resultBtn: '生成我的求知者画像',
+    questions: {
+      q1: { title: '当你在图书馆坐了一下午，但感觉什么都没记住时，你的第一反应是？', left: '责怪自己效率低，更加疯狂地翻书，试图用时长感动自己', right: '合上书本，停下来问自己：我今天到底想解决哪个具体问题？', hint: '深呼吸，慢即是快' },
+      q2: { title: '面对一篇全网爆火的"干货"长文或视频，你的处理方式是？', left: '赶紧收藏进文件夹，虽然大概率不会再打开', right: '先不看，先思考这是否是我当前知识体系急需的拼图' },
+      q3: { title: '当你发现课本上的理论与现实案例完全冲突时，你会？', placeholder: '写下你此刻的困惑或质疑', hint: '写下你此刻的困惑或质疑，随便写什么都可以' },
+      q4: { title: '回想你最近掌握的一项新技能，它的主要来源是？', top: '在实践中试错/复盘', bottom: '死记硬背/刷题', left: '为了应付考试/考证', right: '为了解决真实世界的问题' },
+      q5: { title: '在小组作业中，如果队友都在划水，你会？', left: '既然他们不做，那我只能多干点，免得挂科', right: '明确分工界限，只承担属于我的部分，并记录他们的不作为' },
+      q6: { title: '当你在学习中遇到一个极难理解的知识点，卡住超过1小时，你会？', left: '死磕到底，不弄懂不睡觉，陷入钻牛角尖', right: '暂时跳过，去寻求外部资源或休息，换个脑子再回来', hint: '拖动滑块，找到你的真实状态' },
+      q7: { title: '如果现在让你定义什么是"真正的学习"，你会说什么？', placeholder: '抛开分数和证书，谈谈你的理解', hint: '' }
+    }
+  },
+  creator: {
+    name: '自由职业 / 创作者',
+    resultBtn: '生成我的造物主画像',
+    questions: {
+      q1: { title: '早上醒来，没有闹钟也没有打卡要求，你的第一件事是？', left: '刷手机直到中午，带着愧疚感起床，一天又废了', right: '按照昨晚的计划，喝一杯水，进入晨间仪式', hint: '拖动滑块，找到你的真实状态' },
+      q2: { title: '创作过程中突然卡壳，完全没有灵感，你会？', left: '焦虑地刷新社交媒体，寻找刺激，逃避痛苦', right: '允许自己无聊，或者去做家务/散步，等待灵感自然浮现' },
+      q3: { title: '当客户提出一个极其无理且修改意见模糊的要求时，你的内心OS是？', placeholder: '写下你最真实的愤怒或无奈', hint: '写下你最真实的愤怒或无奈，随便写什么都可以' },
+      q4: { title: '你最近一次感到"心流"状态，是因为？', top: '挑战未知的新领域', bottom: '机械重复熟练技巧', left: '为了迎合市场热点', right: '为了表达自我热爱' },
+      q5: { title: '面对同行爆火的作品，你的第一反应是？', left: '嫉妒、焦虑，觉得自己是个废物，想要模仿他', right: '拆解他的成功逻辑，思考如何差异化地应用到自己的赛道' },
+      q6: { title: '当你连续一周没有收入进账时，你会？', left: '恐慌，开始接廉价的单子，破坏自己的定价体系', right: '复盘之前的获客渠道，坚持价值输出，不降价', hint: '拖动滑块，找到你的真实状态' },
+      q7: { title: '如果可以忽略金钱，你最想创作的作品是什么样的？', placeholder: '这是你灵魂的归宿，请诚实回答', hint: '' }
+    }
+  },
+  leader: {
+    name: '管理者 / Leader',
+    resultBtn: '生成我的领航员画像',
+    questions: {
+      q1: { title: '周一早上看到堆积如山的待办事项，你的第一本能是？', left: '立刻开始做最紧急的事，恨不得自己有三头六臂', right: '先花15分钟审视全局，判断哪些可以授权，哪些必须延后', hint: '拖动滑块，找到你的真实状态' },
+      q2: { title: '下属拿着一个并不复杂的问题来问你"怎么办"，你的反应是？', left: '直接告诉他答案，这样最快，省得他做错', right: '反问他："你觉得呢？"，逼他带着方案来找我' },
+      q3: { title: '当你需要做一个可能得罪人的艰难决策（如裁员、砍项目）时，你的状态是？', placeholder: '描述你做决定那一刻的心理活动', hint: '描述你做决定那一刻的心理活动，随便写什么都可以' },
+      q4: { title: '回顾上个月团队的产出，你认为主要归功于？', top: '大家都在成长', bottom: '大家都在忙碌', left: '靠我个人的强力推动', right: '靠机制和流程的自动运转' },
+      q5: { title: '当团队内部发生激烈冲突，双方都来找你评理，你会？', left: '充当和事佬，各打五十大板，维持表面和平', right: '引导他们直面冲突核心，建立解决冲突的规则' },
+      q6: { title: '下班后，如果工作群还在响个不停，你会？', left: '忍不住看，生怕错过重要信息，甚至参与讨论', right: '设置免打扰，相信团队能处理突发状况，除非电话打来', hint: '拖动滑块，找到你的真实状态' },
+      q7: { title: '如果用一种动物来形容你理想中的管理风格，你会选什么？为什么？', placeholder: '不要说官话，说出你内心渴望的状态', hint: '' }
+    }
+  }
+};
+
+// ===== 选择角色 =====
+function selectRole(role) {
+  currentRole = role;
+  localStorage.setItem('userRole', role);
+  renderQuestions();
+  document.getElementById('roleSelectPage').classList.add('hidden');
+  document.getElementById('roleCurrentTag').textContent = ROLE_DATA[role].name;
+  document.getElementById('roleCurrentTag').classList.add('show');
+  document.getElementById('switchRoleBtn').classList.add('show');
+  // 检查是否有保存的进度
+  checkSavedProgress(role);
+}
+
+// ===== 返回角色选择 =====
+function backToRoleSelect() {
+  if (confirm('切换身份将清空当前答题进度，确定要切换吗？')) {
+    localStorage.removeItem('subjectivityProgress_' + currentRole);
+    currentRole = null;
+    answers = {};
+    currentQ = 1;
+    document.getElementById('roleSelectPage').classList.remove('hidden');
+    document.getElementById('roleCurrentTag').classList.remove('show');
+    document.getElementById('switchRoleBtn').classList.remove('show');
+    // 重置所有题目显示
+    for (let i = 1; i <= 7; i++) {
+      document.getElementById('q' + i).classList.remove('active', 'leave');
+    }
+    document.getElementById('q1').classList.add('active');
+    document.getElementById('resultPage').classList.remove('active');
+    updateProgress();
+  }
+}
+
+// ===== 渲染题目 =====
+function renderQuestions() {
+  const data = ROLE_DATA[currentRole];
+  if (!data) return;
+  const q = data.questions;
+  // Q1
+  document.getElementById('q1Title').textContent = q.q1.title;
+  document.getElementById('q1Left').textContent = q.q1.left;
+  document.getElementById('q1Right').textContent = q.q1.right;
+  document.getElementById('q1Hint').textContent = q.q1.hint;
+  // Q2
+  document.getElementById('q2Title').textContent = q.q2.title;
+  document.getElementById('q2Left').textContent = q.q2.left;
+  document.getElementById('q2Right').textContent = q.q2.right;
+  // Q3
+  document.getElementById('q3Title').textContent = q.q3.title;
+  document.getElementById('textInput3').placeholder = q.q3.placeholder;
+  document.getElementById('q3Hint').textContent = q.q3.hint;
+  // Q4
+  document.getElementById('q4Title').textContent = q.q4.title;
+  document.getElementById('q4Top').textContent = q.q4.top;
+  document.getElementById('q4Bottom').textContent = q.q4.bottom;
+  document.getElementById('q4Left').textContent = q.q4.left;
+  document.getElementById('q4Right').textContent = q.q4.right;
+  // Q5
+  document.getElementById('q5Title').textContent = q.q5.title;
+  document.getElementById('q5Left').textContent = q.q5.left;
+  document.getElementById('q5Right').textContent = q.q5.right;
+  // Q6
+  document.getElementById('q6Title').textContent = q.q6.title;
+  document.getElementById('q6Left').textContent = q.q6.left;
+  document.getElementById('q6Right').textContent = q.q6.right;
+  document.getElementById('q6Hint').textContent = q.q6.hint;
+  // Q7
+  document.getElementById('q7Title').textContent = q.q7.title;
+  document.getElementById('textInput7').placeholder = q.q7.placeholder;
+  document.getElementById('q7Hint').textContent = q.q7.hint;
+  // 结果按钮
+  document.getElementById('nextBtn7').textContent = data.resultBtn;
+}
+
+// ===== 检查保存的进度 =====
+function checkSavedProgress(role) {
+  const saved = localStorage.getItem('subjectivityProgress_' + role);
+  if (saved) {
+    const progress = JSON.parse(saved);
+    if (confirm('检测到你有未完成的测评进度，是否继续？')) {
+      answers = progress.answers || {};
+      restoreAnswers();
+      currentQ = 7;
+      showResult();
+    }
+  }
+}
+
+// 全局状态
+let currentQ = 1;
+const totalQ = 7;
+const answers = {};
+
+// 更新进度条
+function updateProgress() {
+  const percent = (currentQ / totalQ) * 100;
+  document.getElementById('progressFill').style.width = percent + '%';
+}
+
+// 通用切换题目
+function switchQuestion(newQ) {
+  if (newQ > totalQ) {
+    // 跳到结果页
+    const currentEl = document.getElementById('q' + currentQ);
+    currentEl.classList.remove('active');
+    currentEl.style.display = 'none';
+    currentQ = newQ;
+    showResult();
+    return;
+  }
+
+  const oldQ = currentQ;
+  const currentEl = document.getElementById('q' + oldQ);
+  const nextEl = document.getElementById('q' + newQ);
+
+  // 先显示新题目（确保不会空白）
+  nextEl.style.display = 'flex';
+  // 强制重排
+  void nextEl.offsetWidth;
+  nextEl.classList.add('active');
+
+  // 然后隐藏旧题目
+  currentEl.classList.remove('active');
+  // 延迟隐藏旧题目，等动画开始后再 display:none
+  setTimeout(() => {
+    // 只有当前仍然是 newQ 时才隐藏旧题（防止快速切换导致错乱）
+    if (currentQ === newQ) {
+      currentEl.style.display = 'none';
+    }
+  }, 100);
+
+  currentQ = newQ;
+  updateProgress();
+}
+
+// 切换到下一题
+function nextQuestion() {
+  switchQuestion(currentQ + 1);
+}
+
+// 上一题 / 上一页
+function goPrevQ() {
+  if (currentQ > 1) {
+    switchQuestion(currentQ - 1);
+  } else {
+    // 第一题：上一页跳转到四个群体选择页面
+    window.location.href = './index.html?role=1';
+  }
+}
+
+// 下一题
+function goNextQ() {
+  if (currentQ < totalQ) {
+    switchQuestion(currentQ + 1);
+  }
+}
+
+// ===== 评分算法 =====
+// 每道题映射到三个维度：在场(Presence)、守界(Boundary)、主宰(Dominion)
+// 参考 MBTI 维度计分 + 大五连续分数模型
+// 每题独立产生0-100的三维分数，最终加权平均
+function calculateScores() {
+  let presence = 0, boundary = 0, dominion = 0;
+  const weights = { q1: 1.2, q2: 1.0, q3: 1.5, q4: 1.3, q5: 1.0, q6: 1.1, q7: 0.9 };
+  let totalWeight = 0;
+  const scores = [];
+
+  // 根据角色选择关键词库
+  const role = currentRole || 'worker';
+
+  // ========== 题目1（滑动条 0~1）==========
+  if (answers.q1 !== undefined) {
+    const v = answers.q1;
+    scores.push({ p: v * 100, b: v * 35, d: v * 25, w: weights.q1 });
+  }
+
+  // ========== 题目2（二选一）==========
+  if (answers.q2 !== undefined) {
+    const v = answers.q2 === 'right' ? 1 : 0;
+    scores.push({ p: 20 + v * 60, b: 15 + v * 85, d: 15 + v * 70, w: weights.q2 });
+  }
+
+  // ========== 题目3（文本）==========
+  if (answers.q3 !== undefined) {
+    const text = String(answers.q3);
+    let bKw, dKw, pKw;
+
+    if (role === 'student') {
+      bKw = ['质疑','怀疑','不对','有问题','不认同','反思','批判','独立思考','自己的理解','不盲从','不迷信','挑战权威','验证','检验','实践出真知','结合实际','现实','案例','矛盾','冲突'];
+      dKw = ['我要','我想','我决定','主动','探索','研究','深入','搞懂','解决','应用','实践','验证','自己找答案','查资料','问老师','讨论','交流','拓展','延伸'];
+      pKw = ['困惑','迷茫','焦虑','压力','累','疲惫','困','难受','不舒服','情绪','感受','感觉','身体','头疼','崩溃','受不了','生气','愤怒','委屈','无奈','心力交瘁','内耗'];
+    } else if (role === 'creator') {
+      bKw = ['拒绝','不行','做不到','没空','没时间','私人时间','休息','我的时间','我自己','我安排','我决定','凭什么','为什么','不了','算了','忙','推掉','说不','底线','原则','边界'];
+      dKw = ['我决定','我来','我会','我选择','我安排','我规划','我计划','沟通','协商','谈判','反馈','提议','建议','方案','优先级','掌控','主导','主动','负责','承担','解决','处理','应对','创作','表达','热爱'];
+      pKw = ['累','烦','疲惫','困','难受','不舒服','焦虑','压力','情绪','感受','感觉','身体','头疼','崩溃','受不了','生气','愤怒','委屈','无奈','心力交瘁','内耗','恶心','迷茫','空虚'];
+    } else if (role === 'leader') {
+      bKw = ['拒绝','推迟','明天再说','不急','不是必须','评估','判断','思考','考虑','权衡','分清','边界','底线','原则','做不到','没空','没时间','下班','私人时间','休息','我的时间','我自己','我安排','我决定','凭什么','为什么','不行','不了','算了','忙','推掉','说不'];
+      dKw = ['我决定','我来','我会','我选择','我安排','我规划','我计划','沟通','协商','谈判','反馈','提议','建议','方案','优先级','排序','分类','管理','掌控','主导','主动','负责','承担','解决','处理','应对','授权','培养','团队','机制','流程'];
+      pKw = ['累','烦','疲惫','困','难受','不舒服','焦虑','压力','情绪','感受','感觉','身体','头疼','崩溃','受不了','生气','愤怒','委屈','无奈','心力交瘁','内耗','恶心'];
+    } else {
+      // worker (default)
+      bKw = ['拒绝','推迟','明天再说','下次','以后','不急','不是必须','评估','判断','思考','考虑','权衡','分清','边界','底线','原则','做不到','没空','没时间','加班','下班','私人时间','休息','我的时间','我自己','我安排','我决定','凭什么','为什么','不行','不了','算了','忙','推掉','拒绝','说不'];
+      dKw = ['我决定','我来','我会','我选择','我安排','我规划','我计划','沟通','协商','谈判','反馈','提议','建议','方案','优先级','排序','分类','管理','掌控','主导','主动','负责','承担','解决','处理','应对','告诉领导','跟领导说'];
+      pKw = ['累','烦','疲惫','困','难受','不舒服','焦虑','压力','情绪','感受','感觉','身体','头疼','崩溃','受不了','生气','愤怒','委屈','无奈','心力交瘁','内耗','恶心'];
+    }
+
+    let bC = 0, dC = 0, pC = 0;
+    bKw.forEach(kw => { if (text.includes(kw)) bC++; });
+    dKw.forEach(kw => { if (text.includes(kw)) dC++; });
+    pKw.forEach(kw => { if (text.includes(kw)) pC++; });
+
+    const lenBonus = Math.min(text.length / 40, 0.25);
+    const bScore = Math.min(30 + bC * 12 + dC * 5 + lenBonus * 20, 100);
+    const dScore = Math.min(25 + dC * 15 + bC * 3 + lenBonus * 15, 100);
+    const pScore = Math.min(25 + pC * 15 + bC * 3 + lenBonus * 10, 100);
+    scores.push({ p: pScore, b: bScore, d: dScore, w: weights.q3 });
+  }
+
+  // ========== 题目4（坐标系 x,y 0~1）==========
+  if (answers.q4 !== undefined) {
+    const { x, y } = answers.q4;
+    scores.push({ p: 20 + y * 80, b: 25 + x * 55, d: 15 + x * 85, w: weights.q4 });
+  }
+
+  // ========== 题目5（二选一）==========
+  if (answers.q5 !== undefined) {
+    const v = answers.q5 === 'right' ? 1 : 0;
+    scores.push({ p: 20 + v * 55, b: 15 + v * 75, d: 15 + v * 85, w: weights.q5 });
+  }
+
+  // ========== 题目6（滑动条 0~1）==========
+  if (answers.q6 !== undefined) {
+    const v = answers.q6;
+    scores.push({ p: 20 + v * 50, b: 15 + v * 85, d: 15 + v * 75, w: weights.q6 });
+  }
+
+  // ========== 题目7（文本）==========
+  if (answers.q7 !== undefined) {
+    const text = String(answers.q7);
+    let pKw, bKw, dKw;
+
+    if (role === 'student') {
+      pKw = ['累','疲惫','焦虑','压力','麻木','充实','享受','痛苦','开心','满足','无聊','迷茫','清醒','身体','感受','情绪','状态','呼吸','活着','存在','意义','价值','成长','进步','觉察','感知','理解','领悟','启发'];
+      bKw = ['边界','底线','拒绝','妥协','平衡','取舍','选择','说不','学会','保护','捍卫','空间','私人','分离','不被定义','不被裹挟','不被消耗','不被控制','守住','坚持','原则','独立思考','批判','质疑'];
+      dKw = ['掌控','主导','主动','自主','自由','创造','突破','改变','成长','进步','目标','方向','规划','计划','执行','我的','自己','选择','决定','力量','能力','自信','坚定','清醒','独立','探索','求知','好奇'];
+    } else if (role === 'creator') {
+      pKw = ['累','疲惫','焦虑','压力','麻木','充实','享受','痛苦','开心','满足','无聊','迷茫','清醒','身体','感受','情绪','状态','呼吸','活着','存在','意义','价值','成长','进步','觉察','感知','心流','沉浸','热爱'];
+      bKw = ['边界','底线','拒绝','妥协','平衡','取舍','选择','说不','学会','保护','捍卫','空间','私人','分离','不被定义','不被裹挟','不被消耗','不被控制','守住','坚持','原则','创作自由','表达'];
+      dKw = ['掌控','主导','主动','自主','自由','创造','突破','改变','成长','进步','目标','方向','规划','计划','执行','我的','自己','选择','决定','力量','能力','自信','坚定','清醒','独立','创作','作品','表达','风格'];
+    } else if (role === 'leader') {
+      pKw = ['累','疲惫','焦虑','压力','麻木','充实','享受','痛苦','开心','满足','无聊','迷茫','清醒','身体','感受','情绪','状态','呼吸','活着','存在','意义','价值','成长','进步','觉察','感知','责任','担当'];
+      bKw = ['边界','底线','拒绝','妥协','平衡','取舍','选择','说不','学会','保护','捍卫','空间','私人','分离','不被定义','不被裹挟','不被消耗','不被控制','守住','坚持','原则','界限','授权','分权'];
+      dKw = ['掌控','主导','主动','自主','自由','创造','突破','改变','成长','进步','目标','方向','规划','计划','执行','我的','自己','选择','决定','力量','能力','自信','坚定','清醒','独立','团队','机制','流程','培养'];
+    } else {
+      // worker (default)
+      pKw = ['累','疲惫','焦虑','压力','麻木','充实','享受','痛苦','开心','满足','无聊','迷茫','清醒','身体','感受','情绪','状态','呼吸','活着','存在','意义','价值','成长','进步','觉察','感知'];
+      bKw = ['边界','底线','拒绝','妥协','平衡','取舍','选择','说不','学会','保护','捍卫','空间','私人','分离','不被定义','不被裹挟','不被消耗','不被控制','守住','坚持','原则'];
+      dKw = ['掌控','主导','主动','自主','自由','创造','突破','改变','成长','进步','目标','方向','规划','计划','执行','我的','自己','选择','决定','力量','能力','自信','坚定','清醒','独立'];
+    }
+
+    let pC = 0, bC = 0, dC = 0;
+    pKw.forEach(kw => { if (text.includes(kw)) pC++; });
+    bKw.forEach(kw => { if (text.includes(kw)) bC++; });
+    dKw.forEach(kw => { if (text.includes(kw)) dC++; });
+
+    const lenBonus = Math.min(text.length / 30, 0.25);
+    const pScore = Math.min(30 + pC * 12 + lenBonus * 20, 100);
+    const bScore = Math.min(30 + bC * 14 + lenBonus * 20, 100);
+    const dScore = Math.min(30 + dC * 12 + lenBonus * 20, 100);
+    scores.push({ p: pScore, b: bScore, d: dScore, w: weights.q7 });
+  }
+
+  // 加权平均
+  scores.forEach(s => {
+    presence += s.p * s.w;
+    boundary += s.b * s.w;
+    dominion += s.d * s.w;
+    totalWeight += s.w;
+  });
+
+  if (totalWeight > 0) {
+    presence = Math.round(presence / totalWeight);
+    boundary = Math.round(boundary / totalWeight);
+    dominion = Math.round(dominion / totalWeight);
+  }
+
+  return { presence, boundary, dominion };
+}
+
+// ===== 细分标签系统 =====
+// 参考 MBTI Step II 的子维度 + 九型人格翼类型
+function getArchetype(p, b, d) {
+  const avg = (p + b + d) / 3;
+  const maxDim = Math.max(p, b, d);
+  const minDim = Math.min(p, b, d);
+  const range = maxDim - minDim; // 离散度
+
+  // 三级主体性
+  if (avg >= 70) {
+    // 极强
+    if (range <= 15) return {
+      title: '清醒的掌舵人',
+      subtitle: '内在的秩序',
+      desc: '在喧嚣的职场系统中，你依然保留着对自我生命的绝对主权。你拥有极强的情绪免疫力，既不冷漠盲从，也不被他人的期待裹挟。\n\n你完美地适应了规则，却从未被规则驯化。你不是系统的齿轮，你是那个在暗中优化系统、掌控自己航向的掌舵人。你的每一次温和而坚定的"不"，都在为你真正的创造力腾出空间。',
+      cta: '将你的主体性转化为创造力。开启【主宰】进阶挑战。',
+      level: 'strong'
+    };
+    if (maxDim === p) return {
+      title: '扎根的觉察者',
+      subtitle: '身体先于思维醒来',
+      desc: '你拥有罕见的身体觉察能力，能在疲惫袭来之前就感知到信号。这种"在场"不是冥想式的修行，而是你在日常工作中自然流露的生命力。\n\n你的身体是你最忠实的盟友——它总能在你被系统吞噬之前拉你一把。保持这份敏感，它是你主体性的根基。',
+      cta: '从身体出发，扩展你的觉醒半径。开启【在场】深化练习。',
+      level: 'strong'
+    };
+    if (maxDim === b) return {
+      title: '温柔的守线人',
+      subtitle: '柔软而不可逾越',
+      desc: '你深谙一个道理：真正的强大不是对抗，而是温柔地守住自己的边界。你能在系统中游刃有余，同时不让任何人越过那条看不见的线。\n\n你的边界不是城墙，而是水面——平静、清澈，但任何试图穿透它的力量都会被温柔地化解。',
+      cta: '将边界感转化为创造力。开启【守界】进阶挑战。',
+      level: 'strong'
+    };
+    return {
+      title: '清醒的掌舵人',
+      subtitle: '内在的秩序',
+      desc: '在喧嚣的职场系统中，你依然保留着对自我生命的绝对主权。你拥有极强的情绪免疫力，既不冷漠盲从，也不被他人的期待裹挟。\n\n你完美地适应了规则，却从未被规则驯化。你不是系统的齿轮，你是那个在暗中优化系统、掌控自己航向的掌舵人。',
+      cta: '将你的主体性转化为创造力。开启【主宰】进阶挑战。',
+      level: 'strong'
+    };
+  }
+
+  if (avg >= 40) {
+    // 中等
+    if (range >= 35) {
+      // 高离散度：某维度突出
+      if (maxDim === p) return {
+        title: '觉醒的身体旅人',
+        subtitle: '身体已醒，意志跟随中',
+        desc: '你正走在一条非常勇敢的探索之路上。你的身体已经开始觉醒——你能感知到疲惫、焦虑和不适，不再麻木地接受一切。\n\n但在守界和主宰方面，你可能还会在某些时刻习惯性地妥协。好消息是，身体觉知是主体性觉醒的第一步，你已经迈出了最重要的一步。',
+        cta: '在感知的基础上学会行动。开启【守界】专项练习。',
+        level: 'medium'
+      };
+      if (maxDim === b) return {
+        title: '边界的试探者',
+        subtitle: '在妥协与坚持之间',
+        desc: '你正走在一条非常勇敢的探索之路上。在某些时刻，你能敏锐地察觉到外界对你的侵蚀，并试图捍卫自己的空间；但在另一些时刻，你可能还会因为害怕冲突或习惯性的顺从而妥协。\n\n请允许这种波动的存在。主体性从来不是一劳永逸的满分，而是在每一次"妥协"与"夺回"的拉扯中，你始终没有放弃对真实自我的追问。',
+        cta: '在拉扯中积蓄力量。开启【守界】专项练习。',
+        level: 'medium'
+      };
+      return {
+        title: '萌芽的掌舵人',
+        subtitle: '野心已现，根基待固',
+        desc: '你内心有一股不甘于被定义的力量，它驱使你想要掌控自己的方向。你已经展现出主动思考和行动的意愿，这是主宰力的萌芽。\n\n但在身体感知和边界守护上，你还需要更多的练习。没有根基的掌控欲容易变成另一种消耗，先学会感受，才能更好地主导。',
+        cta: '先扎根，再生长。开启【在场】唤醒练习。',
+        level: 'medium'
+      };
+    }
+    // 均衡中等
+    return {
+      title: '觉醒的探索者',
+      subtitle: '动态的平衡',
+      desc: '你正走在一条非常勇敢的探索之路上。在某些时刻，你能敏锐地察觉到外界对你的侵蚀，并试图捍卫自己的空间；但在另一些时刻，你可能还会因为害怕冲突或习惯性的顺从而妥协。\n\n请允许这种波动的存在。主体性从来不是一劳永逸的满分，而是在每一次"妥协"与"夺回"的拉扯中，你始终没有放弃对真实自我的追问。你已经比昨天更清醒了。',
+      cta: '在拉扯中积蓄力量。开启【守界】专项练习。',
+      level: 'medium'
+    };
+  }
+
+  // 较弱
+  if (minDim >= 25) {
+    return {
+      title: '沉睡的齿轮',
+      subtitle: '待唤醒的潜能',
+      desc: '你似乎习惯了把方向盘交给别人，在系统的运转中感到疲惫，却忘了自己原本拥有踩下刹车的权利。但这并不是你的错，长期的规训让我们容易忘记身体的声音。\n\n好消息是，当你点开这个测评时，那个真实的"你"就已经开始苏醒了。你的主体性并没有消失，它只是睡着了。现在，让我们试着先找回一次深呼吸，把注意力从外界拉回自己身上。',
+      cta: '没关系，我们从感受身体开始。开启【在场】唤醒练习。',
+      level: 'weak'
+    };
+  }
+  if (maxDim === p) return {
+    title: '失语的感知者',
+    subtitle: '能感受到，却说不出',
+    desc: '你的身体比你的意识更诚实——你能感受到疲惫、委屈和不对劲，但似乎总是找不到说"不"的勇气。你的感知力是天赋，只是暂时被压抑了。\n\n你不需要一下子变得强大。先从承认自己的感受开始：是的，我很累；是的，这不公平。光是这两句话，就已经是主体性觉醒的第一步。',
+    cta: '从承认感受开始。开启【在场】唤醒练习。',
+    level: 'weak'
+  };
+  if (maxDim === d) return {
+    title: '空转的马达',
+    subtitle: '有力气，没方向',
+    desc: '你并不缺乏行动力，甚至有时候你会拼命地运转——但总感觉在原地打转。这是因为你的主宰力缺少了两个重要的支撑：对身体信号的感知，和对个人边界的守护。\n\n没有感知的主宰是盲目的，没有边界的掌控是消耗的。停下来，先感受一下自己此刻的状态，然后再出发。',
+    cta: '先停下来，感受自己。开启【在场】唤醒练习。',
+    level: 'weak'
+  };
+  return {
+    title: '外包的旅人',
+    subtitle: '正在寻找回家的路',
+    desc: '你似乎习惯了把方向盘交给别人，在系统的运转中感到疲惫，却忘了自己原本拥有踩下刹车的权利。但这并不是你的错，长期的规训让我们容易忘记身体的声音。\n\n好消息是，当你点开这个测评时，那个真实的"你"就已经开始苏醒了。你的主体性并没有消失，它只是睡着了。',
+    cta: '没关系，我们从感受身体开始。开启【在场】唤醒练习。',
+    level: 'weak'
+  };
+}
+
+// ===== 雷达图绘制 =====
+function drawRadar(presence, boundary, dominion, level) {
+  const canvas = document.getElementById('radarCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
+  const cx = W / 2;
+  const cy = H / 2;
+  const R = 100; // 最大半径
+  const dims = [
+    { label: '在场', value: presence, angle: -Math.PI / 2 },           // 顶部
+    { label: '守界', value: boundary, angle: -Math.PI / 2 + (2 * Math.PI / 3) },  // 左下
+    { label: '主宰', value: dominion, angle: -Math.PI / 2 + (4 * Math.PI / 3) }   // 右下
+  ];
+
+  ctx.clearRect(0, 0, W, H);
+
+  // 颜色方案
+  let strokeColor, fillColor, glowColor;
+  if (level === 'strong') {
+    strokeColor = '#1A1A1A';
+    fillColor = 'rgba(245, 158, 11, 0.15)';
+    glowColor = 'rgba(245, 158, 11, 0.4)';
+  } else if (level === 'medium') {
+    strokeColor = '#555555';
+    fillColor = 'rgba(100, 130, 160, 0.12)';
+    glowColor = 'rgba(100, 130, 160, 0.3)';
+  } else {
+    strokeColor = '#AAAAAA';
+    fillColor = 'rgba(170, 170, 170, 0.08)';
+    glowColor = 'rgba(170, 170, 170, 0.15)';
+  }
+
+  // 绘制背景网格（3层）
+  for (let ring = 1; ring <= 3; ring++) {
+    const r = R * (ring / 3);
+    ctx.beginPath();
+    dims.forEach((dim, i) => {
+      const x = cx + r * Math.cos(dim.angle);
+      const y = cy + r * Math.sin(dim.angle);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    ctx.strokeStyle = '#E5E5E5';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  }
+
+  // 绘制轴线
+  dims.forEach(dim => {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + R * Math.cos(dim.angle), cy + R * Math.sin(dim.angle));
+    ctx.strokeStyle = '#E5E5E5';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  });
+
+  // 绘制数据区域
+  ctx.beginPath();
+  dims.forEach((dim, i) => {
+    const r = R * (dim.value / 100);
+    const x = cx + r * Math.cos(dim.angle);
+    const y = cy + r * Math.sin(dim.angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = fillColor;
+  ctx.fill();
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // 强主体性：中心琥珀色光芒
+  if (level === 'strong') {
+    const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.3);
+    gradient.addColorStop(0, 'rgba(245, 158, 11, 0.25)');
+    gradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * 0.3, 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  }
+
+  // 绘制数据点
+  dims.forEach(dim => {
+    const r = R * (dim.value / 100);
+    const x = cx + r * Math.cos(dim.angle);
+    const y = cy + r * Math.sin(dim.angle);
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = strokeColor;
+    ctx.fill();
+    if (level === 'strong') {
+      ctx.beginPath();
+      ctx.arc(x, y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = glowColor;
+      ctx.fill();
+    }
+  });
+
+  // 绘制标签
+  ctx.font = 'bold 13px "Noto Serif SC", "Source Han Serif SC", "SimSun", serif';
+  ctx.fillStyle = '#555555';
+  ctx.textAlign = 'center';
+  dims.forEach(dim => {
+    const labelR = R + 22;
+    const x = cx + labelR * Math.cos(dim.angle);
+    const y = cy + labelR * Math.sin(dim.angle);
+    ctx.fillText(dim.label, x, y + 4);
+  });
+}
+
+// ===== 显示结果（AI 优先，失败降级） =====
+async function showResult() {
+  updateProgress();
+
+  // 先隐藏当前题目
+  const currentEl = document.getElementById('q' + (currentQ > totalQ ? totalQ : currentQ));
+  if (currentEl) {
+    currentEl.classList.remove('active');
+  }
+
+  // 先准备结果页（显示加载状态）
+  const resultPage = document.getElementById('resultPage');
+  resultPage.style.opacity = '0';
+  resultPage.style.display = 'flex';
+
+  // 隐藏所有题目
+  setTimeout(() => {
+    for (let i = 1; i <= totalQ; i++) {
+      const el = document.getElementById('q' + i);
+      if (el) el.style.display = 'none';
+    }
+  }, 30);
+
+  // 强制重排
+  void resultPage.offsetWidth;
+  resultPage.classList.add('show');
+  resultPage.style.transition = 'opacity 0.8s ease';
+  resultPage.style.opacity = '1';
+
+  // 临时显示"分析中"状态
+  document.getElementById('resultArchetype').textContent = '分析中...';
+  document.getElementById('resultSubtitle').textContent = '正在生成你的主体性画像';
+  document.getElementById('dimPresence').textContent = '—';
+  document.getElementById('dimBoundary').textContent = '—';
+  document.getElementById('dimDominion').textContent = '—';
+  document.getElementById('resultDesc').innerHTML = '<div class="ai-loading show" style="padding:1rem"><div class="ai-loading-spinner" style="width:30px;height:30px;margin:0 auto"></div><div class="ai-loading-text" style="margin-top:0.8rem">深度分析中，请稍候...</div></div>';
+  document.getElementById('resultCta').textContent = '分析中...';
+  document.getElementById('resultCta').style.opacity = '0.5';
+  document.getElementById('resultCta').style.pointerEvents = 'none';
+
+  let scores, archetype, isAI = false;
+
+  // 尝试 AI 分析
+  const apiKey = getAPIKey();
+  if (apiKey) {
+    try {
+      const aiResult = await analyzeWithAI(answers);
+      // 验证 AI 返回的数据格式
+      if (aiResult && aiResult.presence !== undefined && aiResult.title) {
+        scores = {
+          presence: Math.max(0, Math.min(100, parseInt(aiResult.presence) || 50)),
+          boundary: Math.max(0, Math.min(100, parseInt(aiResult.boundary) || 50)),
+          dominion: Math.max(0, Math.min(100, parseInt(aiResult.dominion) || 50))
+        };
+        archetype = {
+          title: aiResult.title,
+          subtitle: aiResult.subtitle || '',
+          desc: aiResult.desc || '',
+          cta: aiResult.cta || '',
+          level: aiResult.level || 'medium'
+        };
+        isAI = true;
+      }
+    } catch (e) {
+      console.warn('AI 分析失败，降级使用关键词算法:', e);
+    }
+  }
+
+  // 如果 AI 分析失败或未启用，使用原有关键词算法
+  if (!scores || !archetype) {
+    scores = calculateScores();
+    archetype = getArchetype(scores.presence, scores.boundary, scores.dominion);
+  }
+
+  // 保存进度
+  saveProgress(scores, archetype, isAI);
+
+  // 计算 maxDim（用于练习跳转）
+  const maxDim = scores.presence >= scores.boundary && scores.presence >= scores.dominion ? 'presence'
+    : scores.boundary >= scores.dominion ? 'boundary' : 'dominion';
+  const dimNames = { presence: '在场', boundary: '守界', dominion: '主宰' };
+  const focusDim = dimNames[maxDim];
+
+  // 填充数据（带动画效果重新触发）
+  resultPage.style.opacity = '0';
+  
+  setTimeout(() => {
+    document.getElementById('resultArchetype').textContent = archetype.title + (isAI ? ' <span class="ai-badge">✨ AI</span>' : '');
+    document.getElementById('resultSubtitle').textContent = archetype.subtitle;
+    document.getElementById('dimPresence').textContent = scores.presence;
+    document.getElementById('dimBoundary').textContent = scores.boundary;
+    document.getElementById('dimDominion').textContent = scores.dominion;
+    document.getElementById('resultDesc').innerHTML = archetype.desc.replace(/\n/g, '<br>');
+    
+    // CTA 按钮
+    const ctaTexts = {
+      weak: `没关系，我们从感受身体开始。开启7天【${focusDim}】唤醒练习`,
+      medium: `在拉扯中积蓄力量。开启7天【${focusDim}】专项练习`,
+      strong: `将你的主体性转化为创造力。开启7天【${focusDim}】进阶挑战`
+    };
+    const ctaBtn = document.getElementById('resultCta');
+    ctaBtn.textContent = isAI ? (archetype.cta || ctaTexts[archetype.level]) : (ctaTexts[archetype.level] || archetype.cta);
+    ctaBtn.style.opacity = '1';
+    ctaBtn.style.pointerEvents = 'auto';
+
+    // 重新触发淡入动画
+    resultPage.style.opacity = '1';
+
+    // 绑定结果页"查看练习"按钮
+    const navPracticeBtn = document.getElementById('resultNavPractice');
+    const newNavBtn = navPracticeBtn.cloneNode(true);
+    navPracticeBtn.parentNode.replaceChild(newNavBtn, navPracticeBtn);
+    newNavBtn.addEventListener('click', () => {
+      window.location.href = './practice.html?type=' + maxDim + '&day=1';
+    });
+
+    // 绘制雷达图
+    setTimeout(() => {
+      drawRadar(scores.presence, scores.boundary, scores.dominion, archetype.level);
+    }, 200);
+  }, 100);
+}
+
+// ===== 从结果页返回题目 =====
+function goBackToQuiz() {
+  const resultPage = document.getElementById('resultPage');
+  
+  // 先淡出结果页
+  resultPage.classList.remove('show');
+  
+  // 恢复所有答案的UI状态
+  restoreAnswerUI();
+  
+  // 准备第7题（先设置 display，但保持透明）
+  currentQ = 7;
+  const q7 = document.getElementById('q7');
+  q7.style.display = 'flex';
+  q7.classList.remove('active');
+  
+  // 等结果页淡出后，隐藏结果页，显示第7题
+  setTimeout(() => {
+    resultPage.style.display = 'none';
+    
+    // 强制重排，然后添加 active 触发淡入动画
+    void q7.offsetWidth;
+    q7.classList.add('active');
+    updateProgress();
+  }, 300);
+}
+
+// ===== 滑动条逻辑 =====
+function initSlider(trackId, fillId, thumbId, nextBtnId, qNum) {
+  const track = document.getElementById(trackId);
+  const fill = document.getElementById(fillId);
+  const thumb = document.getElementById(thumbId);
+  const nextBtn = document.getElementById(nextBtnId);
+  let isDragging = false;
+  let value = 0;
+
+  function updateSlider(clientX) {
+    const rect = track.getBoundingClientRect();
+    let x = clientX - rect.left;
+    x = Math.max(0, Math.min(x, rect.width));
+    value = x / rect.width;
+    
+    fill.style.width = (value * 100) + '%';
+    thumb.style.left = (value * 100) + '%';
+    
+    // 拉到最右侧时闪烁琥珀色
+    if (value > 0.9) {
+      thumb.classList.add('glow');
+    } else {
+      thumb.classList.remove('glow');
+    }
+    
+    answers['q' + qNum] = value;
+    nextBtn.classList.add('show');
+  }
+
+  thumb.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    thumb.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    updateSlider(e.clientX);
+  });
+
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    thumb.classList.remove('dragging');
+  });
+
+  track.addEventListener('click', (e) => {
+    updateSlider(e.clientX);
+  });
+
+  nextBtn.addEventListener('click', nextQuestion);
+}
+
+// ===== 二选一逻辑 =====
+function initChoice(qNum, nextBtnId) {
+  const container = document.getElementById('q' + qNum);
+  const cards = container.querySelectorAll('.choice-card');
+  const nextBtn = document.getElementById(nextBtnId);
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+      const choice = card.dataset.choice;
+      answers['q' + qNum] = choice;
+      
+      // 选中效果：选中的高亮，未选中的保持可见但降低透明度
+      cards.forEach(c => {
+        if (c.dataset.choice === choice) {
+          c.classList.add('selected');
+          c.classList.remove('unselected');
+        } else {
+          c.classList.remove('selected');
+          c.classList.add('unselected');
+        }
+      });
+      
+      nextBtn.classList.add('show');
+    });
+  });
+
+  nextBtn.addEventListener('click', nextQuestion);
+}
+
+// ===== 文本质量检测 =====
+function detectTextQuality(text) {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) return { quality: 'empty', message: '' };
+
+  // 1. 太短（少于8个字符）
+  if (trimmed.length < 8) {
+    return { quality: 'low', message: '再多写一点吧，至少8个字才能更好地了解你' };
+  }
+
+  // 2. 检测重复字符（连续重复3次以上）
+  const repeatPattern = /(.)\1{3,}/;
+  if (repeatPattern.test(trimmed)) {
+    return { quality: 'low', message: '检测到重复输入，请认真写下你真实的想法' };
+  }
+
+  // 3. 检测键盘乱打（连续相邻键）
+  const keyboardRows = [
+    'qwertyuiop', 'asdfghjkl', 'zxcvbnm',
+    '1234567890', 'QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'
+  ];
+  for (const row of keyboardRows) {
+    for (let i = 0; i <= row.length - 5; i++) {
+      const seq = row.substring(i, i + 5);
+      if (trimmed.includes(seq)) {
+        return { quality: 'low', message: '看起来像是随意敲击键盘，请认真写下你的想法' };
+      }
+    }
+  }
+
+  // 4. 检测纯标点/纯数字/纯符号
+  const purePunct = /^[\s\d\W]+$/;
+  if (purePunct.test(trimmed.replace(/[\u4e00-\u9fff]/g, '')) && trimmed.replace(/[\u4e00-\u9fff]/g, '').length === trimmed.length) {
+    return { quality: 'low', message: '请写下有意义的文字内容' };
+  }
+
+  // 5. 检测单一字符占比过高（超过70%是同一个字）
+  const charFreq = {};
+  for (const ch of trimmed) {
+    if (/[\u4e00-\u9fff\w]/.test(ch)) {
+      charFreq[ch] = (charFreq[ch] || 0) + 1;
+    }
+  }
+  const meaningfulChars = Object.values(charFreq).reduce((a, b) => a + b, 0);
+  if (meaningfulChars > 5) {
+    const maxFreq = Math.max(...Object.values(charFreq));
+    if (maxFreq / meaningfulChars > 0.7) {
+      return { quality: 'low', message: '内容看起来不够丰富，请尝试描述更具体的场景或感受' };
+    }
+  }
+
+  // 6. 检测常见敷衍短语
+  const casualPhrases = [
+    '不知道', '不知道啊', '没啥', '没什么', '没想好', '没想过',
+    '随便', '都行', '无所谓', '不想说', '不想写', '不知道写什么',
+    '不知道说什么', '没感觉', '就这样吧', '差不多', '还行吧',
+    '一般般', '挺好的', '挺好的', '不知道啊不知道', '啊啊啊',
+    '哈哈哈', '哈哈哈哈', '呵呵呵', '嘿嘿嘿', '呜呜呜', '嗯嗯嗯',
+    '对对对', '好好好', '是是是', '不了', '算了', '随便吧',
+    '不知道不知道', '真的不知道', '我真的不知道'
+  ];
+  const lowerText = trimmed.toLowerCase();
+  for (const phrase of casualPhrases) {
+    if (lowerText === phrase || lowerText.replace(/[。！？，、\s]/g, '') === phrase) {
+      return { quality: 'low', message: '请认真回想一下，写下你此刻真实的感受和想法' };
+    }
+  }
+
+  // 7. 检测中文字符占比过低（大量英文/数字但中文很少）
+  const chineseChars = trimmed.match(/[\u4e00-\u9fff]/g) || [];
+  if (trimmed.length > 15 && chineseChars.length / trimmed.length < 0.2) {
+    return { quality: 'low', message: '请用中文写下你的真实想法' };
+  }
+
+  return { quality: 'ok', message: '' };
+}
+
+// ===== 文本输入逻辑 =====
+function initTextInput(inputId, nextBtnId, qNum) {
+  const input = document.getElementById(inputId);
+  const nextBtn = document.getElementById(nextBtnId);
+  const container = input.closest('.text-input-container') || input.parentElement;
+  const hintEl = container.querySelector('.text-hint');
+  const originalHint = hintEl ? hintEl.textContent : '';
+  let qualityWarningShown = false;
+
+  function checkQuality() {
+    const text = input.value;
+    answers['q' + qNum] = text;
+
+    if (text.trim().length > 0) {
+      nextBtn.classList.add('show');
+    } else {
+      nextBtn.classList.remove('show');
+    }
+
+    // 文本质量检测（只在有足够内容时检测）
+    if (text.trim().length >= 3 && hintEl) {
+      const result = detectTextQuality(text);
+      if (result.quality === 'low') {
+        input.classList.add('low-quality');
+        hintEl.textContent = result.message;
+        hintEl.classList.add('warning');
+        qualityWarningShown = true;
+      } else {
+        input.classList.remove('low-quality');
+        hintEl.classList.remove('warning');
+        if (result.quality === 'ok') {
+          hintEl.textContent = originalHint;
+          qualityWarningShown = false;
+        }
+      }
+    } else if (text.trim().length === 0 && hintEl) {
+      input.classList.remove('low-quality');
+      hintEl.textContent = originalHint;
+      hintEl.classList.remove('warning');
+      qualityWarningShown = false;
+    }
+  }
+
+  input.addEventListener('input', checkQuality);
+
+  nextBtn.addEventListener('click', () => {
+    // 如果有质量警告，给用户一个确认提示
+    if (qualityWarningShown) {
+      const text = input.value.trim();
+      const result = detectTextQuality(text);
+      if (result.quality === 'low') {
+        const proceed = confirm('你的回答似乎比较简短，可能会影响测评的准确性。\n\n确定要继续吗？');
+        if (!proceed) return;
+      }
+    }
+    nextQuestion();
+  });
+}
+
+// ===== 坐标系逻辑 =====
+function initCoord() {
+  const container = document.getElementById('coordContainer');
+  const star = document.getElementById('coordStar');
+  const nextBtn = document.getElementById('nextBtn4');
+
+  container.addEventListener('click', (e) => {
+    const rect = container.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    
+    answers.q4 = { x, y };
+    
+    star.style.left = (x * 100) + '%';
+    star.style.top = (y * 100) + '%';
+    star.classList.add('show');
+    
+    nextBtn.classList.add('show');
+  });
+
+  nextBtn.addEventListener('click', nextQuestion);
+}
+
+// 初始化所有题目
+initSlider('sliderTrack1', 'sliderFill1', 'sliderThumb1', 'nextBtn1', 1);
+initChoice(2, 'nextBtn2');
+initTextInput('textInput3', 'nextBtn3', 3);
+initCoord();
+initChoice(5, 'nextBtn5');
+initSlider('sliderTrack6', 'sliderFill6', 'sliderThumb6', 'nextBtn6', 6);
+initTextInput('textInput7', 'nextBtn7', 7);
+
+// ===== 检查是否已有完整结果（非回顾模式下直接显示） =====
+(function checkCompletedResult() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('review') === '1') return;
+  let progress = null;
+  try {
+    const saved = localStorage.getItem(PROGRESS_KEY) || localStorage.getItem('subjectivityProgress');
+    if (saved) {
+      progress = JSON.parse(saved);
+      if (!progress || typeof progress !== 'object') progress = null;
+    }
+  } catch(e) { progress = null; }
+  if (progress && progress.archetype) {
+    if (progress.answers) Object.assign(answers, progress.answers);
+    for (let i = 1; i <= 7; i++) {
+      const q = document.getElementById('q' + i);
+      if (q) q.style.display = 'none';
+    }
+    showResult();
+  }
+})();
+
+// ===== 检查是否是回顾模式 =====
+(function checkReviewMode() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('review') === '1') {
+    const saved = localStorage.getItem('subjectivityProgress');
+    if (saved) {
+      const progress = JSON.parse(saved);
+      // 恢复答案
+      if (progress.answers) {
+        Object.assign(answers, progress.answers);
+      }
+      // 恢复UI状态
+      restoreAnswerUI();
+
+      // 默认跳到第7题，除非指定了其他题号
+      const qParam = params.get('q');
+      let targetQ = 7;
+      if (qParam) {
+        const parsedQ = parseInt(qParam);
+        if (parsedQ >= 1 && parsedQ <= 7) {
+          targetQ = parsedQ;
+        }
+      }
+      
+      // 隐藏第1题，显示目标题
+      const q1 = document.getElementById('q1');
+      q1.classList.remove('active');
+      q1.style.display = 'none';
+      currentQ = targetQ;
+      const targetEl = document.getElementById('q' + targetQ);
+      targetEl.style.display = 'flex';
+      targetEl.classList.add('active');
+      updateProgress();
+    }
+  }
+})();
+
+// ===== 恢复答案的UI状态 =====
+function restoreAnswerUI() {
+  // 滑动条1
+  if (answers.q1 !== undefined) {
+    const v = answers.q1;
+    document.getElementById('sliderFill1').style.width = (v * 100) + '%';
+    document.getElementById('sliderThumb1').style.left = (v * 100) + '%';
+    if (v > 0.9) document.getElementById('sliderThumb1').classList.add('glow');
+    document.getElementById('nextBtn1').classList.add('show');
+  }
+  // 二选一2
+  if (answers.q2 !== undefined) {
+    const cards = document.querySelectorAll('#q2 .choice-card');
+    cards.forEach(c => {
+      if (c.dataset.choice === answers.q2) {
+        c.classList.add('selected');
+        c.classList.remove('unselected');
+      } else {
+        c.classList.remove('selected');
+        c.classList.add('unselected');
+      }
+    });
+    document.getElementById('nextBtn2').classList.add('show');
+  }
+  // 文本3
+  if (answers.q3 !== undefined) {
+    document.getElementById('textInput3').value = answers.q3;
+    document.getElementById('nextBtn3').classList.add('show');
+  }
+  // 坐标系4
+  if (answers.q4 !== undefined) {
+    const star = document.getElementById('coordStar');
+    star.style.left = (answers.q4.x * 100) + '%';
+    star.style.top = (answers.q4.y * 100) + '%';
+    star.classList.add('show');
+    document.getElementById('nextBtn4').classList.add('show');
+  }
+  // 二选一5
+  if (answers.q5 !== undefined) {
+    const cards = document.querySelectorAll('#q5 .choice-card');
+    cards.forEach(c => {
+      if (c.dataset.choice === answers.q5) {
+        c.classList.add('selected');
+        c.classList.remove('unselected');
+      } else {
+        c.classList.remove('selected');
+        c.classList.add('unselected');
+      }
+    });
+    document.getElementById('nextBtn5').classList.add('show');
+  }
+  // 滑动条6
+  if (answers.q6 !== undefined) {
+    const v = answers.q6;
+    document.getElementById('sliderFill6').style.width = (v * 100) + '%';
+    document.getElementById('sliderThumb6').style.left = (v * 100) + '%';
+    if (v > 0.9) document.getElementById('sliderThumb6').classList.add('glow');
+    document.getElementById('nextBtn6').classList.add('show');
+  }
+  // 文本7
+  if (answers.q7 !== undefined) {
+    document.getElementById('textInput7').value = answers.q7;
+    document.getElementById('nextBtn7').classList.add('show');
+  }
+}
+
+// ===== 保存进度到 localStorage =====
+function saveProgress(scores, archetype, isAI) {
+  const maxDim = scores.presence >= scores.boundary && scores.presence >= scores.dominion ? 'presence'
+    : scores.boundary >= scores.dominion ? 'boundary' : 'dominion';
+  const progress = {
+    role: currentRole,
+    scores: scores,
+    archetype: {
+      title: archetype.title,
+      subtitle: archetype.subtitle,
+      level: archetype.level,
+      desc: archetype.desc,
+      cta: archetype.cta
+    },
+    focusDim: maxDim,
+    answers: answers,
+    practiceDay: 1,
+    practiceType: maxDim,
+    isAI: isAI || false,
+    lastVisit: new Date().toISOString()
+  };
+  localStorage.setItem('subjectivityProgress', JSON.stringify(progress));
+}
+
+// ===== 结果页按钮跳转 =====
+document.getElementById('resultCta').addEventListener('click', () => {
+  const scores = calculateScores();
+  const archetype = getArchetype(scores.presence, scores.boundary, scores.dominion);
+  saveProgress(scores, archetype);
+  const maxDim = scores.presence >= scores.boundary && scores.presence >= scores.dominion ? 'presence'
+    : scores.boundary >= scores.dominion ? 'boundary' : 'dominion';
+  window.location.href = './practice.html?type=' + maxDim + '&day=1';
+});
+
+document.getElementById('resultCtaFast').addEventListener('click', () => {
+  const scores = calculateScores();
+  const archetype = getArchetype(scores.presence, scores.boundary, scores.dominion);
+  saveProgress(scores, archetype);
+  window.location.href = './practice-fast.html';
+});
+
+// ===== AI 深度分析功能 =====
+
+// API 提供商配置
+const AI_PROVIDERS = {
+  siliconflow: {
+    name: '硅基流动',
+    baseUrl: 'https://api.siliconflow.cn/v1/chat/completions',
+    model: 'deepseek-ai/DeepSeek-V3',
+    hintHtml: '免费获取：前往 <a href="https://cloud.siliconflow.cn/" target="_blank">硅基流动</a> 注册，新用户赠送 2000 万 token，可使用 DeepSeek-V3 等模型。<br>🔒 你的 API Key 仅保存在本地浏览器中，不会上传到任何服务器。'
+  },
+  deepseek: {
+    name: 'DeepSeek 官方',
+    baseUrl: 'https://api.deepseek.com/chat/completions',
+    model: 'deepseek-v4-flash',
+    hintHtml: '免费获取：前往 <a href="https://platform.deepseek.com/" target="_blank">DeepSeek 开放平台</a> 注册，新用户赠送免费额度。<br>🔒 你的 API Key 仅保存在本地浏览器中，不会上传到任何服务器。'
+  }
+};
+
+// 获取当前 API 提供商
+function getAIProvider() {
+  return localStorage.getItem('ai_provider') || 'siliconflow';
+}
+
+// 获取 API Key
+function getAPIKey() {
+  return localStorage.getItem('deepseek_api_key') || '';
+}
+
+// 切换提供商时更新提示文字
+function onProviderChange() {
+  const provider = document.getElementById('aiProviderSelect').value;
+  const config = AI_PROVIDERS[provider];
+  document.getElementById('aiHintText').innerHTML = config.hintHtml;
+}
+
+// 保存 API Key
+function saveAPIKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  const provider = document.getElementById('aiProviderSelect').value;
+  if (key) {
+    localStorage.setItem('deepseek_api_key', key);
+    localStorage.setItem('ai_provider', provider);
+    updateAIStatus();
+    toggleAISettings();
+    testAPIConnection();
+  }
+}
+
+// 测试 API 连接
+async function testAPIConnection() {
+  const apiKey = getAPIKey();
+  if (!apiKey) return;
+  
+  const provider = getAIProvider();
+  const config = AI_PROVIDERS[provider];
+  const btn = document.getElementById('aiSettingsBtn');
+  btn.classList.add('active');
+  
+  try {
+    const response = await fetch(config.baseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: config.model,
+        messages: [{ role: 'user', content: 'hi' }],
+        stream: false,
+        max_tokens: 5
+      })
+    });
+    
+    if (response.ok) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+      alert('API Key 验证失败，请检查后重试。\n错误码：' + response.status);
+      localStorage.removeItem('deepseek_api_key');
+      updateAIStatus();
+    }
+  } catch (e) {
+    console.warn('API 连接测试失败:', e);
+  }
+}
+
+// 更新 AI 状态显示
+function updateAIStatus() {
+  const key = getAPIKey();
+  const provider = getAIProvider();
+  const dot = document.getElementById('aiStatusDot');
+  const text = document.getElementById('aiStatusText');
+  const btn = document.getElementById('aiSettingsBtn');
+  const input = document.getElementById('apiKeyInput');
+  const select = document.getElementById('aiProviderSelect');
+  
+  if (key) {
+    const config = AI_PROVIDERS[provider];
+    dot.classList.add('active');
+    text.textContent = 'AI 深度分析已启用（' + config.name + '）';
+    btn.classList.add('active');
+    input.value = key;
+    select.value = provider;
+  } else {
+    dot.classList.remove('active');
+    text.textContent = '未启用 AI 分析';
+    btn.classList.remove('active');
+    input.value = '';
+    select.value = provider;
+  }
+}
+
+// 切换 AI 设置模态框
+function toggleAISettings() {
+  const modal = document.getElementById('aiModal');
+  if (modal.classList.contains('show')) {
+    modal.classList.remove('show');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
+  } else {
+    updateAIStatus();
+    modal.style.display = 'flex';
+    // 强制重排
+    void modal.offsetWidth;
+    modal.classList.add('show');
+  }
+}
+
+// ===== DeepSeek API 调用（多重试 + 超时 + 多提供商降级） =====
+async function callDeepSeekAPI(systemPrompt, userMessage, retries) {
+  const apiKey = getAPIKey();
+  if (!apiKey) throw new Error('未设置 API Key');
+
+  // 按优先级尝试所有提供商
+  const providers = [getAIProvider()];
+  if (providers[0] !== 'siliconflow') providers.push('siliconflow');
+  if (providers[0] !== 'deepseek') providers.push('deepseek');
+
+  const maxRetries = retries || 2;
+
+  for (const providerKey of providers) {
+    const config = AI_PROVIDERS[providerKey];
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        // 超时控制：15秒
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        const response = await fetch(config.baseUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: config.model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userMessage }
+            ],
+            stream: false,
+            temperature: 0.7,
+            max_tokens: 1024
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.warn(`API 请求失败 (${config.name}, 尝试 ${attempt + 1}):`, response.status, errorText);
+          if (attempt < maxRetries) {
+            await new Promise(r => setTimeout(r, 1000 * (attempt + 1))); // 递增等待
+            continue;
+          }
+          throw new Error(`${config.name} ${response.status}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if (!content) throw new Error('返回内容为空');
+        return content;
+
+      } catch (e) {
+        clearTimeout(undefined); // 清理可能残留的 timeout
+        if (e.name === 'AbortError') {
+          console.warn(`API 超时 (${config.name}, 尝试 ${attempt + 1})`);
+        } else {
+          console.warn(`API 错误 (${config.name}, 尝试 ${attempt + 1}):`, e.message);
+        }
+        if (attempt < maxRetries) {
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+          continue;
+        }
+        // 当前提供商所有重试失败，尝试下一个提供商
+        break;
+      }
+    }
+  }
+
+  throw new Error('所有 API 提供商均不可用');
+}
+
+// ===== 安全解析 AI 返回的 JSON =====
+function safeParseAIResult(content) {
+  // 尝试直接解析
+  try {
+    const obj = JSON.parse(content);
+    if (obj && typeof obj === 'object') return obj;
+  } catch (e) {}
+
+  // 尝试提取 JSON 块（可能被 markdown 包裹）
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      const obj = JSON.parse(jsonMatch[0]);
+      if (obj && typeof obj === 'object') return obj;
+    } catch (e) {}
+  }
+
+  // 尝试修复常见 JSON 问题
+  try {
+    let fixed = content
+      .replace(/,\s*}/g, '}')       // 移除末尾逗号
+      .replace(/,\s*]/g, ']')       // 移除数组末尾逗号
+      .replace(/'/g, '"')             // 单引号转双引号
+      .replace(/\\n/g, '\\n');        // 确保换行符正确
+    const obj = JSON.parse(fixed);
+    if (obj && typeof obj === 'object') return obj;
+  } catch (e) {}
+
+  return null;
+}
+
+// ===== 使用 AI 分析答案生成画像（带完整容错） =====
+async function analyzeWithAI(answersData) {
+  const systemPrompt = `你是一位资深的职场心理咨询师和人格测评专家。请根据用户的测评答案，进行深度分析并生成个性化的主体性画像。
+
+请严格按照以下 JSON 格式返回（不要包含任何其他文字，只返回 JSON）：
+{
+  "presence": 0到100之间的整数,
+  "boundary": 0到100之间的整数,
+  "dominion": 0到100之间的整数,
+  "title": "主标签名称2到6个字要有诗意和力量感",
+  "subtitle": "副标题简短有力的描述",
+  "desc": "详细的画像描述200到300字温暖有洞察力能打动人分成2到3段用换行符分隔",
+  "cta": "行动召唤语推荐开启对应维度的练习",
+  "level": "weak或medium或strong根据三维平均分判断40以下为weak40到70为medium70以上为strong"
+}
+
+分析要求：
+1. 三维分数要基于用户的实际答案不要随意给分
+2. 标签要精准且有温度不要用刻板的标签
+3. 描述要结合用户的具体回答有针对性不要泛泛而谈
+4. 语气温柔但有力量给人希望和方向
+5. 职场人场景结合工作情境
+6. 必须返回合法的JSON格式不要包含任何其他文字`;
+
+  const userMessage = `以下是用户的7道测评题答案（职场人主体性测评）：
+
+【第1题】双极滑动条（0=左侧，1=右侧）
+题目：当你在工位上连续开了两个小时的会，或者盯了一上午屏幕后，你的第一反应是？
+左侧：大脑空白极度疲惫只想刷手机麻痹自己
+右侧：意识到身体僵硬会主动站起来接水感受双脚踩在地上的重力
+答案：${answersData.q1 !== undefined ? answersData.q1.toFixed(2) : '未作答'}
+
+【第2题】直觉二选一
+题目：面对一项紧急但不重要的任务你的内心OS是？
+左：虽然烦但只能先做完再说
+右：停下来评估一下这真的是我必须亲自处理的吗？
+答案：${answersData.q2 === 'left' ? '左侧' : answersData.q2 === 'right' ? '右侧' : '未作答'}
+
+【第3题】自由文本
+题目：领导在下班前突然@你安排非紧急任务你的真实反应是？
+答案：${answersData.q3 || '未作答'}
+
+【第4题】二维坐标系（x和y都是0到1）
+题目：回想你最近一次下班后的状态更接近以下哪种？
+答案：${answersData.q4 ? 'x=' + answersData.q4.x.toFixed(2) + ' y=' + answersData.q4.y.toFixed(2) : '未作答'}
+
+【第5题】直觉二选一
+题目：当你发现一个更好的工作方法但团队一直沿用旧流程时你会？
+左：按部就班不做出头鸟
+右：整理好思路主动提出优化建议
+答案：${answersData.q5 === 'left' ? '左侧' : answersData.q5 === 'right' ? '右侧' : '未作答'}
+
+【第6题】双极滑动条（0=左侧，1=右侧）
+题目：在会议上当你的观点与多数人不同时你的第一反应是？
+左：咽回去毕竟枪打出头鸟
+右：温和但坚定地表达我的视角
+答案：${answersData.q6 !== undefined ? answersData.q6.toFixed(2) : '未作答'}
+
+【第7题】自由文本
+题目：如果现在让你用一句话描述你目前的工作状态你会说什么？
+答案：${answersData.q7 || '未作答'}
+
+请基于以上答案生成个性化的主体性画像。只返回JSON不要返回其他内容。`;
+
+  const content = await callDeepSeekAPI(systemPrompt, userMessage);
+  const result = safeParseAIResult(content);
+
+  if (!result) {
+    throw new Error('AI 返回数据解析失败');
+  }
+
+  // 验证并修正关键字段
+  return {
+    presence: Math.max(0, Math.min(100, parseInt(result.presence) || 50)),
+    boundary: Math.max(0, Math.min(100, parseInt(result.boundary) || 50)),
+    dominion: Math.max(0, Math.min(100, parseInt(result.dominion) || 50)),
+    title: String(result.title || '未命名').substring(0, 10),
+    subtitle: String(result.subtitle || '').substring(0, 20),
+    desc: String(result.desc || '').substring(0, 500),
+    cta: String(result.cta || ''),
+    level: (result.level === 'weak' || result.level === 'medium' || result.level === 'strong')
+      ? result.level : 'medium'
+  };
+}
+
+// 页面加载时更新状态
+updateAIStatus();
+
+// 如果没有设置过 API Key，自动预配置硅基流动的 Key
+if (!getAPIKey()) {
+  localStorage.setItem('deepseek_api_key', 'sk-kyvwjsyrgdvbintjozqykhufomgjkceducpyzztzsrsxpcrn');
+  localStorage.setItem('ai_provider', 'siliconflow');
+  updateAIStatus();
+}
+</script>
+
+</body>
+</html>

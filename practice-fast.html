@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>极速版练习</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #1A1A1A;
+    --gray: #888888;
+    --light-gray: #E5E5E5;
+    --bg: #FAFAFA;
+    --accent: #69DB7C;
+    --amber: #F59E0B;
+  }
+  body {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', 'STSong', 'Songti SC', serif;
+    background: var(--bg);
+    color: var(--ink);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    opacity: 0;
+    animation: pageFadeIn 0.4s ease forwards;
+  }
+  @keyframes pageFadeIn {
+    to { opacity: 1; }
+  }
+  body.page-fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  /* ===== 导航栏 ===== */
+  .nav-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    z-index: 90;
+    background: var(--bg);
+  }
+  .nav-back {
+    font-size: 0.8rem;
+    color: var(--gray);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    background: none;
+    border: none;
+    font-family: inherit;
+  }
+  .nav-back:hover { color: var(--ink); }
+  .nav-title {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.15em;
+  }
+
+  /* ===== 页面区块 ===== */
+  .section {
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 2rem 2rem;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .section.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* ===== 首页 ===== */
+  .home-title {
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .home-subtitle {
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+  .mode-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 280px);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .mode-card {
+    background: #FFFFFF;
+    border: 1px solid var(--light-gray);
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.5s ease;
+  }
+  .mode-card:hover {
+    border-color: var(--ink);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .mode-card .mode-icon {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+  }
+  .mode-card .mode-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .mode-card .mode-desc {
+    font-size: 0.75rem;
+    color: #999999;
+    letter-spacing: 0.05em;
+    line-height: 1.6;
+  }
+
+  /* ===== 输入区域通用 ===== */
+  .input-area {
+    width: 100%;
+    max-width: 560px;
+    margin-bottom: 1.5rem;
+  }
+  .input-label {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.15em;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+  }
+  .main-input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--light-gray);
+    background: #FFFFFF;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.3s ease;
+    resize: none;
+  }
+  .main-input:focus {
+    border-color: var(--ink);
+  }
+  .micro-hint {
+    font-size: 0.7rem;
+    color: #BBBBBB;
+    margin-top: 0.4rem;
+    letter-spacing: 0.02em;
+    line-height: 1.5;
+  }
+
+  /* ===== 步进器 ===== */
+  .stepper-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+    max-width: 560px;
+    width: 100%;
+  }
+  .step-dot {
+    flex: 1;
+    height: 3px;
+    background: var(--light-gray);
+    transition: all 0.4s ease;
+  }
+  .step-dot.completed {
+    background: var(--ink);
+  }
+  .step-dot.current {
+    background: var(--ink);
+    box-shadow: 0 0 8px rgba(26,26,26,0.2);
+  }
+
+  /* 5Why进度 */
+  .why-progress {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.15em;
+    margin-bottom: 2rem;
+  }
+  .why-progress .current-level {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ===== 按钮 ===== */
+  .btn-primary {
+    padding: 0.9rem 3rem;
+    background: var(--ink);
+    color: #FFFFFF;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: #333333;
+    transform: translateY(-2px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .btn-secondary {
+    padding: 0.9rem 3rem;
+    background: transparent;
+    color: var(--gray);
+    border: 1px solid var(--light-gray);
+    font-family: inherit;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    margin-left: 1rem;
+  }
+  .btn-secondary:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .btn-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  /* ===== 破局思路卡片 ===== */
+  .result-container {
+    width: 100%;
+    max-width: 600px;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: #FFFFFF;
+    border: 2px solid var(--ink);
+    padding: 2.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 8px 8px 0 rgba(26,26,26,0.08);
+  }
+  .breakthrough-card {
+    display: none;
+  }
+  .breakthrough-card.show {
+    display: block;
+  }
+  .card-section {
+    margin-bottom: 1.8rem;
+  }
+  .card-section:last-child {
+    margin-bottom: 0;
+  }
+  .card-emoji {
+    font-size: 1.3rem;
+    margin-right: 0.4rem;
+  }
+  .card-heading {
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.8rem;
+    color: var(--ink);
+  }
+  .card-body {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    color: #444;
+    letter-spacing: 0.02em;
+  }
+  .card-body ul {
+    list-style: none;
+    padding: 0;
+  }
+  .card-body li {
+    padding: 0.4rem 0;
+    padding-left: 1.2rem;
+    position: relative;
+  }
+  .card-body li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gray);
+  }
+  .card-highlight {
+    background: #F8F8F8;
+    padding: 1rem 1.2rem;
+    border-left: 3px solid var(--ink);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+
+  /* ===== 加载状态 ===== */
+  .loading {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .loading.show {
+    display: flex;
+  }
+  .loading-text {
+    font-size: 0.8rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+  }
+  .loading-dots {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .loading-dots span {
+    width: 6px;
+    height: 6px;
+    background: var(--ink);
+    border-radius: 50%;
+    animation: bounce 1.4s ease-in-out infinite both;
+  }
+  .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+  .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+
+  /* ===== 成功反馈 ===== */
+  .success-banner {
+    display: none;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #69DB7C 0%, #51CF66 100%);
+    color: #FFFFFF;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .success-banner.show {
+    display: block;
+  }
+
+  /* ===== 终止提示 ===== */
+  .stop-hint {
+    display: none;
+    padding: 1rem 1.5rem;
+    background: #FFF9E6;
+    border-left: 3px solid var(--amber);
+    color: #8B6914;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    max-width: 560px;
+    width: 100%;
+  }
+  .stop-hint.show {
+    display: block;
+  }
+
+  @media (max-width: 640px) {
+    .mode-grid { grid-template-columns: 1fr; max-width: 320px; }
+    .btn-group { flex-direction: column; }
+    .btn-secondary { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<div class="nav-bar">
+  <button class="nav-back" id="navBackBtn">&#8592; 返回</button>
+  <div class="nav-title" id="navTitle">极速版练习</div>
+  <div></div>
+</div>
+
+<!-- ===== 首页：选择模式 ===== -->
+<div class="section active" id="homeSection">
+  <div class="home-title" id="homeTitle">极速版练习</div>
+  <div class="home-subtitle" id="homeSubtitle">5分钟，找回你的主体性</div>
+
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startStarburst()">
+      <div class="mode-icon">&#10024;</div>
+      <div class="mode-name" id="starburstName">星爆式思维</div>
+      <div class="mode-desc" id="starburstDesc">用5W1H拆解难题<br>找到行动抓手</div>
+    </div>
+    <div class="mode-card" onclick="startFiveWhy()">
+      <div class="mode-icon">&#127795;</div>
+      <div class="mode-name" id="fiveWhyName">5Why深度分析</div>
+      <div class="mode-desc" id="fiveWhyDesc">层层剥洋葱<br>找到根本原因</div>
+    </div>
+  </div>
+
+  <div class="fast-hint" style="font-size:0.8rem;color:var(--gray);letter-spacing:0.1em;text-align:center;max-width:400px;line-height:1.8;">
+    极速版练习不需要7天，每个练习只需5分钟。<br>
+    当你感到失控时，随时回来做一遍。
+  </div>
+</div>
+
+<!-- ===== 星爆模式 ===== -->
+<div class="section" id="starburstSection">
+  <div class="stepper-bar" id="starburstStepper">
+    <div class="step-dot" data-step="0"></div>
+    <div class="step-dot" data-step="1"></div>
+    <div class="step-dot" data-step="2"></div>
+    <div class="step-dot" data-step="3"></div>
+    <div class="step-dot" data-step="4"></div>
+    <div class="step-dot" data-step="5"></div>
+  </div>
+
+  <div class="input-area" id="starburstInputArea">
+    <div class="input-label" id="starburstLabel">请输入你的核心问题</div>
+    <textarea class="main-input" id="starburstInput" rows="3" placeholder=""></textarea>
+    <div class="micro-hint" id="starburstHint"></div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn-primary" id="starburstNextBtn" onclick="starburstNext()" disabled>开始</button>
+    <button class="btn-secondary" onclick="goHome()">取消</button>
+  </div>
+
+  <div class="loading" id="starburstLoading">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+    <div class="loading-text">正在生成分析...</div>
+  </div>
+</div>
+
+<!-- ===== 5Why模式 ===== -->
+<div class="section" id="fiveWhySection">
+  <div class="why-progress" id="whyProgress">
+    当前层级：<span class="current-level" id="whyLevel">输入问题</span>
+  </div>
+
+  <div class="stop-hint" id="whyStopHint"></div>
+  <div class="success-banner" id="whySuccessBanner">已找到可行动的根本原因</div>
+
+  <div class="input-area" id="fiveWhyInputArea">
+    <div class="input-label" id="fiveWhyLabel">你遇到了什么问题？</div>
+    <textarea class="main-input" id="fiveWhyInput" rows="3" placeholder=""></textarea>
+    <div class="micro-hint" id="fiveWhyHint">描述一个让你感到困扰的具体问题</div>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn-primary" id="fiveWhyNextBtn" onclick="fiveWhyNext()" disabled>下一步</button>
+    <button class="btn-secondary" onclick="goHome()">取消</button>
+  </div>
+
+  <div class="loading" id="fiveWhyLoading">
+    <div class="loading-dots"><span></span><span></span><span></span></div>
+    <div class="loading-text">正在分析...</div>
+  </div>
+</div>
+
+<!-- ===== 结果页 ===== -->
+<div class="section" id="resultSection">
+  <div class="result-container" id="resultContainer">
+    <div class="result-title" id="resultTitle">破局思路卡片</div>
+    <div class="breakthrough-card show" id="breakthroughCard">
+      <div class="card-section" id="cardCore"></div>
+      <div class="card-section" id="cardAction"></div>
+      <div class="card-section" id="cardTip"></div>
+    </div>
+  </div>
+  <div class="btn-group">
+    <button class="btn-primary" id="exportBtn" onclick="exportResult()">保存为文本</button>
+    <button class="btn-secondary" onclick="copyResult()">复制结果</button>
+    <button class="btn-secondary" onclick="goHome()">返回首页</button>
+  </div>
+</div>
+
+<script>
+// ===================== 角色与Prompt配置 =====================
+const ROLE_CONFIG = {
+  worker: {
+    name: '职场人',
+    starburst: {
+      title: '星爆式思维 — 理性破局',
+      subtitle: '从一团乱麻中找到抓手',
+      systemPrompt: `你是一位资深的项目管理顾问，擅长帮职场人理清复杂局面。用户将输入一个核心工作难题。请按5W1H顺序引导用户回答：谁(Who)、什么(What)、何时(When)、何地(Where)、为什么(Why)、如何(How)。
+
+执行规则：
+1. 提问风格：专业、干练、直击痛点。不要问虚的，要问具体的执行细节。
+2. 输出格式：最终结果仅以清晰的 Markdown 列表呈现，禁止生成任何图形或代码块。
+3. 结尾：提供一个纯文本格式的待办清单。`,
+      steps: [
+        { key: 'who', label: '谁 (Who)', hint: '聚焦具体责任人，而非部门名称', question: '这件事涉及哪些具体的人？谁是决策者？谁是执行者？' },
+        { key: 'what', label: '什么 (What)', hint: '关注可量化的交付物', question: '具体要解决什么问题？期望的交付物是什么？' },
+        { key: 'when', label: '何时 (When)', hint: '设定明确的时间节点', question: '截止日期是什么时候？有哪些关键里程碑？' },
+        { key: 'where', label: '何地 (Where)', hint: '明确场景和范围', question: '这件事发生在什么场景？影响的范围有多大？' },
+        { key: 'why', label: '为什么 (Why)', hint: '找到真正的动机', question: '为什么要做这件事？不做会有什么后果？' },
+        { key: 'how', label: '如何 (How)', hint: '拆解为可执行的步骤', question: '第一步应该做什么？需要哪些资源？' }
+      ],
+      resultPrompt: `# Role: 资深运营总监/战略顾问
+# Task: 基于用户的5W1H回答，提供破局策略。
+
+# 深度思考协议：
+1. **禁止套话**：严禁出现"建议制定计划"、"保持积极心态"、"加强沟通"等万金油建议。
+2. **基于证据**：每一条建议必须直接引用用户在问答中提供的具体细节（如具体的时间点、具体的人名、具体的阻碍）。
+3. **反直觉**：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. **诊断真伪**：分析用户的问题，判断是"能力问题"还是"机制/资源问题"。如果是后者，不要建议用户"提升能力"，而要建议"重新定义预期"或"争取资源"。
+5. **寻找杠杆**：不要让用户做加法（更努力），要找减法（砍掉什么）或乘法（谁能帮我）。
+6. **具体化**：如果用户提到"跨部门难"，不要说"多沟通"，要说"建立书面确认机制"或"拉齐双方KPI"。
+
+# 输出格式要求（必须严格遵循）：
+## 🔍 核心洞察
+（用一句犀利的实话，点破问题本质，必须引用用户提到的具体细节）
+
+## 🚀 破局三步走
+1. **止血动作**：（立刻能做的，停止损失的动作，必须具体到人/事/物）
+2. **杠杆支点**：（利用什么资源或规则来撬动问题，必须是用户没想到的角度）
+3. **长期防御**：（如何避免下次再踩坑，必须引用用户原始回答中的具体场景）`,
+      exportName: '破局策略.txt',
+      exportTitle: '职场破局策略'
+    },
+    fiveWhy: {
+      title: '5Why深度分析 — 找到根因',
+      subtitle: '像剥洋葱一样找到根本原因',
+      systemPrompt: `你是一位专注于效率提升的职场教练。用户输入一个问题，你要引导他进行5Why深度分析，找到根本原因。
+
+执行规则：
+1. 追问逻辑：层层递进，像剥洋葱一样。
+2. 终止检测：如果用户的回答中包含"公司规定"、"大环境不好"、"别人不配合"等不可控因素，立即停止追问，并标记为"需向上管理或调整心态的外部因素"。
+3. 成功反馈：如果用户找到了自己能改变的具体行动点，提示"已找到可行动的根本原因"。
+4. 输出格式：仅以清晰的 Markdown 列表呈现，禁止图形。`,
+      hints: ['描述一个让你卡住的具体工作问题', '为什么会发生这个问题？', '为什么会出现上一个原因？', '再深入一层，根本原因是什么？', '继续挖掘，直到触及本质', '最后一层：找到真正可行动的根因'],
+      stopKeywords: ['公司规定', '大环境不好', '别人不配合', '领导不同意', '预算不够', '资源不足', '体制问题', '行业现状'],
+      resultPrompt: `# Role: 资深运营总监/战略顾问
+# Task: 基于用户的5Why分析链，提供破局策略。
+
+# 深度思考协议：
+1. **禁止套话**：严禁出现"建议制定计划"、"保持积极心态"、"加强沟通"等万金油建议。
+2. **基于证据**：每一条建议必须直接引用用户在5Why链中提到的具体细节。
+3. **反直觉**：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. **诊断真伪**：分析用户的问题，判断是"能力问题"还是"机制/资源问题"。如果是后者，不要建议用户"提升能力"，而要建议"重新定义预期"或"争取资源"。
+5. **寻找杠杆**：不要让用户做加法（更努力），要找减法（砍掉什么）或乘法（谁能帮我）。
+
+# 输出格式要求（必须严格遵循）：
+## 🔍 核心洞察
+（用一句犀利的实话，点破问题本质，必须引用用户5Why链中的具体细节）
+
+## 🚀 破局三步走
+1. **止血动作**：（立刻能做的，停止损失的动作，必须具体）
+2. **杠杆支点**：（利用什么资源或规则来撬动问题，必须是反直觉的角度）
+3. **长期防御**：（如何避免下次再踩坑，必须引用用户原始回答中的具体场景）`,
+      exportName: '破局策略.txt',
+      exportTitle: '职场破局策略'
+    }
+  },
+  student: {
+    name: '学生',
+    starburst: {
+      title: '星爆式思维 — 成长探索',
+      subtitle: '把宏大的焦虑拆解为成长阶梯',
+      systemPrompt: `你是一位温和的学业规划导师。用户输入一个关于学习或未来的困惑。请按5W1H顺序引导用户拆解。
+
+执行规则：
+1. 提问风格：鼓励、启发、降低压迫感。
+2. 输出格式：最终结果以"我的成长探索清单"列表呈现，禁止图形。
+3. 结尾：生成纯文本格式的成长清单。`,
+      steps: [
+        { key: 'who', label: '谁 (Who)', hint: '想想谁能帮到你', question: '这件事和谁有关？你可以向谁求助或学习？' },
+        { key: 'what', label: '什么 (What)', hint: '明确具体的目标', question: '你具体想达成什么？是为了取悦父母还是自己？' },
+        { key: 'when', label: '何时 (When)', hint: '从小时间窗口开始', question: '如果这周只做一件事，是什么？什么时候开始做？' },
+        { key: 'where', label: '何地 (Where)', hint: '找到最适合的环境', question: '在哪里做这件事最有效？图书馆、家里还是其他地方？' },
+        { key: 'why', label: '为什么 (Why)', hint: '找到内在驱动力', question: '为什么这个目标对你重要？十年后回看会怎样？' },
+        { key: 'how', label: '如何 (How)', hint: '从最小行动开始', question: '第一步可以小到多简单？只需要5分钟能做什么？' }
+      ],
+      resultPrompt: `# Role: 认知心理学导师/学霸学长
+# Task: 帮学生从情绪泥潭中拔出来，找到学习抓手。
+
+# 深度思考协议：
+1. **禁止套话**：严禁出现"你要努力学习"、"不要焦虑"、"加油"等鸡汤式建议。
+2. **基于证据**：每一条建议必须直接引用用户在问答中提到的具体细节（如具体科目、具体时间、具体场景）。
+3. **反直觉**：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. **情绪剥离**：先承认情绪，然后迅速把情绪转化为具体问题。不要只说"别怕"，要说"怕是因为不知道下一步做什么"。
+5. **极度拆解**：把大目标拆解到"不可能失败"的程度。比如不是"复习数学"，而是"看懂这一个公式"。
+6. **反馈机制**：建议中必须包含"如何获得正反馈"，让学生觉得这事儿能成。
+
+# 输出格式要求（必须严格遵循）：
+## 💡 心理松绑
+（指出焦虑的来源，并告诉他这很正常，但这不代表他不行。必须引用用户的具体描述）
+
+## 🎯 极简启动方案
+1. **5分钟起步法**：（一个极小的、现在就能做的动作，必须具体到时间/地点/动作）
+2. **环境微调**：（改变物理环境来辅助意志力的建议，必须引用用户提到的场景）
+3. **奖励节点**：（做完这一步，给自己什么具体的正向反馈）`,
+      exportName: '成长方案.txt',
+      exportTitle: '成长探索方案'
+    },
+    fiveWhy: {
+      title: '5Why深度分析 — 看见自己',
+      subtitle: '情绪背后的需求',
+      systemPrompt: `你是一位懂心理学的学长/学姐。用户输入一个烦恼（如"不想考试"、"讨厌某个老师"），引导他做5Why分析。
+
+执行规则：
+1. 追问逻辑：关注情绪背后的需求。
+2. 终止检测：当检测到"我太笨了"、"我没天赋"等自我否定词汇时，温柔地打断，标记为"认知误区"，并建议换个角度思考。
+3. 成功反馈：当用户找到具体的行动点，给予极大的肯定。
+4. 输出格式：仅以清晰的 Markdown 列表呈现，禁止图形。`,
+      hints: ['描述一个让你烦恼的学习问题', '为什么会有这种感觉？', '这种感觉背后是什么需求？', '再深入一层，真正担心的是什么？', '继续探索，直到找到核心', '最后一层：发现你可以改变的'],
+      stopKeywords: ['我太笨了', '我没天赋', '我不行', '我做不到', '我就是废物', '我怎么努力都没用'],
+      resultPrompt: `# Role: 认知心理学导师/学霸学长
+# Task: 基于用户的5Why分析链，帮学生找到学习抓手。
+
+# 深度思考协议：
+1. **禁止套话**：严禁出现"你要努力学习"、"不要焦虑"等鸡汤式建议。
+2. **基于证据**：每一条建议必须直接引用用户在5Why链中提到的具体细节。
+3. **反直觉**：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. **情绪剥离**：先承认情绪，然后迅速转化为具体问题。
+5. **极度拆解**：把大目标拆解到"不可能失败"的程度。
+
+# 输出格式要求（必须严格遵循）：
+## 💡 心理松绑
+（指出焦虑来源，必须引用用户5Why链中的具体描述）
+
+## 🎯 极简启动方案
+1. **5分钟起步法**：（一个极小的、现在就能做的动作，必须具体）
+2. **环境微调**：（改变物理环境的建议，必须引用用户场景）
+3. **奖励节点**：（具体的正向反馈）`,
+      exportName: '成长方案.txt',
+      exportTitle: '成长探索方案'
+    }
+  },
+  creator: {
+    name: '创作者',
+    starburst: {
+      title: '星爆式思维 — 灵感捕手',
+      subtitle: '从虚无缥缈的焦虑中落地',
+      systemPrompt: `你是一位经验丰富的创意总监。用户输入一个创作瓶颈。请用5W1H帮他重构创作思路。
+
+执行规则：
+1. 提问风格：感性、敏锐、富有想象力。
+2. 输出格式：以"灵感碎片整理"列表呈现，禁止图形。
+3. 结尾：生成纯文本格式的灵感卡片。`,
+      steps: [
+        { key: 'who', label: '谁 (Who)', hint: '想象你的受众此刻的表情', question: '这个作品是给谁看的？他们此刻最需要什么？' },
+        { key: 'what', label: '什么 (What)', hint: '抛开流量，聚焦最想表达的', question: '抛开数据，你最想表达的一个画面/观点是什么？' },
+        { key: 'when', label: '何时 (When)', hint: '找到最佳创作时机', question: '一天中什么时候你最有灵感？这个作品需要什么时候完成？' },
+        { key: 'where', label: '何地 (Where)', hint: '寻找能让你兴奋的环境', question: '在哪里创作能让你兴奋起来？需要走出去看看吗？' },
+        { key: 'why', label: '为什么 (Why)', hint: '回归创作初心', question: '你为什么开始这个创作？如果没有任何回报，你还想做吗？' },
+        { key: 'how', label: '如何 (How)', hint: '从最简单的形式开始', question: '如果用一句话概括，你会怎么说？先完成再完美。' }
+      ],
+      resultPrompt: `# Role: 创意总监/独立出版人
+# Task: 帮创作者打破瓶颈，找到独特的表达角度。
+
+# 深度思考协议：
+1. **禁止套话**：严禁出现"多看书"、"多积累素材"、"坚持日更"等套路建议。
+2. **基于证据**：每一条建议必须直接引用用户在问答中提到的具体创作细节（如具体主题、具体风格、具体受众）。
+3. **反直觉**：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. **挖掘痛点**：从用户的困惑中找到共鸣点。用户的痛苦往往是读者的痛点。
+5. **反向思维**：如果大家都在写A，建议用户从B切入，或者把A写到极致。
+6. **完成大于完美**：针对完美主义，给出"烂初稿"策略，鼓励先完成再修改。
+
+# 输出格式要求（必须严格遵循）：
+## 🔥 灵感引爆点
+（基于用户的素材，提炼出一个最具张力的切入点。必须引用用户提到的具体内容）
+
+## ✍️ 创作突围指引
+1. **私密练习**：（一个不需要发出来的练习，用来找回手感，必须具体）
+2. **形式微创新**：（换个载体或结构试试，必须是反直觉的建议）
+3. **发布策略**：（如何低成本地测试市场反馈，必须引用用户的创作类型）`,
+      exportName: '突围指引.txt',
+      exportTitle: '创作突围指引'
+    },
+    fiveWhy: {
+      title: '5Why深度分析 — 回归初心',
+      subtitle: '区分外部噪音与内心声音',
+      systemPrompt: `你是一位深谙创作痛苦的同行者。用户输入创作焦虑，引导他挖掘根源。
+
+执行规则：
+1. 追问逻辑：区分"外部评价"与"内部表达"。
+2. 终止检测：当用户提到"没人看"、"点赞少"时，标记为"外部噪音"，引导其回到内容本身。
+3. 成功反馈：当用户意识到"我是为了表达而创作，不是为了数据"时，生成《创作初心确认书》。
+4. 输出格式：仅以清晰的 Markdown 列表呈现，禁止图形。`,
+      hints: ['描述你当前的创作焦虑', '为什么会有这种焦虑？', '这种焦虑来自外部还是内心？', '再深入一层，你真正害怕的是什么？', '继续挖掘，找到真实的创作动机', '最后一层：确认你的创作初心'],
+      stopKeywords: ['没人看', '点赞少', '没流量', '不火', '没人喜欢', '平台不推', '算法不给'],
+      resultPrompt: `# Role: 创意总监/独立出版人
+# Task: 基于用户的5Why分析链，帮创作者打破瓶颈。
+
+# 深度思考协议：
+1. **禁止套话**：严禁出现"多看书"、"多积累素材"、"坚持日更"等套路建议。
+2. **基于证据**：每一条建议必须直接引用用户在5Why链中提到的具体创作细节。
+3. **反直觉**：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. **挖掘痛点**：从用户的困惑中找到共鸣点。
+5. **反向思维**：如果大家都在写A，建议用户从B切入。
+
+# 输出格式要求（必须严格遵循）：
+## 🔥 灵感引爆点
+（基于用户的素材，提炼出最具张力的切入点，必须引用用户具体内容）
+
+## ✍️ 创作突围指引
+1. **私密练习**：（不需要发出来的练习，必须具体）
+2. **形式微创新**：（换个载体或结构，必须是反直觉建议）
+3. **发布策略**：（低成本测试市场反馈，引用用户创作类型）`,
+      exportName: '突围指引.txt',
+      exportTitle: '创作突围指引'
+    }
+  },
+  leader: {
+    name: '管理者',
+    starburst: {
+      title: '星爆式思维 — 决策导航',
+      subtitle: '从微观事务中跳出来看全局',
+      systemPrompt: `你是一位战略咨询顾问。用户输入一个管理难题。用5W1H协助他进行全景扫描。
+
+执行规则：
+1. 提问风格：宏观、严谨、注重资源匹配。
+2. 输出格式：以"决策要素核查表"列表呈现，禁止图形。
+3. 结尾：生成纯文本格式的会议议程草稿。`,
+      steps: [
+        { key: 'who', label: '谁 (Who)', hint: '谁是关键利益相关者', question: '谁是关键利益相关者？谁会受影响？谁有否决权？' },
+        { key: 'what', label: '什么 (What)', hint: '明确决策的核心目标', question: '这个决策的核心目标是什么？成功标准是什么？' },
+        { key: 'when', label: '何时 (When)', hint: '考虑时机和节奏', question: '什么时候必须做出决定？最佳时机是什么？' },
+        { key: 'where', label: '何地 (Where)', hint: '明确边界和范围', question: '这个决策影响的范围有多大？边界在哪里？' },
+        { key: 'why', label: '为什么 (Why)', hint: '评估长期风险', question: '这个决策的长期风险是什么？不做的代价是什么？' },
+        { key: 'how', label: '如何 (How)', hint: '盘点资源瓶颈', question: '现有的资源瓶颈在哪里？需要争取什么支持？' }
+      ],
+      resultPrompt: `# Role: 组织发展专家/高管教练
+# Task: 帮管理者跳出事务性工作，看到系统性问题。
+
+# 深度思考协议：
+1. **禁止套话**：严禁出现"多关心员工"、"多开会"、"以身作则"等说教式建议。
+2. **基于证据**：每一条建议必须直接引用用户在问答中提到的具体管理细节（如具体人员、具体流程、具体冲突）。
+3. **反直觉**：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. **归因分析**：如果是人的问题，是意愿还是能力？如果是流程问题，是缺失还是冗余？
+5. **授权艺术**：不要建议"亲力亲为"，要建议"如何定标准"和"如何检查"。
+6. **文化视角**：从团队氛围和激励机制的角度看问题，而不仅仅是盯着KPI。
+
+# 输出格式要求（必须严格遵循）：
+## 🧭 管理透视
+（一针见血指出管理盲区。必须引用用户提到的具体细节）
+
+## 🛠️ 管理杠杆解法
+1. **机制修补**：（调整哪个规则或流程能自动解决问题，必须引用用户原始回答）
+2. **关键对话**：（需要和谁进行一次什么样的谈话，谈话的核心要点是什么，必须具体）
+3. **放权测试**：（试着把哪件事完全交出去，并容忍初期的不完美，必须是反直觉的放权建议）`,
+      exportName: '管理策略.txt',
+      exportTitle: '管理破局策略'
+    },
+    fiveWhy: {
+      title: '5Why深度分析 — 系统思维',
+      subtitle: '从人的问题到机制的问题',
+      systemPrompt: `你是一位冷静的幕后军师。用户输入管理困境，引导他找到系统性根因。
+
+执行规则：
+1. 追问逻辑：从"人的问题"引导向"机制的问题"。
+2. 终止检测：当用户一直归咎于"员工能力不行"时，追问"是否有培训机制或筛选标准的问题？"，直到找到制度层面的原因。
+3. 成功反馈：当找到可优化的流程或制度点时，生成《管理复盘摘要》。
+4. 输出格式：仅以清晰的 Markdown 列表呈现，禁止图形。`,
+      hints: ['描述一个管理困境', '为什么会发生这种情况？', '这是人的问题还是机制的问题？', '制度层面是否有漏洞？', '系统性的原因是什么？', '最后一层：找到可优化的流程或制度点'],
+      stopKeywords: ['员工不行', '下属能力差', '招不到好人', '年轻人不行', '这届员工不好带'],
+      resultPrompt: `# Role: 组织发展专家/高管教练
+# Task: 基于用户的5Why分析链，帮管理者看到系统性问题。
+
+# 深度思考协议：
+1. **禁止套话**：严禁出现"多关心员工"、"多开会"、"以身作则"等说教式建议。
+2. **基于证据**：每一条建议必须直接引用用户在5Why链中提到的具体管理细节。
+3. **反直觉**：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. **归因分析**：如果是人的问题，是意愿还是能力？如果是流程问题，是缺失还是冗余？
+5. **授权艺术**：不要建议"亲力亲为"，要建议"如何定标准"和"如何检查"。
+
+# 输出格式要求（必须严格遵循）：
+## 🧭 管理透视
+（一针见血指出管理盲区，必须引用用户5Why链中的具体细节）
+
+## 🛠️ 管理杠杆解法
+1. **机制修补**：（调整哪个规则或流程能自动解决问题，引用用户原始回答）
+2. **关键对话**：（需要和谁谈话，核心要点是什么，必须具体）
+3. **放权测试**：（把哪件事完全交出去，容忍初期不完美，反直觉的放权建议）`,
+      exportName: '管理策略.txt',
+      exportTitle: '管理破局策略'
+    }
+  }
+};
+
+// ===================== 全局状态 =====================
+let currentRole = localStorage.getItem('userRole') || 'worker';
+let currentMode = null; // 'starburst' | 'fiveWhy'
+let starburstAnswers = {};
+let starburstStep = 0;
+let fiveWhyAnswers = [];
+let fiveWhyStep = 0;
+let currentResult = '';
+let currentExportName = '';
+let currentExportTitle = '';
+
+const config = ROLE_CONFIG[currentRole] || ROLE_CONFIG.worker;
+
+// ===================== 导航函数 =====================
+function navigateTo(url) {
+  document.body.classList.add('page-fade-out');
+  setTimeout(() => { window.location.href = url; }, 300);
+}
+function getQuizPage() {
+  return './' + (localStorage.getItem('userRole') || 'worker') + '.html';
+}
+function goBack() {
+  navigateTo(getQuizPage() + '?review=1&q=7');
+}
+function goHome() {
+  currentMode = null;
+  starburstStep = 0;
+  starburstAnswers = {};
+  fiveWhyStep = 0;
+  fiveWhyAnswers = [];
+  showSection('homeSection');
+  document.getElementById('navTitle').textContent = '极速版练习';
+}
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  target.classList.add('active');
+  // 强制重排确保淡入
+  void target.offsetWidth;
+}
+
+document.getElementById('navBackBtn').addEventListener('click', goBack);
+
+// ===================== 首页初始化 =====================
+function initHome() {
+  const cfg = ROLE_CONFIG[currentRole] || ROLE_CONFIG.worker;
+  document.getElementById('homeTitle').textContent = cfg.name + ' · 极速版练习';
+  document.getElementById('starburstName').textContent = cfg.starburst.title.split(' — ')[0];
+  document.getElementById('starburstDesc').innerHTML = cfg.starburst.subtitle + '<br>点击开始';
+  document.getElementById('fiveWhyName').textContent = cfg.fiveWhy.title.split(' — ')[0];
+  document.getElementById('fiveWhyDesc').innerHTML = cfg.fiveWhy.subtitle + '<br>点击开始';
+}
+
+// ===================== 星爆模式 =====================
+function startStarburst() {
+  currentMode = 'starburst';
+  starburstStep = 0;
+  starburstAnswers = {};
+  const cfg = config.starburst;
+
+  document.getElementById('navTitle').textContent = cfg.title;
+  showSection('starburstSection');
+  updateStarburstStepper();
+  renderStarburstStep();
+}
+
+function updateStarburstStepper() {
+  const dots = document.querySelectorAll('#starburstStepper .step-dot');
+  dots.forEach((dot, i) => {
+    dot.classList.remove('completed', 'current');
+    if (i < starburstStep) dot.classList.add('completed');
+    if (i === starburstStep) dot.classList.add('current');
+  });
+}
+
+function renderStarburstStep() {
+  const cfg = config.starburst;
+  const btn = document.getElementById('starburstNextBtn');
+  const input = document.getElementById('starburstInput');
+  const label = document.getElementById('starburstLabel');
+  const hint = document.getElementById('starburstHint');
+
+  if (starburstStep === 0) {
+    label.textContent = '请输入你的核心问题';
+    input.placeholder = '例如：项目总是延期，我该怎么办？';
+    hint.textContent = cfg.steps[0].hint;
+    btn.textContent = '开始';
+  } else if (starburstStep <= 6) {
+    const stepCfg = cfg.steps[starburstStep - 1];
+    label.textContent = stepCfg.label;
+    input.placeholder = stepCfg.question;
+    hint.textContent = stepCfg.hint;
+    btn.textContent = starburstStep === 6 ? '完成' : '下一步';
+  }
+
+  input.value = starburstAnswers[starburstStep] || '';
+  btn.disabled = !input.value.trim();
+  updateStarburstStepper();
+}
+
+function starburstNext() {
+  const input = document.getElementById('starburstInput');
+  const value = input.value.trim();
+  if (!value) return;
+
+  starburstAnswers[starburstStep] = value;
+
+  if (starburstStep < 6) {
+    starburstStep++;
+    renderStarburstStep();
+  } else {
+    generateStarburstResult();
+  }
+}
+
+document.getElementById('starburstInput').addEventListener('input', function() {
+  document.getElementById('starburstNextBtn').disabled = !this.value.trim();
+});
+
+async function generateStarburstResult() {
+  const cfg = config.starburst;
+  const loading = document.getElementById('starburstLoading');
+  loading.classList.add('show');
+
+  const coreProblem = starburstAnswers[0];
+  // 构建完整的用户原始回答上下文
+  const contextLines = [];
+  contextLines.push(`【核心问题】${coreProblem}`);
+  cfg.steps.forEach((s, i) => {
+    const ans = starburstAnswers[i + 1];
+    if (ans && ans.trim()) {
+      contextLines.push(`【${s.label}】${ans.trim()}`);
+    }
+  });
+  const fullContext = contextLines.join('\n');
+
+  const fullSystemPrompt = cfg.resultPrompt;
+
+  const userMessage = `以下是我的完整5W1H回答，请基于这些原始细节生成破局思路：\n\n${fullContext}`;
+
+  try {
+    const content = await callAI(fullSystemPrompt, userMessage);
+    currentResult = content;
+    currentExportName = cfg.exportName;
+    currentExportTitle = cfg.exportTitle;
+    showResult(content, cfg.title + ' — 破局思路卡片');
+  } catch (e) {
+    alert('生成失败：' + e.message + '\n请检查API Key设置。');
+  } finally {
+    loading.classList.remove('show');
+  }
+}
+
+// ===================== 5Why模式 =====================
+function startFiveWhy() {
+  currentMode = 'fiveWhy';
+  fiveWhyStep = 0;
+  fiveWhyAnswers = [];
+  const cfg = config.fiveWhy;
+
+  document.getElementById('navTitle').textContent = cfg.title;
+  document.getElementById('whySuccessBanner').classList.remove('show');
+  document.getElementById('whyStopHint').classList.remove('show');
+  showSection('fiveWhySection');
+  renderFiveWhyStep();
+}
+
+function renderFiveWhyStep() {
+  const cfg = config.fiveWhy;
+  const btn = document.getElementById('fiveWhyNextBtn');
+  const input = document.getElementById('fiveWhyInput');
+  const label = document.getElementById('fiveWhyLabel');
+  const hint = document.getElementById('fiveWhyHint');
+  const progress = document.getElementById('whyLevel');
+
+  if (fiveWhyStep === 0) {
+    progress.textContent = '输入问题';
+    label.textContent = '你遇到了什么问题？';
+    input.placeholder = '描述一个让你感到困扰的具体问题';
+    hint.textContent = cfg.hints[0];
+    btn.textContent = '开始分析';
+  } else if (fiveWhyStep <= 5) {
+    progress.textContent = 'Why ' + fiveWhyStep + ' / 5';
+    label.textContent = '为什么会' + (fiveWhyAnswers[fiveWhyStep - 1] || '这样') + '？';
+    input.placeholder = '再深入一层...';
+    hint.textContent = cfg.hints[fiveWhyStep] || '';
+    btn.textContent = fiveWhyStep === 5 ? '完成分析' : '下一层';
+  }
+
+  input.value = fiveWhyAnswers[fiveWhyStep] || '';
+  btn.disabled = !input.value.trim();
+
+  // 检查终止条件
+  const stopHint = document.getElementById('whyStopHint');
+  if (fiveWhyStep > 0 && fiveWhyStep <= 5) {
+    const currentAnswer = input.value || fiveWhyAnswers[fiveWhyStep] || '';
+    const shouldStop = cfg.stopKeywords.some(kw => currentAnswer.includes(kw));
+    if (shouldStop) {
+      stopHint.textContent = '检测到不可控因素或外部噪音。建议：先处理能改变的部分，外部因素可记录但不必纠结。';
+      stopHint.classList.add('show');
+    } else {
+      stopHint.classList.remove('show');
+    }
+  }
+}
+
+function fiveWhyNext() {
+  const input = document.getElementById('fiveWhyInput');
+  const value = input.value.trim();
+  if (!value) return;
+
+  fiveWhyAnswers[fiveWhyStep] = value;
+
+  // 检查终止关键词
+  const cfg = config.fiveWhy;
+  const shouldStop = cfg.stopKeywords.some(kw => value.includes(kw));
+  if (shouldStop && fiveWhyStep >= 2) {
+    document.getElementById('whyStopHint').classList.add('show');
+  }
+
+  if (fiveWhyStep < 5) {
+    fiveWhyStep++;
+    renderFiveWhyStep();
+  } else {
+    generateFiveWhyResult();
+  }
+}
+
+document.getElementById('fiveWhyInput').addEventListener('input', function() {
+  document.getElementById('fiveWhyNextBtn').disabled = !this.value.trim();
+  // 实时检测终止关键词
+  const cfg = config.fiveWhy;
+  const value = this.value;
+  const stopHint = document.getElementById('whyStopHint');
+  if (fiveWhyStep > 0 && cfg.stopKeywords.some(kw => value.includes(kw))) {
+    stopHint.textContent = '检测到不可控因素或外部噪音。建议：聚焦你能改变的部分。';
+    stopHint.classList.add('show');
+  } else {
+    stopHint.classList.remove('show');
+  }
+});
+
+async function generateFiveWhyResult() {
+  const cfg = config.fiveWhy;
+  const loading = document.getElementById('fiveWhyLoading');
+  loading.classList.add('show');
+
+  // 构建完整的用户原始回答上下文
+  const contextLines = [];
+  fiveWhyAnswers.forEach((a, i) => {
+    if (a && a.trim()) {
+      if (i === 0) {
+        contextLines.push(`【核心问题】${a.trim()}`);
+      } else {
+        contextLines.push(`【Why ${i}】${a.trim()}`);
+      }
+    }
+  });
+  const fullContext = contextLines.join('\n');
+
+  const fullSystemPrompt = cfg.resultPrompt;
+
+  const userMessage = `以下是我的完整5Why分析链，请基于这些原始细节生成破局思路：\n\n${fullContext}`;
+
+  try {
+    const content = await callAI(fullSystemPrompt, userMessage);
+    currentResult = content;
+    currentExportName = cfg.exportName;
+    currentExportTitle = cfg.exportTitle;
+    document.getElementById('whySuccessBanner').classList.add('show');
+    showResult(content, cfg.title + ' — 破局思路卡片');
+  } catch (e) {
+    alert('生成失败：' + e.message + '\n请检查API Key设置。');
+  } finally {
+    loading.classList.remove('show');
+  }
+}
+
+// ===================== 结果页 =====================
+function showResult(markdown, title) {
+  document.getElementById('resultTitle').textContent = title;
+
+  // 通用 Markdown 解析器：适配所有角色的不同格式
+  const lines = markdown.split('\n');
+  const blocks = [];
+  let currentBlock = null;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+
+    // 检测标题行（## 开头 或 emoji+粗体 开头）
+    const headingMatch = trimmed.match(/^(##\s+|[\🔍\🚀\💡\🎯\🔥\✍️\🧭\🛠️]\s*\*\*[^*]+\*\*)/);
+    const isListItem = trimmed.match(/^(\d+\.\s+|[\-\*]\s+)/);
+
+    if (headingMatch && !isListItem) {
+      // 保存上一个 block
+      if (currentBlock) blocks.push(currentBlock);
+      // 提取 emoji 和标题文字
+      const emoji = trimmed.match(/^([\🔍\🚀\💡\🎯\🔥\✍️\🧭\🛠️])/) ? trimmed.match(/^([\🔍\🚀\💡\🎯\🔥\✍️\🧭\🛠️])/)[1] : '';
+      const text = trimmed
+        .replace(/^##\s+/, '')
+        .replace(/^[\🔍\🚀\💡\🎯\🔥\✍️\🧭\🛠️]\s*\*\*\s*/, '')
+        .replace(/\*\*\s*$/, '')
+        .replace(/^\*\*[^*]*\*\*\s*[:：]?\s*/, '');
+      currentBlock = { emoji: emoji, title: text, items: [], body: '' };
+    } else if (currentBlock && isListItem) {
+      // 列表项
+      const content = trimmed
+        .replace(/^\d+\.\s+/, '')
+        .replace(/^[\-\*]\s+/, '')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      currentBlock.items.push(content);
+    } else if (currentBlock) {
+      // 普通文本（可能是标题下的说明段落）
+      const clean = trimmed
+        .replace(/^\(.*?\)\s*/, '')  // 去掉（括号说明）
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      if (clean && clean !== trimmed.replace(/^\(.*?\)\s*/, '')) {
+        // 如果去掉括号后还有内容，说明是正文
+        currentBlock.body += (currentBlock.body ? ' ' : '') + clean;
+      } else if (!trimmed.startsWith('(')) {
+        currentBlock.body += (currentBlock.body ? ' ' : '') + clean;
+      }
+    }
+  });
+  if (currentBlock) blocks.push(currentBlock);
+
+  // 按角色识别核心洞察块和行动块
+  let coreBlock = blocks.find(b =>
+    b.title.includes('洞察') || b.title.includes('松绑') ||
+    b.title.includes('引爆') || b.title.includes('透视')
+  );
+  let actionBlock = blocks.find(b =>
+    b.title.includes('破局') || b.title.includes('启动') ||
+    b.title.includes('突围') || b.title.includes('杠杆') ||
+    b.title.includes('行动')
+  );
+
+  // 如果没识别到，取前两个 block
+  if (!coreBlock && blocks.length > 0) coreBlock = blocks[0];
+  if (!actionBlock && blocks.length > 1) actionBlock = blocks[1];
+
+  // 渲染卡片
+  const coreEl = document.getElementById('cardCore');
+  const actionEl = document.getElementById('cardAction');
+  const tipEl = document.getElementById('cardTip');
+
+  if (coreBlock) {
+    const emoji = coreBlock.emoji || '🔍';
+    coreEl.innerHTML = '<div class="card-heading"><span class="card-emoji">' + emoji + '</span>' + coreBlock.title + '</div><div class="card-highlight">' + (coreBlock.body || coreBlock.items.join(' / ') || '暂无') + '</div>';
+  } else {
+    coreEl.innerHTML = '<div class="card-heading"><span class="card-emoji">🔍</span>核心洞察</div><div class="card-highlight">暂无</div>';
+  }
+
+  if (actionBlock) {
+    const emoji = actionBlock.emoji || '🚀';
+    const itemsHtml = actionBlock.items.length > 0
+      ? '<ul>' + actionBlock.items.map(item => '<li>' + item + '</li>').join('') + '</ul>'
+      : '<p>' + (actionBlock.body || '暂无') + '</p>';
+    actionEl.innerHTML = '<div class="card-heading"><span class="card-emoji">' + emoji + '</span>' + actionBlock.title + '</div><div class="card-body">' + itemsHtml + '</div>';
+  } else {
+    actionEl.innerHTML = '<div class="card-heading"><span class="card-emoji">🚀</span>关键行动</div><div class="card-body"><p>暂无</p></div>';
+  }
+
+  // tip 区域显示剩余内容或隐藏
+  const otherBlocks = blocks.filter(b => b !== coreBlock && b !== actionBlock);
+  if (otherBlocks.length > 0) {
+    const extraHtml = otherBlocks.map(b => {
+      const items = b.items.length > 0 ? '<ul>' + b.items.map(i => '<li>' + i + '</li>').join('') + '</ul>' : '';
+      return '<p><strong>' + (b.emoji || '') + ' ' + b.title + '</strong></p>' + (b.body ? '<p>' + b.body + '</p>' : '') + items;
+    }).join('');
+    tipEl.innerHTML = '<div class="card-heading">补充</div><div class="card-body">' + extraHtml + '</div>';
+    tipEl.style.display = 'block';
+  } else {
+    tipEl.style.display = 'none';
+  }
+
+  showSection('resultSection');
+}
+
+// ===================== 导出功能 =====================
+function exportResult() {
+  const cfg = config.starburst; // 根据当前模式应该用对应的配置
+  const modeCfg = currentMode === 'starburst' ? config.starburst : config.fiveWhy;
+  const timestamp = new Date().toLocaleString('zh-CN');
+  const content = `${modeCfg.exportTitle}\n${'='.repeat(modeCfg.exportTitle.length)}\n生成时间：${timestamp}\n身份：${config.name}\n\n${currentResult}\n`;
+
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = modeCfg.exportName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function copyResult() {
+  navigator.clipboard.writeText(currentResult).then(() => {
+    alert('已复制到剪贴板');
+  }).catch(() => {
+    // 降级方案
+    const textarea = document.createElement('textarea');
+    textarea.value = currentResult;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    alert('已复制到剪贴板');
+  });
+}
+
+// ===================== AI调用 =====================
+const AI_PROVIDERS = {
+  siliconflow: {
+    name: '硅基流动',
+    baseUrl: 'https://api.siliconflow.cn/v1/chat/completions',
+    model: 'deepseek-ai/DeepSeek-V3'
+  },
+  deepseek: {
+    name: 'DeepSeek 官方',
+    baseUrl: 'https://api.deepseek.com/chat/completions',
+    model: 'deepseek-v4-flash'
+  }
+};
+
+function getAIProvider() {
+  return localStorage.getItem('ai_provider') || 'siliconflow';
+}
+function getAPIKey() {
+  return localStorage.getItem('deepseek_api_key') || '';
+}
+
+async function callAI(systemPrompt, userMessage) {
+  const apiKey = getAPIKey();
+  if (!apiKey) throw new Error('未设置 API Key');
+
+  const providers = [getAIProvider()];
+  if (providers[0] !== 'siliconflow') providers.push('siliconflow');
+  if (providers[0] !== 'deepseek') providers.push('deepseek');
+
+  for (const providerKey of providers) {
+    const config = AI_PROVIDERS[providerKey];
+    for (let attempt = 0; attempt <= 2; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        const response = await fetch(config.baseUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: config.model,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userMessage }
+            ],
+            stream: false,
+            temperature: 0.7,
+            max_tokens: 1024
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.warn(`API失败(${config.name},尝试${attempt+1}):`, response.status, errorText);
+          if (attempt < 2) {
+            await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+            continue;
+          }
+          throw new Error(`${config.name} ${response.status}`);
+        }
+
+        const data = await response.json();
+        const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+        if (!content) throw new Error('返回内容为空');
+        return content;
+
+      } catch (e) {
+        if (e.name === 'AbortError') {
+          console.warn(`API超时(${config.name},尝试${attempt+1})`);
+        } else {
+          console.warn(`API错误(${config.name},尝试${attempt+1}):`, e.message);
+        }
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+          continue;
+        }
+        break;
+      }
+    }
+  }
+
+  throw new Error('所有API提供商均不可用');
+}
+
+// ===================== 初始化 =====================
+// 预配置默认API Key
+if (!getAPIKey()) {
+  localStorage.setItem('deepseek_api_key', 'sk-kyvwjsyrgdvbintjozqykhufomgjkceducpyzztzsrsxpcrn');
+  localStorage.setItem('ai_provider', 'siliconflow');
+}
+
+initHome();
+</script>
+
+</body>
+</html>

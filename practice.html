@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7天主体性练习</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #1A1A1A;
+    --gray: #888888;
+    --light-gray: #E5E5E5;
+    --bg: #FAFAFA;
+    --accent: #69DB7C;
+    --amber: #F59E0B;
+  }
+  body {
+    font-family: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', 'STSong', 'Songti SC', serif;
+    background: var(--bg);
+    color: var(--ink);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    opacity: 0;
+    animation: pageFadeIn 0.4s ease forwards;
+  }
+  @keyframes pageFadeIn {
+    to { opacity: 1; }
+  }
+  body.page-fade-out {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  /* 进度条 */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--light-gray);
+    z-index: 100;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--ink);
+    transition: width 0.8s ease;
+    width: 0%;
+  }
+
+  /* 顶部导航 */
+  .nav-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    z-index: 90;
+    background: var(--bg);
+  }
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .nav-back {
+    font-size: 0.8rem;
+    color: var(--gray);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: color 0.3s;
+  }
+  .nav-back:hover { color: var(--ink); }
+  .nav-link {
+    font-size: 0.75rem;
+    color: var(--gray);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: color 0.3s;
+    border-bottom: 1px solid transparent;
+  }
+  .nav-link:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+  .nav-title {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.15em;
+  }
+  .nav-day {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+  }
+
+  /* 底部导航 */
+  .day-nav {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 90;
+  }
+  .day-nav-btn {
+    padding: 0.6rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--light-gray);
+    color: var(--gray);
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+  }
+  .day-nav-btn:hover:not(:disabled) {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .day-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .day-nav-current {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.15em;
+    min-width: 80px;
+    text-align: center;
+  }
+  .day-nav-link {
+    font-size: 0.7rem;
+    color: var(--gray);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: color 0.3s;
+    border-bottom: 1px solid transparent;
+    margin-left: 1rem;
+  }
+  .day-nav-link:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+  }
+
+  /* 练习容器 */
+  .practice-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4rem 3rem 3rem;
+    position: absolute;
+    top: 0; left: 0;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+    pointer-events: none;
+  }
+  .practice-container.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: all;
+  }
+  .practice-container.leave {
+    opacity: 0;
+    transform: translateY(-30px);
+    pointer-events: none;
+  }
+
+  .day-badge {
+    font-size: 0.7rem;
+    color: var(--gray);
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+    padding: 0.4rem 1.2rem;
+    border: 1px solid var(--light-gray);
+  }
+  .day-title {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .day-subtitle {
+    font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    margin-bottom: 2.5rem;
+    text-align: center;
+  }
+  .day-task {
+    font-size: 0.9rem;
+    line-height: 2;
+    color: var(--ink);
+    text-align: center;
+    max-width: 520px;
+    margin-bottom: 2rem;
+    letter-spacing: 0.03em;
+  }
+
+  /* 交互区域 */
+  .interaction-area {
+    width: 100%;
+    max-width: 500px;
+  }
+  .text-input {
+    width: 100%;
+    padding: 1.5rem;
+    border: 1px solid var(--light-gray);
+    background: #FFFFFF;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--ink);
+    resize: none;
+    outline: none;
+    transition: border-color 0.3s ease;
+    min-height: 120px;
+  }
+  .text-input:focus { border-color: var(--ink); }
+
+  /* 焦虑指数滑块 */
+  .anxiety-slider {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto 2rem;
+  }
+  .anxiety-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.75rem;
+    color: var(--gray);
+  }
+  .anxiety-track {
+    width: 100%;
+    height: 2px;
+    background: var(--light-gray);
+    position: relative;
+    cursor: pointer;
+  }
+  .anxiety-fill {
+    height: 100%;
+    background: var(--ink);
+    width: 0%;
+    transition: width 0.1s ease;
+  }
+  .anxiety-thumb {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--ink);
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 0%;
+    cursor: grab;
+  }
+  .anxiety-value {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--ink);
+  }
+
+  /* 倒计时 */
+  .countdown-display {
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .countdown-hint {
+    font-size: 0.8rem;
+    color: var(--gray);
+    text-align: center;
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
+  }
+
+  /* 下一步按钮 */
+  .next-btn {
+    margin-top: 2rem;
+    padding: 0.9rem 3rem;
+    background: var(--ink);
+    color: #FFFFFF;
+    border: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    font-family: inherit;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .next-btn.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .next-btn:hover { background: #333333; }
+
+  /* 终极彩蛋 */
+  .badge-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--bg);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .badge-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  .badge-svg {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 2rem;
+  }
+  .badge-title {
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+  }
+  .badge-desc {
+    font-size: 0.9rem;
+    color: var(--gray);
+    line-height: 2;
+    text-align: center;
+    max-width: 480px;
+    letter-spacing: 0.05em;
+  }
+  .badge-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+  .badge-nav-btn {
+    padding: 0.6rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--light-gray);
+    color: var(--gray);
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+  }
+  .badge-nav-btn:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  /* ===== AI建议卡片 ===== */
+  .ai-suggestion-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(250,250,250,0.95);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .ai-suggestion-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  .ai-suggestion-card {
+    width: 100%;
+    max-width: 560px;
+    background: #FFFFFF;
+    border: 2px solid var(--ink);
+    padding: 2.5rem;
+    box-shadow: 8px 8px 0 rgba(26,26,26,0.08);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease 0.3s;
+  }
+  .ai-suggestion-overlay.show .ai-suggestion-card {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .ai-suggestion-header {
+    font-size: 0.75rem;
+    color: var(--gray);
+    letter-spacing: 0.2em;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+  .ai-suggestion-body {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: #333;
+    letter-spacing: 0.03em;
+    margin-bottom: 2rem;
+  }
+  .ai-suggestion-body strong {
+    color: var(--ink);
+  }
+  .ai-suggestion-body p {
+    margin-bottom: 0.8rem;
+  }
+  .ai-suggestion-section {
+    margin-bottom: 1.8rem;
+  }
+  .ai-suggestion-section:last-of-type {
+    margin-bottom: 0;
+  }
+  .ai-section-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .ai-section-emoji {
+    font-size: 1.1rem;
+  }
+  .ai-section-highlight {
+    background: #F8F8F8;
+    padding: 1rem 1.2rem;
+    border-left: 3px solid var(--ink);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+  .ai-section-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .ai-section-list li {
+    padding: 0.5rem 0;
+    padding-left: 1.2rem;
+    position: relative;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #444;
+  }
+  .ai-section-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gray);
+  }
+  .ai-suggestion-divider {
+    width: 40px;
+    height: 2px;
+    background: var(--light-gray);
+    margin: 1.5rem auto;
+  }
+  .ai-suggestion-tip {
+    font-size: 0.8rem;
+    color: var(--gray);
+    font-style: italic;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .ai-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .ai-loading-dots {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .ai-loading-dots span {
+    width: 6px;
+    height: 6px;
+    background: var(--ink);
+    border-radius: 50%;
+    animation: aiBounce 1.4s ease-in-out infinite both;
+  }
+  .ai-loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+  .ai-loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+  @keyframes aiBounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+  .ai-loading-text {
+    font-size: 0.8rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+  }
+  .ai-suggestion-btn {
+    padding: 0.8rem 2.5rem;
+    background: var(--ink);
+    color: #FFFFFF;
+    border: none;
+    font-family: inherit;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    margin-top: 0.5rem;
+  }
+  .ai-suggestion-btn:hover {
+    background: #333333;
+  }
+
+  /* 完成页 */
+  .complete-container {
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    opacity: 0;
+    transition: opacity 1s ease;
+  }
+  .complete-container.show {
+    display: flex;
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<div class="nav-bar">
+  <div class="nav-left">
+    <div class="nav-back" onclick="goBack()">&#8592; 返回</div>
+    <div class="nav-link" onclick="goToQuiz()">查看测评</div>
+  </div>
+  <div class="nav-title" id="navTitle">在场专项练习</div>
+  <div class="nav-day" id="navDay">Day 1 / 7</div>
+</div>
+
+<!-- 练习内容由JS动态生成 -->
+<div id="practiceContent"></div>
+
+<!-- 底部左右导航 -->
+<div class="day-nav" id="dayNav">
+  <button class="day-nav-btn" id="prevBtn" onclick="goPrev()">上一页</button>
+  <div class="day-nav-current" id="navCurrent">Day 1 / 7</div>
+  <button class="day-nav-btn" id="nextBtnNav" onclick="goNext()">下一天 &#8594;</button>
+  <div class="day-nav-link" onclick="goToQuiz()">查看测评</div>
+</div>
+
+<!-- AI每日建议 -->
+<div class="ai-suggestion-overlay" id="aiSuggestionOverlay">
+  <div class="ai-suggestion-card">
+    <div class="ai-suggestion-header" id="aiSuggestionHeader">AI 练习建议</div>
+    <div class="ai-loading" id="aiSuggestionLoading">
+      <div class="ai-loading-dots"><span></span><span></span><span></span></div>
+      <div class="ai-loading-text">正在生成今日建议...</div>
+    </div>
+    <div class="ai-suggestion-body" id="aiSuggestionBody">
+      <div class="ai-suggestion-section" id="aiSectionCore"></div>
+      <div class="ai-suggestion-section" id="aiSectionAction"></div>
+      <div class="ai-suggestion-section" id="aiSectionExtra"></div>
+    </div>
+    <div class="ai-suggestion-divider"></div>
+    <div class="ai-suggestion-tip" id="aiSuggestionTip"></div>
+  </div>
+  <button class="ai-suggestion-btn" id="aiSuggestionBtn" onclick="closeAISuggestion()" style="display:none;">继续</button>
+</div>
+
+<!-- 终极彩蛋 -->
+<div class="badge-overlay" id="badgeOverlay">
+  <svg class="badge-svg" id="badgeSvg" viewBox="0 0 200 200">
+    <!-- 徽章由JS动态绘制 -->
+  </svg>
+  <div class="badge-title" id="badgeTitle"></div>
+  <div class="badge-desc" id="badgeDesc"></div>
+  <div class="badge-nav">
+    <button class="badge-nav-btn" onclick="goBack()">&#8592; 返回首页</button>
+    <button class="badge-nav-btn" onclick="goToQuiz()">查看测评 &#8594;</button>
+  </div>
+</div>
+
+<script>
+// 页面跳转（带淡出效果）
+function navigateTo(url) {
+  document.body.classList.add('page-fade-out');
+  setTimeout(() => {
+    window.location.href = url;
+  }, 300);
+}
+
+// 获取当前用户角色对应的测评页面
+function getQuizPage() {
+  const role = localStorage.getItem('userRole') || 'worker';
+  return role + '.html';
+}
+
+// ===== AI 调用配置 =====
+const AI_PROVIDERS = {
+  siliconflow: {
+    name: '硅基流动',
+    baseUrl: 'https://api.siliconflow.cn/v1/chat/completions',
+    model: 'deepseek-ai/DeepSeek-V3'
+  },
+  deepseek: {
+    name: 'DeepSeek 官方',
+    baseUrl: 'https://api.deepseek.com/chat/completions',
+    model: 'deepseek-v4-flash'
+  }
+};
+
+function getAIProvider() {
+  return localStorage.getItem('ai_provider') || 'siliconflow';
+}
+function getAPIKey() {
+  return localStorage.getItem('deepseek_api_key') || '';
+}
+
+// 确保始终有 API Key（预配置方便使用）
+if (!localStorage.getItem('deepseek_api_key')) {
+  localStorage.setItem('deepseek_api_key', 'sk-kyvwjsyrgdvbintjozqykhufomgjkceducpyzztzsrsxpcrn');
+  localStorage.setItem('ai_provider', 'siliconflow');
+}
+
+// 角色对应的AI建议Prompt（深度思考协议）
+const ROLE_ADVICE_PROMPTS = {
+  worker: `# Role: 资深运营总监/战略顾问
+# 深度思考协议：
+1. 禁止套话：严禁出现"建议制定计划"、"保持积极心态"、"加强沟通"等万金油建议。
+2. 基于证据：每一条建议必须直接引用用户在练习中提供的具体细节。
+3. 反直觉：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. 诊断真伪：分析用户的问题，判断是"能力问题"还是"机制/资源问题"。
+5. 寻找杠杆：不要让用户做加法（更努力），要找减法（砍掉什么）或乘法（谁能帮我）。`,
+  student: `# Role: 认知心理学导师/学霸学长
+# 深度思考协议：
+1. 禁止套话：严禁出现"你要努力学习"、"不要焦虑"、"加油"等鸡汤式建议。
+2. 基于证据：每一条建议必须直接引用用户在练习中提到的具体细节（如具体科目、具体时间、具体场景）。
+3. 反直觉：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. 情绪剥离：先承认情绪，然后迅速把情绪转化为具体问题。
+5. 极度拆解：把大目标拆解到"不可能失败"的程度。`,
+  creator: `# Role: 创意总监/独立出版人
+# 深度思考协议：
+1. 禁止套话：严禁出现"多看书"、"多积累素材"、"坚持日更"等套路建议。
+2. 基于证据：每一条建议必须直接引用用户在练习中提到的具体创作细节。
+3. 反直觉：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. 挖掘痛点：从用户的困惑中找到共鸣点。
+5. 完成大于完美：针对完美主义，给出"烂初稿"策略。`,
+  leader: `# Role: 组织发展专家/高管教练
+# 深度思考协议：
+1. 禁止套话：严禁出现"多关心员工"、"多开会"、"以身作则"等说教式建议。
+2. 基于证据：每一条建议必须直接引用用户在练习中提到的具体管理细节。
+3. 反直觉：尝试给出一个用户可能没想到，但符合逻辑的切入点。
+4. 归因分析：如果是人的问题，是意愿还是能力？如果是流程问题，是缺失还是冗余？
+5. 授权艺术：不要建议"亲力亲为"，要建议"如何定标准"和"如何检查"。`
+};
+
+// 本地备用建议模板（API不可用时用，符合深度思考协议格式）
+const LOCAL_SUGGESTIONS = {
+  worker: [
+    `## 核心洞察\n你今天的练习暴露了一个关键盲区：你把"忙碌"当成了"高效"。你记录的那些被打断的瞬间，本质上不是你的时间管理问题，而是你的边界感缺失。\n\n## 关键行动\n1. 止血动作：明天开始，在工位贴一张便利贴写上"这不是我的事"，每次被打断时先看一眼。\n2. 杠杆支点：找出本周你被临时插入的3件事，挑1件直接回绝或转交，测试一下"拒绝"的成本其实为零。\n3. 长期防御：每周五下午花15分钟写"下周不做清单"，比"待办清单"更能保护你的主体性。`,
+    `## 核心洞察\n你注意到自己总是在"准备"而非"行动"。你描述的那些"等我想清楚再开始"的时刻，其实是恐惧的伪装。\n\n## 关键行动\n1. 止血动作：现在就用2分钟写一个"烂初稿"——不修改、不润色、不思考逻辑，纯粹把想法倒出来。\n2. 杠杆支点：把你的任务拆到"不可能失败"的程度，比如不是"完成报告"而是"写报告的第一句话"。\n3. 长期防御：建立一个"完成仪式"——每完成一件事，在笔记本上画一个勾，用视觉反馈对抗完美主义。`,
+    `## 核心洞察\n你的练习显示你在用"战术上的勤奋"掩盖"战略上的懒惰"。你列出的那些琐事，99%都不需要你做。\n\n## 关键行动\n1. 止血动作：明天上午只做一件事——那件如果完成了会让其他事变简单或变多余的事。\n2. 杠杆支点：找到那个一直在消耗你精力但产出极低的人或流程，尝试把它"外包"给制度或工具。\n3. 长期防御：每月做一次"能量审计"——记录一周中哪些事让你精力充沛、哪些事让你精疲力竭，然后主动砍掉后者。`
+  ],
+  student: [
+    `## 心理松绑\n你今天练习中提到的"学不进去"，不是因为你懒，而是因为你的大脑在抗议"无效输入"。你把学习当成了"忍受"而不是"探索"。\n\n## 极简启动方案\n1. 5分钟起步法：不要想着"学完这一章"，只给自己5分钟——读一页、做一道题、背一个概念。5分钟后允许自己停下。\n2. 环境微调：把你学习时最常分心的东西（手机、零食、杂乱的桌面）放到需要起身才能拿到的地方，增加分心的摩擦力。\n3. 奖励节点：每次完成5分钟专注后，在纸上画一个小星星，集满5个换一杯喜欢的饮料。`,
+    `## 心理松绑\n你感到焦虑，不是因为你不努力，而是因为你一直在用"别人的进度"衡量自己。你的练习暴露了这一点——你提到"别人都已经复习到第三章了"。\n\n## 极简启动方案\n1. 5分钟起步法：打开你的教材，翻到任意一页，只读第一段。不记笔记、不做题、不划重点，纯粹"看看"。\n2. 环境微调：把你的学习空间分成"输入区"和"输出区"——输入区只放书和笔，输出区放笔记本。先在输入区"看"，再去输出区"写"。\n3. 奖励节点：每完成一次"5分钟起步"，对着镜子说一句"我今天又走了一步"。`,
+    `## 心理松绑\n你描述的那种"想学但动不起来"的感觉，心理学上叫"习得性无助"。不是你不行，是你过去被"宏大的目标"吓太多次了。\n\n## 极简启动方案\n1. 5分钟起步法：把手机计时器设为5分钟，在这段时间里只做一件事——把今天的学习目标写成一句话。5分钟一到就停下。\n2. 环境微调：把你学习的桌面对着自己喜欢的方向（比如窗户、墙壁、书架），让环境给你正向暗示而非压迫感。\n3. 奖励节点：每次完成练习后，给自己发一条微信语音——"今天我又坚持了一天"，积累自己的声音证据。`
+  ],
+  creator: [
+    `## 灵感引爆点\n你今天练习中写的那个"卡住的瞬间"，恰恰是你最真实的素材。你不需要找更好的主题，你需要把"卡住"本身写出来。\n\n## 创作突围指引\n1. 私密练习：今晚睡前用手机备忘录写200字——不公开、不发任何人，纯粹记录"今天我最想吐槽的一件事"。\n2. 形式微创新：把你平时写的文章改成"给未来的自己写一封信"的形式，降低"被评判"的焦虑。\n3. 发布策略：下次发作品前，先发给一个你最信任的朋友（而非公开平台），收集1条反馈就停，防止陷入"数据焦虑"。`,
+    `## 灵感引爆点\n你提到的"数据焦虑"是一个陷阱。你真正害怕的不是没人看，而是"我花了这么多时间却没人认可"——这本质上是你把自我价值外包给了陌生人。\n\n## 创作突围指引\n1. 私密练习：明天做一个"无目的创作"——用纸笔（不用电子设备）随便写/画15分钟，不设主题、不设目标、不设截止。\n2. 形式微创新：尝试把内容从"说教式"改成"对话式"——想象你在和一个人聊天，而不是在台上演讲。\n3. 发布策略：建立一个"创作暗黑账户"——开一个没人知道的小号，在那里发"不完美"的作品，释放对主号数据的压力。`,
+    `## 灵感引爆点\n你的练习暴露了一个秘密：你其实知道自己想表达什么，只是被"应该写什么"的声音盖住了。你提到"怕被说不够专业"——那是别人的剧本。\n\n## 创作突围指引\n1. 私密练习：这周抽出一个小时，关掉所有屏幕，用笔在纸上写"我最不敢说的话"——不修改、不回头、不停下。\n2. 形式微创新：把你最想表达的观点压缩成一句话，然后用10种不同的方式说同一句话（诗歌、列表、日记、信件...）。\n3. 发布策略：下次发布时，先发"半成品"——比如只发开头，让读者参与后续，降低你"一次性做到完美"的压力。`
+  ],
+  leader: [
+    `## 管理透视\n你今天练习中反复提到的"团队执行力差"，根源不在人，而在你的指令系统。你描述的"说了好几遍还是做错"，说明你的标准没有可视化。\n\n## 管理杠杆解法\n1. 机制修补：把口头指令改成"书面确认制"——每次布置任务时，要求对方用自己的话复述一遍，邮件确认后再执行。\n2. 关键对话：找那个"执行力最差"的人，不谈绩效，只问一句话："你觉得我布置任务时，哪一点最让你困惑？"\n3. 放权测试：下周把一件你习惯亲自审核的小事完全交给下属，容忍一个你平时会纠正的小错误，观察结果是否真如你想象的那么糟。`,
+    `## 管理透视\n你描述的"开会效率低"不是会议的问题，而是你的会议没有"终点"。你在练习中写的"讨论了两个小时没结论"，说明缺乏决策机制。\n\n## 管理杠杆解法\n1. 机制修补：以后每次会议开始前，在白板上写下"本次会议的唯一目标是什么"，讨论一旦触及目标就立即结束。\n2. 关键对话：找团队中最沉默的那个人，单独问："你在会上不发言，是因为没想法还是不敢说？"答案会揭示你的团队氛围真相。\n3. 放权测试：把下一次会议的"主持人"角色交给一个 junior 成员，你只负责最后拍板，观察团队在没有你主导时的表现。`,
+    `## 管理透视\n你的练习揭示了一个悖论：你越想让团队"高效"，团队越依赖你。你提到的"每件事都要我盯着"，说明你的"关心"在培养依赖。\n\n## 管理杠杆解法\n1. 机制修补：建立一个"24小时延迟响应"规则——下属问你问题时，你先问"你觉得应该怎么做？"等对方给出方案后，你再补充或修正。\n2. 关键对话：和团队开一次"吐槽会"，规则是每个人必须说出一个"领导让我最难受的习惯"，你只能听不能解释。\n3. 放权测试：这周故意"消失"半天——不接电话、不回微信、不开会，看看团队在没有你时能不能正常运转。结果可能让你惊讶。`
+  ]
+};
+
+async function callPracticeAI(systemPrompt, userMessage) {
+  const apiKey = getAPIKey();
+
+  // 如果有API Key，尝试调用
+  if (apiKey) {
+    const providers = [getAIProvider()];
+    if (providers[0] !== 'siliconflow') providers.push('siliconflow');
+    if (providers[0] !== 'deepseek') providers.push('deepseek');
+
+    for (const providerKey of providers) {
+      const config = AI_PROVIDERS[providerKey];
+      for (let attempt = 0; attempt <= 1; attempt++) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+          const response = await fetch(config.baseUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+              model: config.model,
+              messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: userMessage }
+              ],
+              stream: false,
+              temperature: 0.7,
+              max_tokens: 512
+            }),
+            signal: controller.signal
+          });
+
+          clearTimeout(timeoutId);
+
+          if (!response.ok) {
+            if (attempt < 1) { await new Promise(r => setTimeout(r, 1000)); continue; }
+            break;
+          }
+
+          const data = await response.json();
+          const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+          if (content) return content;
+        } catch (e) {
+          if (attempt < 1) { await new Promise(r => setTimeout(r, 1000)); continue; }
+          break;
+        }
+      }
+    }
+  }
+
+  // API不可用时生成本地建议
+  const role = localStorage.getItem('userRole') || 'worker';
+  const suggestions = LOCAL_SUGGESTIONS[role] || LOCAL_SUGGESTIONS.worker;
+  // 根据天数取模选择不同建议
+  const dayIndex = (userMessage.length % suggestions.length);
+  return suggestions[dayIndex];
+}
+
+// 显示AI建议（深度思考协议版）
+async function showAISuggestion(dayNum, dayData, userAnswer) {
+  const overlay = document.getElementById('aiSuggestionOverlay');
+  const loading = document.getElementById('aiSuggestionLoading');
+  const body = document.getElementById('aiSuggestionBody');
+  const tip = document.getElementById('aiSuggestionTip');
+  const btn = document.getElementById('aiSuggestionBtn');
+  const header = document.getElementById('aiSuggestionHeader');
+
+  const role = localStorage.getItem('userRole') || 'worker';
+  const rolePrompt = ROLE_ADVICE_PROMPTS[role] || ROLE_ADVICE_PROMPTS.worker;
+  const dimName = data.title;
+
+  header.textContent = `Day ${dayNum} · ${dayData.title} — AI建议`;
+
+  overlay.classList.add('show');
+  loading.style.display = 'flex';
+  body.style.display = 'none';
+  tip.style.display = 'none';
+  btn.style.display = 'none';
+
+  // 清空分区
+  document.getElementById('aiSectionCore').innerHTML = '';
+  document.getElementById('aiSectionAction').innerHTML = '';
+  document.getElementById('aiSectionExtra').innerHTML = '';
+  document.getElementById('aiSectionExtra').style.display = 'none';
+
+  const systemPrompt = rolePrompt + `\n\n用户正在做一个"${dimName}"主题的7天练习。今天是第${dayNum}天，练习内容是"${dayData.title}：${dayData.subtitle}"。\n任务描述：${dayData.task}\n\n请根据用户的练习回答，生成深度建议。\n\n# 输出格式要求（必须严格遵循）：\n## 🔍 核心洞察\n（用一句犀利的实话，点破问题本质，必须引用用户练习中的具体细节）\n\n## 🛠️ 关键行动\n1. **止血动作**：（立刻能做的，停止损失的动作，必须具体到人/事/物）\n2. **杠杆支点**：（利用什么资源或规则来撬动问题，必须是用户没想到的角度）\n3. **长期防御**：（如何避免下次再踩坑，必须引用用户原始回答中的具体场景）\n\n注意：\n- 每条建议必须引用用户的具体细节\n- 禁止出现任何套话、鸡汤、套路建议\n- 给出一个反直觉的切入点\n- 用 Markdown 格式返回`;
+
+  const userMessage = `以下是我今天的练习回答：\n\n${userAnswer || '（用户完成了练习但未填写文字）'}`;
+
+  const content = await callPracticeAI(systemPrompt, userMessage);
+
+  loading.style.display = 'none';
+  body.style.display = 'block';
+
+  // 解析 Markdown 并渲染到分区
+  renderAISuggestion(content, role);
+
+  tip.style.display = 'block';
+  tip.textContent = `${dimName} · Day ${dayNum}/7`;
+
+  btn.style.display = 'inline-block';
+}
+
+// 解析AI建议Markdown并渲染到分区
+function renderAISuggestion(markdown, role) {
+  const coreEl = document.getElementById('aiSectionCore');
+  const actionEl = document.getElementById('aiSectionAction');
+  const extraEl = document.getElementById('aiSectionExtra');
+
+  // 通用解析器
+  const lines = markdown.split('\n');
+  const blocks = [];
+  let currentBlock = null;
+
+  lines.forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+
+    // 检测标题行
+    const isHeading = trimmed.match(/^(##\s+|[\🔍\🛠️\💡\🎯\🔥\✍️\🧭]\s*\*\*[^*]+\*\*)/);
+    const isListItem = trimmed.match(/^(\d+\.\s+|[\-\*]\s+)/);
+
+    if (isHeading && !isListItem) {
+      if (currentBlock) blocks.push(currentBlock);
+      const emoji = trimmed.match(/^([\🔍\🛠️\💡\🎯\🔥\✍️\🧭])/) ? trimmed.match(/^([\🔍\🛠️\💡\🎯\🔥\✍️\🧭])/)[1] : '';
+      const text = trimmed.replace(/^##\s+/, '').replace(/^[\🔍\🛠️\💡\🎯\🔥\✍️\🧭]\s*\*\*\s*/, '').replace(/\*\*\s*$/, '').replace(/^\*\*[^*]*\*\*\s*[:：]?\s*/, '');
+      currentBlock = { emoji: emoji, title: text, items: [], body: '' };
+    } else if (currentBlock && isListItem) {
+      const content = trimmed.replace(/^\d+\.\s+/, '').replace(/^[\-\*]\s+/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      currentBlock.items.push(content);
+    } else if (currentBlock) {
+      const clean = trimmed.replace(/^\(.*?\)\s*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      if (clean && !trimmed.startsWith('(')) {
+        currentBlock.body += (currentBlock.body ? ' ' : '') + clean;
+      }
+    }
+  });
+  if (currentBlock) blocks.push(currentBlock);
+
+  // 识别核心洞察块
+  let coreBlock = blocks.find(b =>
+    b.title.includes('洞察') || b.title.includes('松绑') ||
+    b.title.includes('引爆') || b.title.includes('透视')
+  );
+  // 识别关键行动块
+  let actionBlock = blocks.find(b =>
+    b.title.includes('行动') || b.title.includes('启动') ||
+    b.title.includes('突围') || b.title.includes('杠杆') ||
+    b.title.includes('解法')
+  );
+
+  if (!coreBlock && blocks.length > 0) coreBlock = blocks[0];
+  if (!actionBlock && blocks.length > 1) actionBlock = blocks[1];
+
+  // 渲染核心洞察
+  if (coreBlock) {
+    const emoji = coreBlock.emoji || '🔍';
+    coreEl.innerHTML = '<div class="ai-section-title"><span class="ai-section-emoji">' + emoji + '</span>' + coreBlock.title + '</div><div class="ai-section-highlight">' + (coreBlock.body || coreBlock.items.join(' / ') || '') + '</div>';
+  } else {
+    coreEl.innerHTML = '<div class="ai-section-title"><span class="ai-section-emoji">🔍</span>核心洞察</div><div class="ai-section-highlight">你今天的练习本身就是一次觉察，继续保持。</div>';
+  }
+
+  // 渲染关键行动
+  if (actionBlock) {
+    const emoji = actionBlock.emoji || '🛠️';
+    const itemsHtml = actionBlock.items.length > 0
+      ? '<ul class="ai-section-list">' + actionBlock.items.map(item => '<li>' + item + '</li>').join('') + '</ul>'
+      : '<div class="ai-section-highlight">' + (actionBlock.body || '') + '</div>';
+    actionEl.innerHTML = '<div class="ai-section-title"><span class="ai-section-emoji">' + emoji + '</span>' + actionBlock.title + '</div>' + itemsHtml;
+  } else {
+    actionEl.innerHTML = '<div class="ai-section-title"><span class="ai-section-emoji">🛠️</span>关键行动</div><ul class="ai-section-list"><li>明天继续今天的练习，保持一致性。</li></ul>';
+  }
+
+  // 渲染额外内容
+  const otherBlocks = blocks.filter(b => b !== coreBlock && b !== actionBlock);
+  if (otherBlocks.length > 0) {
+    const extraHtml = otherBlocks.map(b => {
+      const items = b.items.length > 0 ? '<ul class="ai-section-list">' + b.items.map(i => '<li>' + i + '</li>').join('') + '</ul>' : '';
+      return '<div class="ai-section-title"><span class="ai-section-emoji">' + (b.emoji || '') + '</span>' + b.title + '</div>' + (b.body ? '<div class="ai-section-highlight">' + b.body + '</div>' : '') + items;
+    }).join('');
+    extraEl.innerHTML = extraHtml;
+    extraEl.style.display = 'block';
+  } else {
+    extraEl.style.display = 'none';
+  }
+}
+
+let pendingAfterSuggestion = null;
+
+function closeAISuggestion() {
+  const overlay = document.getElementById('aiSuggestionOverlay');
+  overlay.classList.remove('show');
+  if (pendingAfterSuggestion) {
+    const fn = pendingAfterSuggestion;
+    pendingAfterSuggestion = null;
+    setTimeout(fn, 300);
+  }
+}
+
+// ===== 练习数据 =====
+const practiceData = {
+  presence: {
+    title: '在场',
+    subtitle: '夺回注意力主权',
+    desc: '从切断外界干扰，到锚定当下，最后建立专注的心流场。',
+    badge: { name: '心流守门人', color: '#69DB7C' },
+    days: [
+      {
+        day: 1, title: '断联', subtitle: '物理隔绝',
+        task: '设定一段30分钟的"绝对勿扰时间"，手机静音并屏幕朝下。',
+        interaction: 'countdown',
+        hint: '30分钟断联倒计时',
+        inputLabel: '断联前你有多想摸手机？'
+      },
+      {
+        day: 2, title: '锚定', subtitle: '感官唤醒',
+        task: '工作感到烦躁时，进行"5-4-3-2-1"感官着陆练习（看5样东西，摸4样东西...）。',
+        interaction: 'text',
+        hint: '用三个词描述你重新感受到的环境细节'
+      },
+      {
+        day: 3, title: '单核', subtitle: '一次只做一件事',
+        task: '挑一项日常工作，关闭所有多余网页和通知，只做这一件事。',
+        interaction: 'text',
+        hint: '记录单核工作时，你的大脑是否还在"多线程"飘忽？写下那个最常飘走的念头。'
+      },
+      {
+        day: 4, title: '呼吸', subtitle: '情绪缓冲',
+        task: '在每次切换任务（如开完会、回完邮件）的间隙，做3次深呼吸。',
+        interaction: 'text',
+        hint: '记录这3次呼吸后，你的肩膀和眉头是否放松了？'
+      },
+      {
+        day: 5, title: '留白', subtitle: '无目的时间',
+        task: '给自己安排15分钟"什么都不做"的时间，不刷手机，不思考工作。',
+        interaction: 'text',
+        hint: '记录这15分钟里你的内心OS'
+      },
+      {
+        day: 6, title: '深潜', subtitle: '心流追踪',
+        task: '找到一项你稍微努力就能做好的工作，投入45分钟。',
+        interaction: 'text',
+        hint: '用5Why追问：是什么阻碍了我进入心流？'
+      },
+      {
+        day: 7, title: '结界', subtitle: '在场宣言',
+        task: '写下你的"专注触发器"（例如：戴上降噪耳机 = 进入在场状态）。',
+        interaction: 'text',
+        hint: '输入你的专注触发器'
+      }
+    ]
+  },
+  boundary: {
+    title: '守界',
+    subtitle: '从觉察到重塑',
+    desc: '从看见边界被侵蚀的瞬间，到温柔而坚定地重建你的个人空间。',
+    badge: { name: '边界的建筑师', color: '#5B8DB8' },
+    days: [
+      {
+        day: 1, title: '觉察', subtitle: '看见边界',
+        task: '今天记录一次你感到"不舒服/被侵犯"的瞬间。',
+        interaction: 'text',
+        hint: '写下当时的感受，不要求解决，只要求"看见"'
+      },
+      {
+        day: 2, title: '停顿', subtitle: '夺回缓冲',
+        task: '面对一个非紧急请求，刻意等待15分钟再回应。',
+        interaction: 'text',
+        hint: '记录等待时的内心OS（焦虑、轻松、还是释然？）'
+      },
+      {
+        day: 3, title: '剥离', subtitle: '情绪解绑',
+        task: '在心里默念三遍："这是他的期待，不是我的义务。"',
+        interaction: 'text',
+        hint: '用一句话写下你剥离掉的"不属于你的责任"'
+      },
+      {
+        day: 4, title: '试探', subtitle: '微小拒绝',
+        task: '用"肯定+拒绝"的句式，拒绝一件小事。',
+        interaction: 'text',
+        hint: '记录拒绝后的身体反应（心跳加速？还是长舒一口气？）'
+      },
+      {
+        day: 5, title: '巩固', subtitle: '正向反馈',
+        task: '主动安排一段完全属于自己的"不可侵犯时间"（哪怕只有20分钟）。',
+        interaction: 'text',
+        hint: '记录这段时间的感受'
+      },
+      {
+        day: 6, title: '深化', subtitle: '5Why归因',
+        task: '用5Why工具，追问一次自己"为什么总是难以拒绝"。',
+        interaction: 'text',
+        hint: '完成追问，找到可行动的根本原因'
+      },
+      {
+        day: 7, title: '重塑', subtitle: '自我契约',
+        task: '写下一条你未来要坚守的"职场边界原则"。',
+        interaction: 'text',
+        hint: '输入你的边界原则'
+      }
+    ]
+  },
+  dominion: {
+    title: '主宰',
+    subtitle: '从被动响应到主动出击',
+    desc: '从识别被动状态，到夺回控制权，最后建立自己的节奏。',
+    badge: { name: '节奏建筑师', color: '#F59E0B' },
+    days: [
+      {
+        day: 1, title: '镜像', subtitle: '看见被动',
+        task: '记录今天一次你"明明不想做，却顺口答应"或"被推着走"的瞬间。',
+        interaction: 'text',
+        hint: '写下当时的感受，不要求解决，只要求"看见"这种失控感'
+      },
+      {
+        day: 2, title: '盘点', subtitle: '夺回清单',
+        task: '列出今天所有的任务，用红笔划掉3件"其实不做也没关系"的琐事。',
+        interaction: 'text',
+        hint: '写下划掉它们时，你是感到轻松，还是隐隐的负罪感？'
+      },
+      {
+        day: 3, title: '翻译', subtitle: '重塑话语',
+        task: '把一句"我必须做..."在心里默念三遍，替换为"我选择做...，因为..."。',
+        interaction: 'text',
+        hint: '用一句话写下你剥离掉的"受害者心态"'
+      },
+      {
+        day: 4, title: '微权', subtitle: '拿回主导',
+        task: '在一个小任务中，主动提出你的方案或节奏。',
+        interaction: 'text',
+        hint: '记录主动出击后，对方的反应以及你的身体感受'
+      },
+      {
+        day: 5, title: '护城河', subtitle: '捍卫节奏',
+        task: '主动安排一段完全由你掌控的"核心工作时间"（哪怕只有30分钟），拒绝任何插队。',
+        interaction: 'text',
+        hint: '记录这段时间的掌控感'
+      },
+      {
+        day: 6, title: '归因', subtitle: '5Why破局',
+        task: '用5Why工具，追问一次自己"为什么总是陷入救火状态"。',
+        interaction: 'text',
+        hint: '完成追问，找到可行动的根本原因'
+      },
+      {
+        day: 7, title: '加冕', subtitle: '主宰契约',
+        task: '写下一条你未来要坚守的"主动权原则"。',
+        interaction: 'text',
+        hint: '输入你的主动权原则'
+      }
+    ]
+  }
+};
+
+// ===== 全局状态 =====
+let currentDay = 1;
+let currentType = 'presence';
+let practiceAnswers = {};
+
+// 从URL参数获取练习类型和天数
+const urlParams = new URLSearchParams(window.location.search);
+const typeParam = urlParams.get('type');
+const dayParam = urlParams.get('day');
+const reviewMode = urlParams.get('review') === '1';
+
+if (typeParam && practiceData[typeParam]) {
+  currentType = typeParam;
+}
+
+// 如果有day参数，设置当前天数
+if (dayParam) {
+  const d = parseInt(dayParam);
+  if (d >= 1 && d <= 7) {
+    currentDay = d;
+  }
+}
+
+const data = practiceData[currentType];
+
+// ===== 初始化页面 =====
+function initPage() {
+  document.getElementById('navTitle').textContent = data.title + '专项练习';
+  renderDay(currentDay);
+}
+
+// ===== 更新底部导航按钮状态 =====
+function updateDayNav() {
+  document.getElementById('navCurrent').textContent = 'Day ' + currentDay + ' / 7';
+  const prevBtn = document.getElementById('prevBtn');
+  if (currentDay <= 1) {
+    // Day 1: 上一页跳转到测评题目
+    prevBtn.disabled = false;
+    prevBtn.textContent = '上一页';
+    prevBtn.onclick = function() { navigateTo('./' + getQuizPage() + '?review=1&q=7'); };
+  } else {
+    // Day 2-7: 上一页回到上一天
+    prevBtn.disabled = false;
+    prevBtn.textContent = '上一页';
+    prevBtn.onclick = function() { goPrev(); };
+  }
+  document.getElementById('nextBtnNav').disabled = currentDay >= 7;
+}
+
+// ===== 渲染每一天 =====
+function renderDay(dayNum) {
+  const dayData = data.days[dayNum - 1];
+  const container = document.getElementById('practiceContent');
+
+  document.getElementById('navDay').textContent = 'Day ' + dayNum + ' / 7';
+  updateProgress();
+  updateDayNav();
+
+  let interactionHTML = '';
+  if (dayData.interaction === 'text') {
+    interactionHTML = `
+      <div class="interaction-area">
+        <textarea class="text-input" id="dayInput" placeholder="${dayData.hint}"></textarea>
+      </div>
+    `;
+  } else if (dayData.interaction === 'countdown') {
+    interactionHTML = `
+      <div class="countdown-display" id="countdown">30:00</div>
+      <div class="countdown-hint">${dayData.hint}</div>
+      <div class="interaction-area">
+        <textarea class="text-input" id="dayInput" placeholder="${dayData.inputLabel}"></textarea>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="practice-container active" id="day${dayNum}">
+      <div class="day-badge">Day ${dayNum} / 7</div>
+      <div class="day-title">${dayData.title}</div>
+      <div class="day-subtitle">${dayData.subtitle}</div>
+      <div class="day-task">${dayData.task}</div>
+      ${interactionHTML}
+      <button class="next-btn" id="nextBtn">${dayNum < 7 ? '完成今日练习' : '完成7天旅程'}</button>
+    </div>
+  `;
+
+  // 绑定输入事件
+  const input = document.getElementById('dayInput');
+  const nextBtn = document.getElementById('nextBtn');
+  if (input) {
+    // 恢复之前保存的答案
+    if (practiceAnswers['day' + dayNum]) {
+      input.value = practiceAnswers['day' + dayNum];
+      nextBtn.classList.add('show');
+    }
+    input.addEventListener('input', () => {
+      if (input.value.trim().length > 0) {
+        nextBtn.classList.add('show');
+      }
+    });
+  }
+
+  // 倒计时逻辑
+  if (dayData.interaction === 'countdown') {
+    startCountdown(30 * 60);
+  }
+
+  nextBtn.addEventListener('click', () => {
+    practiceAnswers['day' + dayNum] = input ? input.value : '';
+    savePracticeProgress();
+    const userAnswer = input ? input.value : '';
+    if (dayNum < 7) {
+      pendingAfterSuggestion = () => nextDay();
+    } else {
+      pendingAfterSuggestion = () => showBadge();
+    }
+    showAISuggestion(dayNum, dayData, userAnswer);
+  });
+}
+
+// ===== 倒计时 =====
+function startCountdown(seconds) {
+  const display = document.getElementById('countdown');
+  let remaining = seconds;
+  const timer = setInterval(() => {
+    remaining--;
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    display.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    if (remaining <= 0) {
+      clearInterval(timer);
+      display.textContent = '00:00';
+      document.getElementById('nextBtn').classList.add('show');
+    }
+  }, 1000);
+}
+
+// ===== 切换天数（通用） =====
+function switchDay(newDay) {
+  currentDay = newDay;
+  renderDay(currentDay);
+}
+
+// ===== 上一天 =====
+function goPrev() {
+  if (currentDay > 1) {
+    switchDay(currentDay - 1);
+  }
+}
+
+// ===== 下一天 =====
+function goNext() {
+  if (currentDay < 7) {
+    switchDay(currentDay + 1);
+  }
+}
+
+// ===== 完成今日练习（原来的nextDay） =====
+function nextDay() {
+  switchDay(currentDay + 1);
+}
+
+// ===== 更新进度条 =====
+function updateProgress() {
+  const percent = (currentDay / 7) * 100;
+  document.getElementById('progressFill').style.width = percent + '%';
+}
+
+// ===== 显示终极彩蛋徽章 =====
+function showBadge() {
+  const overlay = document.getElementById('badgeOverlay');
+  document.getElementById('badgeTitle').textContent = '【' + data.badge.name + '】';
+  document.getElementById('badgeDesc').textContent =
+    '7天的旅程结束了，但你的' + data.title + '才刚刚开始生长。\n\n' +
+    (currentType === 'presence' ? '世界再喧嚣，你随时可以回到自己的锚点。' :
+     currentType === 'boundary' ? '你的边界才刚刚开始生长。' :
+     '从今天起，你是自己时间的CEO。');
+
+  // 绘制徽章SVG
+  drawBadge(data.badge.color);
+
+  overlay.classList.add('show');
+}
+
+// ===== 绘制徽章 =====
+function drawBadge(color) {
+  const svg = document.getElementById('badgeSvg');
+  const shape = currentType === 'presence' ? 'circle'
+    : currentType === 'boundary' ? 'hexagon' : 'triangle';
+
+  let shapePath = '';
+  if (shape === 'circle') {
+    shapePath = '<circle cx="100" cy="100" r="60" fill="none" stroke="' + color + '" stroke-width="3"/>' +
+      '<circle cx="100" cy="100" r="45" fill="none" stroke="' + color + '" stroke-width="1.5" opacity="0.5"/>' +
+      '<circle cx="100" cy="100" r="30" fill="' + color + '" opacity="0.15"/>' +
+      '<circle cx="100" cy="100" r="8" fill="' + color + '"/>';
+  } else if (shape === 'hexagon') {
+    const pts = '100,40 152.9,70 152.9,130 100,160 47.1,130 47.1,70';
+    shapePath = '<polygon points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="3"/>' +
+      '<polygon points="' + pts + '" fill="' + color + '" opacity="0.1"/>' +
+      '<circle cx="100" cy="100" r="8" fill="' + color + '"/>';
+  } else {
+    shapePath = '<polygon points="100,35 165,155 35,155" fill="none" stroke="' + color + '" stroke-width="3"/>' +
+      '<polygon points="100,55 145,140 55,140" fill="' + color + '" opacity="0.1"/>' +
+      '<circle cx="100" cy="115" r="8" fill="' + color + '"/>';
+  }
+
+  svg.innerHTML = shapePath;
+}
+
+// ===== 保存练习进度 =====
+function savePracticeProgress() {
+  const saved = localStorage.getItem('subjectivityProgress');
+  if (saved) {
+    const progress = JSON.parse(saved);
+    // 更新到下一题（如果当前不是第7天）
+    if (currentDay < 7) {
+      progress.practiceDay = currentDay + 1;
+    } else {
+      progress.practiceDay = 8; // 标记已完成
+    }
+    progress.lastVisit = new Date().toISOString();
+    localStorage.setItem('subjectivityProgress', JSON.stringify(progress));
+  }
+}
+
+// ===== 返回 =====
+function goBack() {
+  navigateTo('./' + getQuizPage() + '?review=1&q=7');
+}
+
+// ===== 查看测评题目 =====
+function goToQuiz() {
+  navigateTo('./' + getQuizPage() + '?review=1&q=7');
+}
+
+// 启动
+initPage();
+
+
+</script>
+
+</body>
+</html>
